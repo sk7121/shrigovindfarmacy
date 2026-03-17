@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Toggle Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --primary: #1c8125;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #2d2d2d;
+        }
+        
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .icon-btn {
+            background: transparent;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 15px;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+        
+        .icon-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        .info-box {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Theme Toggle Test</h1>
+        
+        <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark mode">
+            <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+        
+        <div class="info-box">
+            <h3>Current Theme: <span id="current-theme">-</span></h3>
+            <p>Click the button above to toggle between light and dark mode.</p>
+            <p>Theme is saved in localStorage and will persist across page reloads.</p>
+        </div>
+    </div>
+    
+    <script src="/js/theme.js"></script>
+    <script>
+        // Display current theme
+        function updateDisplay() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            document.getElementById('current-theme').textContent = theme;
+        }
+        
+        // Update display on load and when theme changes
+        updateDisplay();
+        document.getElementById('theme-toggle').addEventListener('click', updateDisplay);
+    </script>
+</body>
+</html>

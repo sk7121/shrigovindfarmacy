@@ -1,0 +1,29 @@
+# robots.txt for Shri Govind Pharmacy
+# https://www.shrigovindpharmacy.com
+
+User-agent: *
+Allow: /
+Allow: /home
+Allow: /categories
+Allow: /product
+Allow: /aboutUs
+Allow: /contact
+Allow: /pages/
+
+# Disallow admin and user private areas
+Disallow: /admin/
+Disallow: /user/
+Disallow: /agent/
+Disallow: /checkout/
+Disallow: /account/
+Disallow: /wishlist/
+Disallow: /cart/
+
+# Disallow API endpoints
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://www.shrigovindpharmacy.com/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms & Conditions – Shri Govind Pharmacy</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/theme.js"></script>
+
+  <style>
+    .policy-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    .policy-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 2px solid var(--primary-color, #1c8125);
+    }
+    .policy-header h1 {
+      font-size: 2.5rem;
+      color: var(--text-color, #1a1a1a);
+      margin-bottom: 0.5rem;
+    }
+    .policy-header .last-updated {
+      color: var(--muted-color, #666);
+      font-size: 0.95rem;
+    }
+    .policy-section {
+      margin-bottom: 2.5rem;
+    }
+    .policy-section h2 {
+      font-size: 1.5rem;
+      color: var(--primary-color, #1c8125);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .policy-section h2 i {
+      font-size: 1.3rem;
+    }
+    .policy-section h3 {
+      font-size: 1.1rem;
+      color: var(--text-color, #333);
+      margin-top: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .policy-section p, .policy-section li {
+      line-height: 1.8;
+      color: var(--text-color, #333);
+      font-size: 1rem;
+    }
+    .policy-section ul {
+      margin-left: 1.5rem;
+      margin-top: 0.75rem;
+    }
+    .policy-section li {
+      margin-bottom: 0.5rem;
+    }
+    .policy-highlight {
+      background: rgba(28, 129, 37, 0.08);
+      border-left: 4px solid var(--primary-color, #1c8125);
+      padding: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .policy-warning {
+      background: rgba(255, 152, 0, 0.1);
+      border-left: 4px solid #ff9800;
+      padding: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .policy-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    .policy-table th, .policy-table td {
+      padding: 1rem;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    .policy-table th {
+      background: rgba(28, 129, 37, 0.1);
+      font-weight: 600;
+    }
+    .contact-box {
+      background: linear-gradient(135deg, var(--primary-color, #1c8125), #2d9d3a);
+      color: white;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    .contact-box h3 {
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+    }
+    .contact-box a {
+      color: white;
+      text-decoration: underline;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary-color, #1c8125);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 2rem;
+      transition: gap 0.2s;
+    }
+    .back-link:hover {
+      gap: 0.75rem;
+    }
+    [data-theme="dark"] .policy-highlight {
+      background: rgba(28, 129, 37, 0.15);
+    }
+    [data-theme="dark"] .policy-warning {
+      background: rgba(255, 152, 0, 0.15);
+    }
+    [data-theme="dark"] .policy-table th {
+      background: rgba(28, 129, 37, 0.2);
+    }
+    [data-theme="dark"] .policy-table td,
+    [data-theme="dark"] .policy-table th {
+      border-color: #444;
+    }
+  </style>
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+  <header class="main-header">
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-flex">
+          <a href="/home" class="logo">
+            <i class="fa-solid fa-mortar-pestle logo-ico"></i>
+            <div class="logo-text">
+              <span class="logo-main">Shri Govind Pharmacy</span>
+              <span class="brand-sub">Ayurvedic &amp; Herbal Wellness</span>
+            </div>
+          </a>
+          <div class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+              <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+            <a href="/home" class="btn btn-outline">
+              <i class="fa-solid fa-house"></i>
+              <span>Home</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/home"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right bc-sep"></i>
+        <span>Terms & Conditions</span>
+      </nav>
+    </div>
+  </div>
+
+  <main class="policy-container">
+    <a href="/home" class="back-link">
+      <i class="fa-solid fa-arrow-left"></i>
+      Back to Home
+    </a>
+
+    <div class="policy-header">
+      <h1><i class="fa-solid fa-file-contract"></i> Terms & Conditions</h1>
+      <p class="last-updated">Last Updated: January 1, 2025</p>
+    </div>
+
+    <div class="policy-highlight">
+      <strong><i class="fa-solid fa-circle-info"></i> Welcome to Shri Govind Pharmacy.</strong>
+      By accessing or using our website and services, you agree to be bound by these Terms & Conditions. Please read them carefully before making any purchase.
+    </div>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-scale-balanced"></i> 1. Acceptance of Terms</h2>
+      <p>These Terms and Conditions ("Terms") govern your access to and use of the Shri Govind Pharmacy website (www.shrigovindpharmacy.com) and all related services provided by Shri Govind Pharmacy ("we", "us", "our", or "Company").</p>
+      <p>By accessing, browsing, or using this website, you acknowledge that you have read, understood, and agree to be bound by these Terms and our Privacy Policy. If you do not agree with these Terms, please do not use this website.</p>
+      <p>We reserve the right to modify these Terms at any time. Changes will be effective immediately upon posting. Your continued use of the website constitutes acceptance of the modified Terms.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-store"></i> 2. About Our Services</h2>
+      <p>Shri Govind Pharmacy is a registered Ayurvedic pharmacy providing:</p>
+      <ul>
+        <li>Sale of Ayurvedic medicines and herbal products</li>
+        <li>Online doctor consultations</li>
+        <li>Health and wellness product recommendations</li>
+        <li>Prescription verification and dispensing</li>
+        <li>Home delivery of medicines</li>
+      </ul>
+      <p><strong>Business Information:</strong></p>
+      <ul>
+        <li><strong>Business Name:</strong> Shri Govind Pharmacy</li>
+        <li><strong>Address:</strong> Near Main Bus Stand, Sikar, Rajasthan – 332001</li>
+        <li><strong>Contact:</strong> +91 98765 43210 | info@shrigovindpharmacy.com</li>
+        <li><strong>Business Hours:</strong> Mon–Sat: 8 AM – 9 PM, Sunday: 9 AM – 6 PM</li>
+      </ul>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-user-check"></i> 3. Eligibility</h2>
+      <p>To use our services, you must:</p>
+      <ul>
+        <li>Be at least 18 years of age</li>
+        <li>Be legally capable of entering into a binding contract</li>
+        <li>Not be prohibited from using our services under applicable law</li>
+        <li>Provide accurate and complete registration information</li>
+      </ul>
+      <p>If you are purchasing medicines for someone else (including minors), you are responsible for ensuring proper usage and compliance with medical advice.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-clipboard-list"></i> 4. Account Registration</h2>
+      <h3>4.1 Account Creation</h3>
+      <p>To place orders, you must create an account by providing accurate information including name, email, phone number, and shipping address.</p>
+
+      <h3>4.2 Account Security</h3>
+      <ul>
+        <li>You are responsible for maintaining the confidentiality of your login credentials</li>
+        <li>You are responsible for all activities under your account</li>
+        <li>Notify us immediately of any unauthorized access</li>
+        <li>Do not share your account with others</li>
+      </ul>
+
+      <h3>4.3 Account Termination</h3>
+      <p>We reserve the right to suspend or terminate accounts that violate these Terms or engage in fraudulent activity.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-cart-shopping"></i> 5. Ordering and Purchases</h2>
+      <h3>5.1 Product Information</h3>
+      <p>We strive to provide accurate product descriptions, images, and pricing. However, we do not guarantee that all information is error-free. Product images are for reference only; actual products may vary slightly.</p>
+
+      <h3>5.2 Pricing</h3>
+      <ul>
+        <li>All prices are in Indian Rupees (INR)</li>
+        <li>Prices may change without notice</li>
+        <li>Prices do not include shipping charges unless specified</li>
+        <li>Promotional offers and discounts are subject to terms specified</li>
+      </ul>
+
+      <h3>5.3 Order Acceptance</h3>
+      <p>Receipt of an order does not constitute acceptance. We reserve the right to:</p>
+      <ul>
+        <li>Accept or reject any order at our discretion</li>
+        <li>Cancel orders due to pricing errors or product unavailability</li>
+        <li>Limit quantities available for purchase</li>
+      </ul>
+
+      <h3>5.4 Prescription Requirements</h3>
+      <div class="policy-warning">
+        <strong><i class="fa-solid fa-triangle-exclamation"></i> Important:</strong>
+        Certain Ayurvedic medicines require a valid prescription from a registered practitioner. You must upload a valid prescription for such products. Orders without valid prescriptions may be cancelled.
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-credit-card"></i> 6. Payment Terms</h2>
+      <h3>6.1 Payment Methods</h3>
+      <p>We accept the following payment methods:</p>
+      <ul>
+        <li>Credit/Debit Cards (Visa, MasterCard, RuPay, American Express)</li>
+        <li>UPI (Google Pay, PhonePe, Paytm, BHIM)</li>
+        <li>Net Banking</li>
+        <li>Digital Wallets</li>
+        <li>Cash on Delivery (where available)</li>
+      </ul>
+
+      <h3>6.2 Payment Security</h3>
+      <p>All payments are processed through Razorpay, a PCI-DSS compliant payment gateway. We do not store your complete card details.</p>
+
+      <h3>6.3 Payment Terms</h3>
+      <ul>
+        <li>Payment must be received in full before order processing</li>
+        <li>COD orders may require partial advance payment</li>
+        <li>Failed payments will result in order cancellation</li>
+      </ul>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-truck"></i> 7. Shipping and Delivery</h2>
+      <h3>7.1 Delivery Areas</h3>
+      <p>We deliver pan-India through trusted courier partners. Some remote areas may have limited availability.</p>
+
+      <h3>7.2 Delivery Time</h3>
+      <ul>
+        <li>Metro Cities: 2-3 business days</li>
+        <li>Other Cities: 3-5 business days</li>
+        <li>Remote Areas: 5-7 business days</li>
+      </ul>
+
+      <h3>7.3 Shipping Charges</h3>
+      <ul>
+        <li>Free shipping on orders above ₹499</li>
+        <li>₹50 flat rate for orders below ₹499</li>
+        <li>Express delivery charges may apply</li>
+      </ul>
+
+      <h3>7.4 Delivery Issues</h3>
+      <p>If your order is delayed or damaged in transit, contact us within 48 hours of expected delivery. We will arrange replacement or refund as applicable.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-rotate-left"></i> 8. Returns and Refunds</h2>
+      <p>Our Return and Refund Policy is available at <a href="/refund-policy" style="color: var(--primary-color);">/refund-policy</a>. Key points:</p>
+      <ul>
+        <li>7-day return window for unopened products</li>
+        <li>Products must be in original condition with seals intact</li>
+        <li>Prescription medicines cannot be returned unless defective</li>
+        <li>Refunds processed within 3-5 business days</li>
+        <li>Return shipping free for defective/wrong items</li>
+      </ul>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-user-doctor"></i> 9. Medical Disclaimer</h2>
+      <div class="policy-warning">
+        <strong><i class="fa-solid fa-triangle-exclamation"></i> Important Medical Notice:</strong>
+        <ul style="margin-top: 0.75rem;">
+          <li>Information on this website is for educational purposes only</li>
+          <li>Not intended as a substitute for professional medical advice</li>
+          <li>Always consult a qualified Ayurvedic practitioner before starting any treatment</li>
+          <li>Do not disregard professional medical advice based on website content</li>
+          <li>Results may vary from person to person</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-certificate"></i> 10. Product Disclaimer</h2>
+      <ul>
+        <li>All products are AYUSH approved and from GMP-certified manufacturers</li>
+        <li>Individual results may vary based on body type, lifestyle, and adherence to recommended usage</li>
+        <li>Ayurvedic medicines may take time to show results; patience and consistency are important</li>
+        <li>Some products may contain natural ingredients that cause slight variations in color, texture, or smell</li>
+      </ul>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-comments"></i> 11. User Conduct</h2>
+      <p>You agree NOT to:</p>
+      <ul>
+        <li>Use the website for any illegal or unauthorized purpose</li>
+        <li>Upload false prescriptions or misuse prescription services</li>
+        <li>Attempt to gain unauthorized access to our systems</li>
+        <li>Interfere with the proper functioning of the website</li>
+        <li>Use automated systems to access the website (bots, scrapers)</li>
+        <li>Post fake reviews or misleading content</li>
+        <li>Harass or abuse our staff or other users</li>
+      </ul>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-comments"></i> 12. User Content</h2>
+      <p>By submitting reviews, feedback, or other content, you grant us a non-exclusive, royalty-free license to use, modify, and display such content. You represent that you own or have rights to submit such content.</p>
+      <p>We reserve the right to remove any content that violates these Terms or is inappropriate.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-mobile-screen"></i> 13. Website Access</h2>
+      <h3>13.1 Availability</h3>
+      <p>We strive to ensure uninterrupted website access but do not guarantee 24/7 availability. The website may be unavailable due to maintenance, technical issues, or circumstances beyond our control.</p>
+
+      <h3>13.2 Technical Requirements</h3>
+      <p>You are responsible for ensuring your device and internet connection are compatible with our website.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-copyright"></i> 14. Intellectual Property</h2>
+      <p>All content on this website (text, images, logos, software, designs) is the property of Shri Govind Pharmacy and is protected by copyright and intellectual property laws. You may not reproduce, distribute, or create derivative works without our prior written consent.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-link"></i> 15. Third-Party Links</h2>
+      <p>Our website may contain links to third-party websites (manufacturers, health resources, social media). We do not control these websites and are not responsible for their content, privacy policies, or practices. Access them at your own risk.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-triangle-exclamation"></i> 16. Limitation of Liability</h2>
+      <p>To the maximum extent permitted by law:</p>
+      <ul>
+        <li>Shri Govind Pharmacy shall not be liable for any indirect, incidental, special, or consequential damages</li>
+        <li>Our total liability shall not exceed the amount you paid for the product giving rise to the claim</li>
+        <li>We are not liable for delays or failures due to circumstances beyond our control (force majeure)</li>
+        <li>We are not responsible for misuse of products or failure to follow medical advice</li>
+      </ul>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-hand-holding-hand"></i> 17. Indemnification</h2>
+      <p>You agree to indemnify and hold harmless Shri Govind Pharmacy from any claims, losses, or damages arising from your use of the website, violation of these Terms, or infringement of any rights.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-globe"></i> 18. Governing Law</h2>
+      <p>These Terms shall be governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of courts in Sikar, Rajasthan.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-headset"></i> 19. Contact Information</h2>
+      <p>For questions about these Terms & Conditions:</p>
+      
+      <div class="contact-box">
+        <h3><i class="fa-solid fa-envelope"></i> Contact Us</h3>
+        <p><strong>Email:</strong> <a href="mailto:legal@shrigovindpharmacy.com">legal@shrigovindpharmacy.com</a></p>
+        <p><strong>Phone:</strong> <a href="tel:+919876543210">+91 98765 43210</a></p>
+        <p><strong>Address:</strong> Shri Govind Pharmacy, Near Main Bus Stand, Sikar, Rajasthan – 332001</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" style="margin-top: 4rem;">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2025 Shri Govind Pharmacy. All Rights Reserved.</p>
+        <div class="fb-links">
+          <a href="/privacy-policy">Privacy Policy</a>
+          <a href="/terms-conditions">Terms of Service</a>
+          <a href="/refund-policy">Refund Policy</a>
+          <a href="/sitemap.xml">Sitemap</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/theme.js"></script>
+</body>
+
+</html>

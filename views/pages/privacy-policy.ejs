@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy – Shri Govind Pharmacy</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/theme.js"></script>
+
+  <style>
+    .policy-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    .policy-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 2px solid var(--primary-color, #1c8125);
+    }
+    .policy-header h1 {
+      font-size: 2.5rem;
+      color: var(--text-color, #1a1a1a);
+      margin-bottom: 0.5rem;
+    }
+    .policy-header .last-updated {
+      color: var(--muted-color, #666);
+      font-size: 0.95rem;
+    }
+    .policy-section {
+      margin-bottom: 2.5rem;
+    }
+    .policy-section h2 {
+      font-size: 1.5rem;
+      color: var(--primary-color, #1c8125);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .policy-section h2 i {
+      font-size: 1.3rem;
+    }
+    .policy-section p, .policy-section li {
+      line-height: 1.8;
+      color: var(--text-color, #333);
+      font-size: 1rem;
+    }
+    .policy-section ul {
+      margin-left: 1.5rem;
+      margin-top: 0.75rem;
+    }
+    .policy-section li {
+      margin-bottom: 0.5rem;
+    }
+    .policy-highlight {
+      background: rgba(28, 129, 37, 0.08);
+      border-left: 4px solid var(--primary-color, #1c8125);
+      padding: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .policy-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    .policy-table th, .policy-table td {
+      padding: 1rem;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    .policy-table th {
+      background: rgba(28, 129, 37, 0.1);
+      font-weight: 600;
+    }
+    .contact-box {
+      background: linear-gradient(135deg, var(--primary-color, #1c8125), #2d9d3a);
+      color: white;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    .contact-box h3 {
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+    }
+    .contact-box a {
+      color: white;
+      text-decoration: underline;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary-color, #1c8125);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 2rem;
+      transition: gap 0.2s;
+    }
+    .back-link:hover {
+      gap: 0.75rem;
+    }
+    [data-theme="dark"] .policy-highlight {
+      background: rgba(28, 129, 37, 0.15);
+    }
+    [data-theme="dark"] .policy-table th {
+      background: rgba(28, 129, 37, 0.2);
+    }
+    [data-theme="dark"] .policy-table td,
+    [data-theme="dark"] .policy-table th {
+      border-color: #444;
+    }
+  </style>
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+  <header class="main-header">
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-flex">
+          <a href="/home" class="logo">
+            <i class="fa-solid fa-mortar-pestle logo-ico"></i>
+            <div class="logo-text">
+              <span class="logo-main">Shri Govind Pharmacy</span>
+              <span class="brand-sub">Ayurvedic &amp; Herbal Wellness</span>
+            </div>
+          </a>
+          <div class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+              <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+            <a href="/home" class="btn btn-outline">
+              <i class="fa-solid fa-house"></i>
+              <span>Home</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/home"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right bc-sep"></i>
+        <span>Privacy Policy</span>
+      </nav>
+    </div>
+  </div>
+
+  <main class="policy-container">
+    <a href="/home" class="back-link">
+      <i class="fa-solid fa-arrow-left"></i>
+      Back to Home
+    </a>
+
+    <div class="policy-header">
+      <h1><i class="fa-solid fa-shield-halved"></i> Privacy Policy</h1>
+      <p class="last-updated">Last Updated: January 1, 2025</p>
+    </div>
+
+    <div class="policy-highlight">
+      <strong><i class="fa-solid fa-circle-info"></i> At Shri Govind Pharmacy, your privacy is our priority.</strong>
+      We are committed to protecting your personal information and ensuring your trust in our Ayurvedic products and services.
+    </div>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-book-open"></i> 1. Introduction</h2>
+      <p>Shri Govind Pharmacy ("we", "our", or "us") operates this website and provides Ayurvedic medicines, health products, and consultation services. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.</p>
+      <p>We are committed to protecting your privacy and ensuring the security of your personal information in accordance with applicable Indian laws, including the Information Technology Act, 2000.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-database"></i> 2. Information We Collect</h2>
+      <p>We collect the following types of information:</p>
+      
+      <h3 style="margin-top: 1rem; font-size: 1.1rem; color: var(--text-color);">2.1 Personal Information You Provide:</h3>
+      <ul>
+        <li><strong>Name and Contact Details:</strong> Name, email address, phone number, shipping address</li>
+        <li><strong>Account Information:</strong> Username, password, account preferences</li>
+        <li><strong>Payment Information:</strong> Card details, UPI ID, net banking credentials (processed securely through Razorpay payment gateway)</li>
+        <li><strong>Health Information:</strong> Prescription details, health conditions, symptoms (for consultation and product recommendations)</li>
+        <li><strong>Communication:</strong> Messages, reviews, feedback you submit</li>
+      </ul>
+
+      <h3 style="margin-top: 1rem; font-size: 1.1rem; color: var(--text-color);">2.2 Information Collected Automatically:</h3>
+      <ul>
+        <li><strong>Device Information:</strong> IP address, browser type, operating system</li>
+        <li><strong>Usage Data:</strong> Pages visited, time spent, click patterns</li>
+        <li><strong>Location Data:</strong> General location for delivery and service availability</li>
+        <li><strong>Cookies:</strong> Small data files stored on your device (see our Cookie Policy below)</li>
+      </ul>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-gears"></i> 3. How We Use Your Information</h2>
+      <p>We use your information for the following purposes:</p>
+      <ul>
+        <li>To process and deliver your orders for Ayurvedic medicines and products</li>
+        <li>To provide personalized health consultations and product recommendations</li>
+        <li>To create and manage your account</li>
+        <li>To send order confirmations, shipping updates, and delivery notifications</li>
+        <li>To respond to your inquiries and provide customer support</li>
+        <li>To send promotional offers, health tips, and newsletters (with your consent)</li>
+        <li>To improve our website, products, and services</li>
+        <li>To detect and prevent fraud and unauthorized transactions</li>
+        <li>To comply with legal obligations and regulatory requirements</li>
+      </ul>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-share-nodes"></i> 4. How We Share Your Information</h2>
+      <p>We do NOT sell or rent your personal information. We may share your information only in the following circumstances:</p>
+      
+      <table class="policy-table">
+        <thead>
+          <tr>
+            <th>Recipient</th>
+            <th>Purpose</th>
+            <th>Information Shared</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Payment Processors</strong><br>(Razorpay, Banks)</td>
+            <td>To process payments securely</td>
+            <td>Payment details, transaction amount</td>
+          </tr>
+          <tr>
+            <td><strong>Delivery Partners</strong><br>(Courier Services)</td>
+            <td>To deliver your orders</td>
+            <td>Name, address, phone number</td>
+          </tr>
+          <tr>
+            <td><strong>Healthcare Providers</strong><br>(Doctors, Consultants)</td>
+            <td>To provide consultation services</td>
+            <td>Health information, symptoms, prescription</td>
+          </tr>
+          <tr>
+            <td><strong>Service Providers</strong><br>(IT, Analytics, Marketing)</td>
+            <td>To operate and improve our services</td>
+            <td>Usage data, device information</td>
+          </tr>
+          <tr>
+            <td><strong>Legal Authorities</strong></td>
+            <td>To comply with legal obligations</td>
+            <td>As required by law</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-cookie-bite"></i> 5. Cookie Policy</h2>
+      <p>We use cookies and similar tracking technologies to enhance your experience:</p>
+      <ul>
+        <li><strong>Essential Cookies:</strong> Required for website functionality (login, cart, checkout)</li>
+        <li><strong>Analytics Cookies:</strong> Help us understand how you use our website</li>
+        <li><strong>Marketing Cookies:</strong> Used to show relevant advertisements (with your consent)</li>
+      </ul>
+      <p>You can control cookie settings through your browser. However, disabling cookies may affect website functionality.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-lock"></i> 6. Data Security</h2>
+      <p>We implement industry-standard security measures to protect your information:</p>
+      <ul>
+        <li>SSL/TLS encryption for all data transmission</li>
+        <li>Secure servers with firewall protection</li>
+        <li>PCI-DSS compliant payment processing through Razorpay</li>
+        <li>Regular security audits and updates</li>
+        <li>Restricted employee access to personal information</li>
+      </ul>
+      <p>While we strive to protect your information, no method of internet transmission is 100% secure. We cannot guarantee absolute security.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-user-gear"></i> 7. Your Rights and Choices</h2>
+      <p>You have the following rights regarding your personal information:</p>
+      <ul>
+        <li><strong>Access:</strong> Request a copy of your personal information</li>
+        <li><strong>Correction:</strong> Update or correct inaccurate information</li>
+        <li><strong>Deletion:</strong> Request deletion of your information (subject to legal requirements)</li>
+        <li><strong>Opt-out:</strong> Unsubscribe from marketing communications</li>
+        <li><strong>Data Portability:</strong> Request transfer of your data to another service</li>
+        <li><strong>Grievance Redressal:</strong> Contact our grievance officer for concerns</li>
+      </ul>
+      <p>To exercise these rights, contact us at <strong>privacy@shrigovindpharmacy.com</strong></p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-children"></i> 8. Children's Privacy</h2>
+      <p>Our services are not directed to individuals under 18 years of age. We do not knowingly collect personal information from children. If you believe we have collected information from a child, please contact us immediately.</p>
+      <p>For Ayurvedic consultations and product purchases for minors, parental consent and supervision are required.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-globe"></i> 9. Third-Party Links</h2>
+      <p>Our website may contain links to third-party websites (manufacturers, health resources, social media). This Privacy Policy does not apply to those websites. We encourage you to review their privacy policies.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-building"></i> 10. International Data Transfers</h2>
+      <p>Your information is primarily processed and stored in India. If we transfer data outside India, we will ensure appropriate safeguards are in place as per applicable laws.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-file-contract"></i> 11. Legal Basis for Processing (GDPR Compliance)</h2>
+      <p>For users in the European Economic Area (EEA), we process your data based on:</p>
+      <ul>
+        <li>Performance of contract (processing your orders)</li>
+        <li>Legal compliance (regulatory requirements)</li>
+        <li>Legitimate interests (improving services, fraud prevention)</li>
+        <li>Consent (marketing communications, non-essential cookies)</li>
+      </ul>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-pen-to-square"></i> 12. Changes to This Privacy Policy</h2>
+      <p>We may update this Privacy Policy periodically. Changes will be posted on this page with an updated "Last Updated" date. Significant changes will be notified via email or website notice.</p>
+      <p>We encourage you to review this policy regularly to stay informed about how we protect your information.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-envelope-circle-check"></i> 13. Contact Us</h2>
+      <p>For any questions, concerns, or requests regarding this Privacy Policy or our data practices:</p>
+      
+      <div class="contact-box">
+        <h3><i class="fa-solid fa-headset"></i> Privacy Office</h3>
+        <p><strong>Email:</strong> <a href="mailto:privacy@shrigovindpharmacy.com">privacy@shrigovindpharmacy.com</a></p>
+        <p><strong>Phone:</strong> <a href="tel:+919876543210">+91 98765 43210</a></p>
+        <p><strong>Address:</strong> Privacy Officer, Shri Govind Pharmacy, Near Main Bus Stand, Sikar, Rajasthan – 332001</p>
+        <p><strong>Grievance Officer:</strong> <a href="mailto:grievance@shrigovindpharmacy.com">grievance@shrigovindpharmacy.com</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" style="margin-top: 4rem;">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2025 Shri Govind Pharmacy. All Rights Reserved.</p>
+        <div class="fb-links">
+          <a href="/privacy-policy">Privacy Policy</a>
+          <a href="/terms-conditions">Terms of Service</a>
+          <a href="/refund-policy">Refund Policy</a>
+          <a href="/sitemap.xml">Sitemap</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/theme.js"></script>
+</body>
+
+</html>

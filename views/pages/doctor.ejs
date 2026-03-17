@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Consultation — Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/doctor.css">
+  <script src="/js/theme.js"></script>
+
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+
+  <!-- ══ TOPBAR ══ -->
+  <div class="topbar">
+    <i class="fa-solid fa-leaf"></i>
+    100% Natural Ayurvedic Products &nbsp;|&nbsp;
+    Free Delivery on Orders ₹499+ &nbsp;|&nbsp;
+    Call: +91 <%= doctor?.contact?.phone || '9876543210' %>
+  </div>
+
+  <!-- ══ HEADER ══ -->
+  <header class="main-header">
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-flex">
+          <a href="/home" class="logo">
+            <i class="fa-solid fa-mortar-pestle"></i>
+            <div class="logo-text">
+              <span class="logo-main">Shri Govind Pharmacy</span>
+              <span class="brand-sub">Ayurvedic &amp; Herbal Wellness</span>
+            </div>
+          </a>
+          <div class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+              <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+            <a href="/home" class="btn btn-outline">
+              <i class="fa-solid fa-house"></i> Home
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ══ BREADCRUMB ══ -->
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/home"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span>Doctor Consultation</span>
+      </div>
+    </div>
+  </div>
+
+  <% if (typeof activeAppointment !== 'undefined' && activeAppointment) { %>
+  <!-- Active Appointment Banner -->
+  <div class="active-appointment-banner">
+    <div class="container">
+      <div class="banner-content">
+        <div class="banner-icon">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="banner-text">
+          <strong>You have an upcoming appointment!</strong>
+          <span>
+            Scheduled with Dr. <%= activeAppointment.doctor?.name || 'Doctor' %> on
+            <%= new Date(activeAppointment.appointmentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %> at <%= activeAppointment.appointmentTime %>
+          </span>
+        </div>
+        <a href="/appointment/<%= activeAppointment._id.toString() %>" class="btn btn-view">
+          <i class="fa-solid fa-eye"></i> View Details
+        </a>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- ══ HERO ══ -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-content">
+
+        <!-- Doctor Image -->
+        <div class="doctor-img-carousel">
+          <a class="doctor-carousel-btn prev" href="/doctor?selected=<%= totalDoctors > 0 ? (selectedIndex - 1 + totalDoctors) % totalDoctors : 0 %>"><i class="fa-solid fa-chevron-left"></i></a>
+          <div class="doctor-img-wrap">
+            <div class="doctor-img-frame">
+              <% if (doctor && doctor.image) { %>
+              <img src="<%= doctor.image %>" alt="Dr. <%= doctor.name %>" style="width:100%;height:100%;object-fit:cover;">
+              <% } else { %>
+              <div class="doctor-placeholder">
+                <i class="fa-solid fa-user-doctor"></i>
+                <span>DR. <%= doctor?.name?.toUpperCase() || 'DOCTOR' %></span>
+              </div>
+              <% } %>
+            </div>
+            <div class="doc-badge-float">
+              <div class="dot"></div>
+              <span><%= doctor?.isAvailableNow ? 'Available Now' : 'Currently Unavailable' %></span>
+            </div>
+          </div>
+          <a class="doctor-carousel-btn next" href="/doctor?selected=<%= totalDoctors > 0 ? (selectedIndex + 1) % totalDoctors : 0 %>"><i class="fa-solid fa-chevron-right"></i></a>
+        </div>
+        <div class="doctor-carousel-status" style="text-align:center; margin-top:8px; color:#1c8125; font-weight:bold;">Doctor <%= selectedIndex + 1 %> of <%= totalDoctors %></div>
+
+
+        <!-- Hero Text -->
+        <div class="hero-text">
+          <div class="hero-badge">
+            <i class="fa-solid fa-certificate"></i>
+            <% if (doctor && doctor.qualifications && doctor.qualifications.length > 0) { %>
+            <%= doctor.qualifications.map(q => q.degree).join(' · ') %>
+            <% } else { %>
+            BAMS · MD Ayurveda
+            <% } %>
+            · <%= doctor?.experience?.years || 20 %>+ Years Experience
+          </div>
+          <h1>Meet Dr. <em><%= doctor?.name || 'Doctor' %></em></h1>
+
+          <p>
+            <%= doctor?.title || 'Senior Ayurvedic Physician' %> at Shri Govind Pharmacy.
+            Get personalized, holistic consultation for your wellness journey — rooted in ancient
+            wisdom, guided by modern understanding.
+          </p>
+          <div class="hero-cta-row">
+            <a href="https://wa.me/91<%= doctor?.contact?.whatsapp || doctor?.contact?.phone %>?text=Hello%20Doctor%2C%20I%20would%20like%20to%20book%20a%20consultation." target="_blank" class="btn-wa">
+              <i class="fa-brands fa-whatsapp"></i> Book via WhatsApp
+            </a>
+            <% if (typeof activeAppointment !== 'undefined' && activeAppointment) { %>
+            <button onclick="openBookingModal()" class="btn-ghost" style="background:rgba(255,255,255,0.12);color:white;border:1.5px solid rgba(255,255,255,0.3);">
+              <i class="fa-solid fa-file-medical"></i> View My Appointment
+            </button>
+            <% } else { %>
+            <button onclick="openBookingModal()" class="btn-ghost" style="background:rgba(255,255,255,0.12);color:white;border:1.5px solid rgba(255,255,255,0.3);">
+              <i class="fa-solid fa-calendar-check"></i> Book Appointment
+            </button>
+            <% } %>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ STATS STRIP ══ -->
+  <div class="stats-strip">
+    <div class="container">
+      <div class="stats-row">
+        <div class="stat-block">
+          <div class="stat-num"><%= doctor?.experience?.years || 20 %>+</div>
+          <div class="stat-lbl">Years Experience</div>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat-block">
+          <div class="stat-num"><%= (doctor?.stats?.patientsTreated || 8500).toLocaleString() %></div>
+          <div class="stat-lbl">Patients Treated</div>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat-block">
+          <div class="stat-num"><%= doctor?.stats?.averageRating?.toFixed(1) || '4.9' %>★</div>
+          <div class="stat-lbl">Patient Rating</div>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat-block">
+          <div class="stat-num"><%= doctor?.consultationFee?.isFreeFirstVisit ? 'FREE' : '₹' + (doctor?.consultationFee?.firstVisit || 0) %></div>
+          <div class="stat-lbl">First Consultation</div>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat-block">
+          <div class="stat-num">Pan India</div>
+          <div class="stat-lbl">Online Consultation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MAIN CONTENT ══ -->
+  <main class="main-content" id="profile">
+    <div class="container">
+      <div class="content-grid">
+
+        <!-- ── PROFILE CARD ── -->
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar">
+              <% if (doctor && doctor.image) { %>
+              <img src="<%= doctor.image %>" alt="Dr. <%= doctor.name %>" style="width:100%;height:100%;object-fit:cover;border-radius:18px;">
+              <% } else { %>
+              <i class="fa-solid fa-user-doctor"></i>
+              <% } %>
+            </div>
+            <div class="profile-header-info">
+              <div class="profile-name">Dr. <%= doctor?.name %></div>
+              <div class="profile-title"><%= doctor?.title %></div>
+              <div class="profile-tags">
+                <% if (doctor && doctor.qualifications && doctor.qualifications.length > 0) { %>
+                <% doctor.qualifications.forEach(q => { %>
+                <span class="tag"><i class="fa-solid fa-graduation-cap"></i>&nbsp; <%= q.degree %></span>
+                <% }); %>
+                <% } else { %>
+                <span class="tag"><i class="fa-solid fa-graduation-cap"></i>&nbsp; BAMS</span>
+                <span class="tag">MD Ayurveda</span>
+                <% } %>
+                <% if (doctor?.registrationNumber) { %>
+                <span class="tag">Reg. No. <%= doctor.registrationNumber %></span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-body">
+
+            <!-- About -->
+            <div class="section-label"><i class="fa-solid fa-user"></i> About</div>
+            <p class="about-text">
+              <%= doctor?.about || 'Experienced Ayurvedic physician dedicated to holistic healing and personalized care.' %>
+            </p>
+
+            <!-- Info Grid -->
+            <div class="section-label"><i class="fa-solid fa-circle-info"></i> Details</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-icon"><i class="fa-solid fa-stethoscope"></i></div>
+                <div class="info-item-text">
+                  <div class="info-item-lbl">Specialisation</div>
+                  <div class="info-item-val">
+                    <% if (doctor && doctor.specializations && doctor.specializations.length > 0) { %>
+                    <%= doctor.specializations.slice(0, 2).join(' & ') %>
+                    <% } else { %>
+                    Ayurveda & Herbal Medicine
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="info-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="info-item-text">
+                  <div class="info-item-lbl">Experience</div>
+                  <div class="info-item-val"><%= doctor?.experience?.years || 20 %>+ Years</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="info-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div class="info-item-text">
+                  <div class="info-item-lbl">Education</div>
+                  <div class="info-item-val">
+                    <% if (doctor && doctor.qualifications && doctor.qualifications.length > 0) { %>
+                    <%= doctor.qualifications.map(q => q.degree).join(', ') %>
+                    <% } else { %>
+                    BAMS, MD (Ay.)
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
+                <div class="info-item-text">
+                  <div class="info-item-lbl">Clinic Location</div>
+                  <div class="info-item-val"><%= doctor?.contact?.clinicAddress || 'Ward No.6, Govind Marg, Neemkathana, Dist. Sikar, Rajasthan 332713' %></div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="info-icon"><i class="fa-solid fa-clock"></i></div>
+                <div class="info-item-text">
+                  <div class="info-item-lbl">Consultation Fee</div>
+                  <div class="info-item-val">
+                    <% if (doctor?.consultationFee?.isFreeFirstVisit) { %>
+                    First Visit — FREE
+                    <% } else { %>
+                    First Visit — ₹<%= doctor?.consultationFee?.firstVisit || 0 %>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="info-icon"><i class="fa-solid fa-globe"></i></div>
+                <div class="info-item-text">
+                  <div class="info-item-lbl">Consultation Mode</div>
+                  <div class="info-item-val">
+                    <% if (doctor && doctor.consultationModes && doctor.consultationModes.length > 0) { %>
+                    <%= doctor.consultationModes.join(' & ') %>
+                    <% } else { %>
+                    In-Clinic & Online
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Specialties -->
+            <div class="section-label"><i class="fa-solid fa-leaf"></i> Areas of Expertise</div>
+            <div class="specialties-list">
+              <% if (doctor && doctor.specializations && doctor.specializations.length > 0) { %>
+              <% doctor.specializations.forEach(spec => { %>
+              <span class="specialty-chip"><i class="fa-solid fa-heart-pulse"></i> <%= spec %></span>
+              <% }); %>
+              <% } else { %>
+              <span class="specialty-chip"><i class="fa-solid fa-heart-pulse"></i> Digestive Disorders</span>
+              <span class="specialty-chip"><i class="fa-solid fa-person-dots-from-line"></i> Skin Conditions</span>
+              <span class="specialty-chip"><i class="fa-solid fa-bone"></i> Joint & Arthritis</span>
+              <span class="specialty-chip"><i class="fa-solid fa-shield-halved"></i> Immunity Boosting</span>
+              <% } %>
+            </div>
+
+            <!-- Languages -->
+            <div class="section-label"><i class="fa-solid fa-language"></i> Languages</div>
+            <div class="lang-chips">
+              <% if (doctor && doctor.languages && doctor.languages.length > 0) { %>
+              <% doctor.languages.forEach(lang => { %>
+              <span class="lang-chip"><%= lang %></span>
+              <% }); %>
+              <% } else { %>
+              <span class="lang-chip">🇮🇳 Hindi</span>
+              <span class="lang-chip">🇬🇧 English</span>
+              <span class="lang-chip">🇮🇳 Rajasthani</span>
+              <% } %>
+            </div>
+
+            <!-- CTA -->
+            <div class="card-cta">
+              <p>Consult Dr. <%= doctor?.name?.split(' ').pop() %> directly on WhatsApp — get a personalised response within minutes.</p>
+              <a href="https://wa.me/91<%= doctor?.contact?.whatsapp || doctor?.contact?.phone %>?text=Hello%20Doctor%2C%20I%20would%20like%20to%20book%20an%20Ayurvedic%20consultation%20through%20Shri%20Govind%20Pharmacy." target="_blank" class="wa-btn-big">
+                <i class="fa-brands fa-whatsapp"></i>
+                Chat on WhatsApp: +91 <%= doctor?.contact?.phone %>
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── SIDEBAR ── -->
+        <div class="sidebar">
+
+          <!-- Availability -->
+          <div class="sidebar-card">
+            <div class="sidebar-card-head">
+              <i class="fa-solid fa-calendar-days"></i> Availability
+            </div>
+            <div class="sidebar-card-body">
+              <% if (doctor && doctor.availability && doctor.availability.length > 0) { %>
+              <% doctor.availability.forEach(slot => { %>
+              <div class="avail-row">
+                <div class="avail-day"><%= slot.day %></div>
+                <div class="avail-time"><%= slot.isAvailable ? (slot.startTime + ' – ' + slot.endTime) : '—' %></div>
+                <span class="avail-badge <%= slot.isAvailable ? 'open' : 'closed' %>"><%= slot.isAvailable ? 'Open' : 'Closed' %></span>
+              </div>
+              <% }); %>
+              <% } else { %>
+              <div class="avail-row">
+                <div class="avail-day">Monday</div>
+                <div class="avail-time">9:00 AM – 1:00 PM</div>
+                <span class="avail-badge open">Open</span>
+              </div>
+              <div class="avail-row">
+                <div class="avail-day">Tuesday</div>
+                <div class="avail-time">9:00 AM – 1:00 PM</div>
+                <span class="avail-badge open">Open</span>
+              </div>
+              <div class="avail-row">
+                <div class="avail-day">Wednesday</div>
+                <div class="avail-time">3:00 PM – 7:00 PM</div>
+                <span class="avail-badge open">Open</span>
+              </div>
+              <div class="avail-row">
+                <div class="avail-day">Thursday</div>
+                <div class="avail-time">9:00 AM – 1:00 PM</div>
+                <span class="avail-badge open">Open</span>
+              </div>
+              <div class="avail-row">
+                <div class="avail-day">Friday</div>
+                <div class="avail-time">9:00 AM – 1:00 PM</div>
+                <span class="avail-badge open">Open</span>
+              </div>
+              <div class="avail-row">
+                <div class="avail-day">Saturday</div>
+                <div class="avail-time">9:00 AM – 3:00 PM</div>
+                <span class="avail-badge open">Open</span>
+              </div>
+              <div class="avail-row">
+                <div class="avail-day">Sunday</div>
+                <div class="avail-time">—</div>
+                <span class="avail-badge closed">Closed</span>
+              </div>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Contact -->
+          <div class="sidebar-card">
+            <div class="sidebar-card-head">
+              <i class="fa-solid fa-address-book"></i> Contact Doctor
+            </div>
+            <div class="sidebar-card-body">
+              <a href="https://wa.me/91<%= doctor?.contact?.whatsapp || doctor?.contact?.phone %>" target="_blank" class="contact-method">
+                <div class="cm-icon"><i class="fa-brands fa-whatsapp"></i></div>
+                <div>
+                  <div class="cm-label">WhatsApp</div>
+                  <div class="cm-val">+91 <%= doctor?.contact?.phone %></div>
+                </div>
+              </a>
+              <a href="tel:+91<%= doctor?.contact?.phone %>" class="contact-method">
+                <div class="cm-icon"><i class="fa-solid fa-phone"></i></div>
+                <div>
+                  <div class="cm-label">Phone (Clinic)</div>
+                  <div class="cm-val">+91 <%= doctor?.contact?.phone %></div>
+                </div>
+              </a>
+              <a href="mailto:<%= doctor?.contact?.email %>" class="contact-method">
+                <div class="cm-icon"><i class="fa-solid fa-envelope"></i></div>
+                <div>
+                  <div class="cm-label">Email</div>
+                  <div class="cm-val"><%= doctor?.contact?.email %></div>
+                </div>
+              </a>
+              <div class="contact-method" style="cursor:default;">
+                <div class="cm-icon"><i class="fa-solid fa-location-dot"></i></div>
+                <div>
+                  <div class="cm-label">Clinic Address</div>
+                  <div class="cm-val"><%= doctor?.contact?.clinicAddress %></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Patient Reviews -->
+          <div class="sidebar-card">
+            <div class="sidebar-card-head">
+              <i class="fa-solid fa-star"></i> Patient Reviews
+            </div>
+            <div class="sidebar-card-body">
+              <% if (doctor && doctor.reviews && doctor.reviews.length > 0) { %>
+              <% doctor.reviews.slice(0, 3).forEach(review => { %>
+              <div class="review-item">
+                <div class="review-stars"><%= '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating) %></div>
+                <p class="review-text">"<%= review.comment %>"</p>
+                <div class="review-author">— <%= review.patientName %></div>
+              </div>
+              <% }); %>
+              <% } else { %>
+              <div class="review-item">
+                <div class="review-stars">★★★★★</div>
+                <p class="review-text">"Excellent consultation experience. Very knowledgeable and caring doctor."</p>
+                <div class="review-author">— Happy Patient</div>
+              </div>
+              <% } %>
+              <button onclick="openReviewModal()" class="btn-ghost" style="width:100%;margin-top:10px;">
+                <i class="fa-solid fa-pen"></i> Write a Review
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ══ EXPERTISE SECTION ══ -->
+  <section class="expertise-section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Our Consultation Process</h2>
+        <p>Simple, personalised, and completely natural — here's how we help you heal.</p>
+      </div>
+      <div class="expertise-grid">
+        <div class="exp-card">
+          <div class="exp-icon"><i class="fa-brands fa-whatsapp"></i></div>
+          <div class="exp-title">1. Connect on WhatsApp</div>
+          <p class="exp-desc">Message Dr. <%= doctor?.name?.split(' ').pop() %> directly on WhatsApp with your health concern. Get a response within minutes during clinic hours.</p>
+        </div>
+        <div class="exp-card">
+          <div class="exp-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+          <div class="exp-title">2. Share Your History</div>
+          <p class="exp-desc">Doctor will ask about your Prakriti (body constitution), lifestyle, diet, and symptoms to understand your unique health profile.</p>
+        </div>
+        <div class="exp-card">
+          <div class="exp-icon"><i class="fa-solid fa-flask"></i></div>
+          <div class="exp-title">3. Personalised Prescription</div>
+          <p class="exp-desc">Receive a tailored Ayurvedic treatment plan with herbal formulations, dietary guidelines, and daily routine recommendations.</p>
+        </div>
+        <div class="exp-card">
+          <div class="exp-icon"><i class="fa-solid fa-truck-fast"></i></div>
+          <div class="exp-title">4. Medicine Delivery</div>
+          <p class="exp-desc">Order prescribed medicines directly from Shri Govind Pharmacy. We deliver authentic, lab-tested products across India in 2–4 days.</p>
+        </div>
+        <div class="exp-card">
+          <div class="exp-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <div class="exp-title">5. Follow-Up Support</div>
+          <p class="exp-desc">Regular follow-up consultations to track your progress and adjust your treatment for optimal, lasting results.</p>
+        </div>
+        <div class="exp-card">
+          <div class="exp-icon"><i class="fa-solid fa-infinity"></i></div>
+          <div class="exp-title">6. Ongoing Wellness</div>
+          <p class="exp-desc">Long-term Ayurvedic lifestyle guidance to maintain your health naturally — because prevention is the greatest medicine.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="auth-footer-strip">
+    © 2025 Shri Govind Pharmacy. All Rights Reserved.
+    &nbsp;|&nbsp; <a href="#">Privacy Policy</a>
+    &nbsp;|&nbsp; <a href="#">Terms</a>
+    &nbsp;|&nbsp; <a href="/contact">Contact Us</a>
+  </footer>
+
+  <!-- WhatsApp Floating Button -->
+  <a href="https://wa.me/91<%= doctor?.contact?.whatsapp || doctor?.contact?.phone %>?text=Hello%20Doctor%2C%20I%20need%20Ayurvedic%20consultation." target="_blank" class="wa-float" title="Chat with Doctor">
+    <i class="fa-brands fa-whatsapp"></i>
+    <span class="wa-float-tooltip">Chat with Doctor</span>
+  </a>
+
+  <!-- Toast Container -->
+  <div class="toast-zone" id="toastZone"></div>
+
+  <!-- ══ BOOKING MODAL ══ -->
+  <div id="bookingModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-calendar-check"></i> Book Appointment</h3>
+        <button class="modal-close" onclick="closeBookingModal()">&times;</button>
+      </div>
+      <form id="bookingForm" onsubmit="submitBooking(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label><i class="fa-solid fa-video"></i> Appointment Type</label>
+            <select name="appointmentType" required>
+              <option value="">Select Type</option>
+              <option value="WhatsApp">WhatsApp Consultation</option>
+              <option value="Video Call">Video Call</option>
+              <option value="In-Clinic">In-Clinic Visit</option>
+              <option value="Online">Online Consultation</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-calendar"></i> Preferred Date</label>
+            <input type="date" name="appointmentDate" required min="<%= new Date().toISOString().split('T')[0] %>">
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-clock"></i> Preferred Time</label>
+            <select name="appointmentTime" required>
+              <option value="">Select Time Slot</option>
+              <option value="9:00 AM">9:00 AM</option>
+              <option value="10:00 AM">10:00 AM</option>
+              <option value="11:00 AM">11:00 AM</option>
+              <option value="12:00 PM">12:00 PM</option>
+              <option value="3:00 PM">3:00 PM</option>
+              <option value="4:00 PM">4:00 PM</option>
+              <option value="5:00 PM">5:00 PM</option>
+              <option value="6:00 PM">6:00 PM</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-notes-medical"></i> Reason for Consultation</label>
+            <textarea name="reason" rows="3" required placeholder="Briefly describe your health concern"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-pills"></i> Current Symptoms (Optional)</label>
+            <input type="text" name="symptoms" placeholder="e.g., Headache, Fatigue, Back Pain">
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-file-medical"></i> Medical History (Optional)</label>
+            <textarea name="medicalHistory" rows="2" placeholder="Any existing medical conditions"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-capsules"></i> Current Medications (Optional)</label>
+            <textarea name="currentMedications" rows="2" placeholder="List any medications you're currently taking"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeBookingModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-check"></i> Book Appointment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══ REVIEW MODAL ══ -->
+  <div id="reviewModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-star"></i> Write a Review</h3>
+        <button class="modal-close" onclick="closeReviewModal()">&times;</button>
+      </div>
+      <form id="reviewForm" onsubmit="submitReview(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label><i class="fa-solid fa-star"></i> Rating</label>
+            <div class="star-rating">
+              <input type="radio" name="rating" value="5" id="star5" required><label for="star5">★</label>
+              <input type="radio" name="rating" value="4" id="star4"><label for="star4">★</label>
+              <input type="radio" name="rating" value="3" id="star3"><label for="star3">★</label>
+              <input type="radio" name="rating" value="2" id="star2"><label for="star2">★</label>
+              <input type="radio" name="rating" value="1" id="star1"><label for="star1">★</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-comment"></i> Your Review</label>
+            <textarea name="comment" rows="4" required placeholder="Share your experience with Dr. <%= doctor?.name?.split(' ').pop() %>"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeReviewModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-paper-plane"></i> Submit Review
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Pass doctor data to JavaScript
+    const doctorData = <%- JSON.stringify(doctor || {}) %>;
+    const isLoggedIn = <%- !!locals.user ? 'true' : 'false' %>;
+    const activeAppointment = <%- activeAppointment ? JSON.stringify(activeAppointment) : 'null' %>;
+  </script>
+  <script src="/js/doctor.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order <%= order.tracking.orderId %> — Shri Govind Pharmacy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-light);
+      color: var(--text-dark);
+      min-height: 100vh;
+      padding-bottom: 2rem;
+    }
+
+    .main-content {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .breadcrumb {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .order-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin: 0;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 12px rgba(28, 129, 37, 0.3);
+    }
+
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(28, 129, 37, 0.4);
+    }
+
+    .btn-download i {
+      font-size: 1rem;
+    }
+
+    .order-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .order-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    .item-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .item-details {
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .item-meta {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .item-price {
+      text-align: right;
+    }
+
+    .price {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+    }
+
+    .summary-total {
+      border-top: 2px solid var(--border);
+      padding-top: 1rem;
+      margin-top: 0.5rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .status-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-pending,
+    .status-confirmed {
+      background: rgba(255, 193, 7, 0.1);
+      color: #ffc107;
+    }
+
+    .status-processing,
+    .status-shipped {
+      background: rgba(52, 152, 219, 0.1);
+      color: #3498db;
+    }
+
+    .status-delivered {
+      background: rgba(40, 167, 69, 0.1);
+      color: #28a745;
+    }
+
+    .status-cancelled {
+      background: rgba(220, 53, 69, 0.1);
+      color: #dc3545;
+    }
+
+    .btn-cancel {
+      background: var(--danger);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .btn-print {
+      background: var(--bg-light);
+      color: var(--text-dark);
+      border: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .address-box {
+      background: var(--bg-light);
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+
+      .header-inner,
+      .main-content {
+        padding: 0 1rem;
+      }
+
+      .order-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .order-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+      }
+
+      .btn-download {
+        justify-content: center;
+      }
+    }
+
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: var(--surface);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0.25rem;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: var(--bg);
+    }
+
+    .form-group {
+      padding: 1rem 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: var(--bg);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .items-selection {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .item-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .item-checkbox:last-child {
+      border-bottom: none;
+    }
+
+    .item-checkbox input[type="checkbox"] {
+      margin: 0;
+    }
+
+    .item-checkbox label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1;
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .item-checkbox img {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .item-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .address-display {
+      padding: 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text-dark);
+      border: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .btn-primary:hover,
+    .btn-secondary:hover {
+      opacity: 0.9;
+    }
+  </style>
+  </style>
+  <script src="/js/theme.js"></script>
+
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success">
+      <%= success[0] %>
+    </div>
+    <% } %>
+      <% if (error && error.length) { %>
+        <div class="flash error">
+          <%= error[0] %>
+        </div>
+        <% } %>
+
+          <!-- Header -->
+          <header class="main-header" id="main-header">
+
+            <div class="topbar">
+              <div class="container topbar-flex">
+                <div class="topbar-left">
+                  <a href="tel:+919413010731"><i class="fas fa-phone"></i> +91 9413010731</a>
+                  <a href="mailto:shrigovindpharmacy212@gmail.com"><i class="fas fa-envelope"></i>
+                    shrigovindpharmacy212@gmail.com</a>
+                </div>
+                <div class="topbar-right">
+                  <a href="#"><i class="fas fa-truck"></i> Track Order</a>
+                  <a href="#"><i class="fas fa-map-marker-alt"></i> Store Locator</a>
+                  <div class="topbar-social">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/919413010731" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <nav class="navbar">
+              <div class="container nav-flex">
+
+                <a href="/home" class="logo">
+                  <img src="https://res.cloudinary.com/drufdfmfr/image/upload/v1772726044/favicon_uuzvml.svg"
+                    alt="Shri Govind Pharmacy" class="logo-favicon">
+                  <div class="logo-text">
+                    <span class="logo-main">Shri Govind</span>
+                    <span class="logo-sub">Pharmacy</span>
+                  </div>
+                </a>
+
+                <ul class="nav-links" id="nav-links">
+                  <li><a href="/home">Home</a></li>
+                  <li class="has-dropdown">
+                    <a href="#categories">Categories <i class="fas fa-chevron-down"></i></a>
+                    <ul class="mega-dropdown">
+                      <li><a href="/categories?category=ayurvedic"><i class="fas fa-capsules"></i> Ayurvedic</a></li>
+                      <li><a href="/categories?category=sashtri-ayurvedic"><i class="fas fa-leaf"></i> Sashtri
+                          Ayurvedic</a>
+                      </li>
+                      <li><a href="/categories?category=herbal-cosmetics"><i class="fas fa-heart"></i> Herbal
+                          Cosmetics</a></li>
+                      <li><a href="/categories?category=fmcg"><i class="fas fa-soap"></i> FMCG</a></li>
+                    </ul>
+                  </li>
+                  <li><a href="#product">Products</a></li>
+                  <li><a href="#about">About</a></li>
+                  <li><a href="/contact">Contact</a></li>
+                  <% if (typeof user !=='undefined' && user) { %>
+                    <li class="has-dropdown user-menu">
+                      <a href="/account" class="user-link">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="user-name">
+                          <%= user.name.split(' ')[0] %></span>
+      <i class="fas fa-chevron-down"></i>
+    </a>
+    <ul class="user-dropdown">
+      <li><a href="/account"><i class="fas fa-user"></i> My Account</a></li>
+      <li><a href="/user/orders"><i class="fas fa-box"></i> My Orders</a></li>
+
+      <li><a href="/loyalty-rewards"><i class="fas fa-gift"></i> Loyalty Rewards</a></li>
+      <li><a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a></li>
+      <li><a href="/doctor"><i class="fas fa-user-md"></i> Consult Doctor</a></li>
+      <li class="divider"></li>
+      <li><a href="/logout" onclick="event.preventDefault(); fetch(' /logout', {method: 'POST' ,
+                            credentials: 'same-origin' }).then(()=> window.location.href = '/login'); return false;"><i
+                              class="fas fa-sign-out-alt"></i> Logout</a>
+                    </li>
+                </ul>
+                </li>
+                <% } else { %>
+                  <li><a href="/login" class="login-link"><i class="fas fa-user"></i> Login</a></li>
+                  <% } %>
+                    </ul>
+
+                    <div class="nav-actions">
+                      <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                      </button>
+                      <button class="icon-btn" id="search-trigger" aria-label="Search">
+                        <i class="fas fa-search"></i>
+                      </button>
+                      <a href="/cart" class="cart-icon" id="cart-btn" aria-label="Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="badge" id="cart-count">
+                          <%= typeof cartCount !=='undefined' ? cartCount : 0 %>
+                        </span>
+                      </a>
+                      <a href="/wishlist" class="icon-btn wishlist-btn" aria-label="Wishlist">
+                        <i class="fas fa-heart"></i>
+                        <span class="badge wish-badge" id="wish-count">
+                          <%= typeof wishCount !=='undefined' ? wishCount : 0 %>
+                        </span>
+                      </a>
+                      <a href="/doctor" class="btn btn-primary consult-btn desktop-only">
+                        <i class="fas fa-user-md"></i> Consult Doctor
+                      </a>
+                      <button class="hamburger" id="hamburger" aria-label="Open Menu" aria-expanded="false">
+                        <span></span><span></span><span></span>
+                      </button>
+                    </div>
+
+              </div>
+            </nav>
+
+            <!-- SEARCH OVERLAY -->
+            <div class="search-overlay" id="search-overlay" role="dialog" aria-modal="true" aria-label="Search">
+              <div class="search-overlay-inner">
+                <div class="search-bar-big">
+                  <div class="sbb-categories">
+                    <select id="search-cat" aria-label="Search category">
+                      <option value="">All Categories</option>
+                      <option>Ayurvedic</option>
+                      <option>Sashtri Ayurvedic</option>
+                      <option>Herbal Cosmetics</option>
+                      <option>FMCG</option>
+                    </select>
+                  </div>
+                  <input type="search" id="searchInput" placeholder="Search medicines, supplements, herbal products…"
+                    autocomplete="off" autocorrect="off" spellcheck="false" inputmode="search">
+                  <button id="searchBtn"><i class="fas fa-search"></i> Search</button>
+                </div>
+                <div class="search-suggestions">
+                  <span class="sug-label">Popular:</span>
+                  <button class="sug-chip" onclick="quickSearch('Ashwagandha')">Ashwagandha</button>
+                  <button class="sug-chip" onclick="quickSearch('Triphala')">Triphala</button>
+                  <button class="sug-chip" onclick="quickSearch('Vitamin C')">Vitamin C</button>
+                  <button class="sug-chip" onclick="quickSearch('Immunity')">Immunity</button>
+                  <button class="sug-chip" onclick="quickSearch('Omega 3')">Omega 3</button>
+                </div>
+                <button class="search-close" id="search-close" aria-label="Close search"><i
+                    class="fas fa-times"></i></button>
+              </div>
+            </div>
+
+            <!-- MOBILE MENU -->
+            <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+              <div class="mobile-menu-inner">
+                <div class="mobile-menu-head">
+                  <span>Menu</span>
+                  <button id="mobile-close" aria-label="Close menu"><i class="fas fa-times"></i></button>
+                </div>
+                <ul>
+                  <li><a href="/home"><i class="fas fa-home"></i> Home</a></li>
+                  <li class="mob-has-sub">
+                    <a href="#categories" class="mob-sub-trigger"><i class="fas fa-th-large"></i> Categories <i
+                        class="fas fa-chevron-down mob-arrow"></i></a>
+                    <ul class="mob-submenu">
+                      <li><a href="/categories?category=ayurvedic">Ayurvedic</a></li>
+                      <li><a href="/categories?category=sashtri-ayurvedic">Sashtri Ayurvedic</a></li>
+                      <li><a href="/categories?category=herbal-cosmetics">Herbal Cosmetics</a></li>
+                      <li><a href="/categories?category=fmcg">FMCG</a></li>
+                    </ul>
+                  </li>
+                  <li><a href="#product"><i class="fas fa-box"></i> Products</a></li>
+                  <li><a href="#about"><i class="fas fa-info-circle"></i> About</a></li>
+                  <li><a href="/contact"><i class="fas fa-phone"></i> Contact</a></li>
+                  <% if (typeof user !=='undefined' && user) { %>
+                    <li class="mob-user-info">
+                      <div class="mob-user-display">
+                        <i class="fas fa-user-circle"></i>
+                        <span>
+                          <%= user.name %>
+                        </span>
+                      </div>
+                      <ul class="mob-user-menu">
+                        <li><a href="/account"><i class="fas fa-user"></i> My Account</a></li>
+                        <li><a href="/user/orders"><i class="fas fa-box"></i> My Orders</a></li>
+                        <li><a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a></li>
+                        <li><a href="/doctor"><i class="fas fa-user-md"></i> Consult Doctor</a></li>
+                        <li class="divider"></li>
+                        <li><a href="/logout"
+                            onclick="event.preventDefault(); fetch('/logout', {method: 'POST', credentials: 'same-origin'}).then(() => window.location.href = '/login'); return false;"><i
+                              class="fas fa-sign-out-alt"></i> Logout</a></li>
+                      </ul>
+                    </li>
+                    <% } else { %>
+                      <li><a href="/login"><i class="fas fa-user"></i> Login</a></li>
+                      <% } %>
+                        <li>
+                          <a href="/doctor" class="btn btn-primary mob-consult">
+                            <i class="fas fa-user-md"></i> Consult Doctor
+                          </a>
+                        </li>
+                </ul>
+                <div class="mob-contact-strip">
+                  <a href="tel:+919413010731"><i class="fas fa-phone"></i> +91 9413010731</a>
+                  <a href="https://wa.me/919413010731" target="_blank" rel="noopener noreferrer"><i
+                      class="fab fa-whatsapp"></i>
+                    WhatsApp Us</a>
+                </div>
+              </div>
+            </div>
+            <div class="mobile-overlay" id="mobile-overlay"></div>
+
+          </header>
+
+          <main class="main-content">
+            <div class="breadcrumb">
+              <a href="/home"><i class="fas fa-home"></i> Home</a>
+              <i class="fas fa-chevron-right"></i>
+              <a href="/user/orders">Orders</a>
+              <i class="fas fa-chevron-right"></i>
+              <span>
+                <%= order.tracking.orderId %>
+              </span>
+            </div>
+
+            <div class="order-header">
+              <h1 class="order-title">Order Details</h1>
+              <a href="/user/orders/<%= order._id %>/invoice" class="btn-download" target="_blank">
+                <i class="fas fa-download"></i> Download Invoice
+              </a>
+            </div>
+
+            <div class="order-grid">
+              <div>
+                <div class="card">
+                  <h2 class="card-title">Order Items</h2>
+                  <% order.items.forEach(item=> { %>
+                    <div class="order-item">
+                      <img src="<%= item.image || 'https://via.placeholder.com/80' %>" alt="<%= item.name %>"
+                        class="item-image">
+                      <div class="item-details">
+                        <div class="item-name">
+                          <%= item.name %>
+                        </div>
+                        <div class="item-meta">Qty: <%= item.quantity %> × ₹<%= item.price %>
+                        </div>
+                      </div>
+                      <div class="item-price">
+                        <div class="price">₹<%= item.subtotal %>
+                        </div>
+                      </div>
+                    </div>
+                    <% }) %>
+                </div>
+
+                <div class="card">
+                  <h2 class="card-title"><i class="fas fa-map-marker-alt"></i> Delivery Address</h2>
+                  <div class="address-box">
+                    <strong>
+                      <%= order.address.fullName %>
+                    </strong><br>
+                    <%= order.address.address %><br>
+                      <%= order.address.city %>, <%= order.address.state %> - <%= order.address.pincode %><br>
+                            <% if (order.address.landmark) { %>Landmark: <%= order.address.landmark %><br>
+                                <% } %>
+                                  Phone: <%= order.address.phone %><br>
+                                    Email: <%= order.address.email %>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="card">
+                  <h2 class="card-title">Order Summary</h2>
+                  <div style="text-align: center; margin-bottom: 1rem;">
+                    <span class="status-badge status-<%= order.status %>">
+                      <%= order.status.replace('_', ' ' ).toUpperCase() %>
+                    </span>
+                  </div>
+                  <div class="summary-row"><span>Subtotal</span><span>₹<%= Math.round(order.pricing.subtotal) %></span>
+                  </div>
+                  <div class="summary-row"><span>GST (5%)</span><span>₹<%= Math.round(order.pricing.gst) %></span></div>
+                  <div class="summary-row"><span>Delivery</span><span style="color: var(--success);">FREE</span></div>
+                  <div class="summary-row summary-total"><span>Total</span><span>₹<%= Math.round(order.pricing.total) %>
+                    </span></div>
+
+                  <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">Payment Method
+                    </div>
+                    <div style="font-weight: 600;"><i
+                        class="fas fa-<%= order.payment.method === 'cod' ? 'money-bill-wave' : 'credit-card' %>"></i>
+                      <%= order.payment.method.toUpperCase() %>
+                    </div>
+                  </div>
+
+                  <% if ((order.status==='assigned' || order.status==='out_for_delivery' ) && order.deliveryOTP &&
+                    !order.deliveryOTP.verifiedAt) { %>
+                    <div
+                      style="margin-top: 1.5rem; padding: 1rem; background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 8px;">
+                      <div style="font-size: 0.875rem; color: var(--warning); font-weight: 600; margin-bottom: 0.5rem;">
+                        <i class="fas fa-key"></i> Delivery OTP
+                      </div>
+                      <div
+                        style="font-size: 1.2rem; font-weight: 700; color: var(--text-dark); letter-spacing: 2px; text-align: center; background: white; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border);">
+                        <%= order.deliveryOTP.code %>
+                      </div>
+                      <div
+                        style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">
+                        Share this OTP with the delivery agent when they arrive
+                      </div>
+                    </div>
+                    <% } %>
+
+                      <% if (order.deliveryAgent) { %>
+                        <div
+                          style="margin-top: 1.5rem; padding: 1rem; background: rgba(28, 129, 37, 0.1); border: 1px solid rgba(28, 129, 37, 0.3); border-radius: 8px;">
+                          <div
+                            style="font-size: 0.875rem; color: var(--primary); font-weight: 600; margin-bottom: 0.75rem;">
+                            <i class="fas fa-truck"></i> Delivery Agent Details
+                          </div>
+                          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                            <% if (order.deliveryAgent.profileImage) { %>
+                              <img src="<%= order.deliveryAgent.profileImage %>" alt="Agent"
+                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                              <% } else { %>
+                                <div
+                                  style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white;">
+                                  <i class="fas fa-user"></i>
+                                </div>
+                                <% } %>
+                                  <div>
+                                    <div style="font-weight: 600; color: var(--text);">
+                                      <%= order.deliveryAgent.name %>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                      <i class="fas fa-phone"></i>
+                                      <%= order.deliveryAgent.phone %>
+                                    </div>
+                                  </div>
+                          </div>
+                          <% if (order.deliveryAgent.vehicleType && order.deliveryAgent.vehicleNumber) { %>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">
+                              <i
+                                class="fas fa-<%= order.deliveryAgent.vehicleType === 'bike' ? 'motorcycle' : order.deliveryAgent.vehicleType === 'scooter' ? 'motorcycle' : order.deliveryAgent.vehicleType === 'car' ? 'car' : 'truck' %>"></i>
+                              <%= order.deliveryAgent.vehicleType.charAt(0).toUpperCase() +
+                                order.deliveryAgent.vehicleType.slice(1) %> - <%= order.deliveryAgent.vehicleNumber %>
+                            </div>
+                            <% } %>
+                        </div>
+                        <% } %>
+
+                          <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Print
+                            Invoice</button>
+
+                          <% if ((order.status==='confirmed' || order.status==='processing' || order.status==='assigned' || order.status==='shipped') && !order.tracking.cancelledAt) { %>
+                            <button class="btn-cancel" onclick="openCancellationModal()"><i class="fas fa-times"></i> Request Cancellation</button>
+                            <% } %>
+                </div>
+
+                <div class="card">
+                  <h2 class="card-title"><i class="fas fa-clock"></i> Order Timeline</h2>
+                  <div style="font-size: 0.875rem;">
+                    <div style="padding: 0.5rem 0; border-left: 2px solid var(--primary); padding-left: 1rem;">
+                      <strong>Order Placed</strong><br>
+                      <span style="color: var(--text-muted);">
+                        <%= new Date(order.createdAt).toLocaleDateString('en-IN') %>
+                      </span>
+                    </div>
+                    <% if (order.tracking.shippedAt) { %>
+                      <div style="padding: 0.5rem 0; border-left: 2px solid var(--primary); padding-left: 1rem;">
+                        <strong>Shipped</strong><br>
+                        <span style="color: var(--text-muted);">
+                          <%= new Date(order.tracking.shippedAt).toLocaleDateString('en-IN') %>
+                        </span>
+                      </div>
+                      <% } %>
+                        <% if (order.tracking.deliveredAt) { %>
+                          <div style="padding: 0.5rem 0; border-left: 2px solid var(--success); padding-left: 1rem;">
+                            <strong>Delivered</strong><br>
+                            <span style="color: var(--text-muted);">
+                              <%= new Date(order.tracking.deliveredAt).toLocaleDateString('en-IN') %>
+                            </span>
+                          </div>
+                          <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+
+          <!-- Cancellation Request Modal -->
+          <div id="cancellationModal" class="modal" style="display: none;">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3>Request Order Cancellation</h3>
+                <button class="modal-close" onclick="closeCancellationModal()">&times;</button>
+              </div>
+              <form id="cancellationForm">
+                <input type="hidden" name="orderId" value="<%= order._id %>">
+
+                <div class="form-group">
+                  <label for="cancellationReason">Reason for Cancellation *</label>
+                  <select id="cancellationReason" name="reason" required>
+                    <option value="">Select a reason</option>
+                    <option value="wrong_item">Wrong item ordered</option>
+                    <option value="damaged_product">Product damaged</option>
+                    <option value="expired_product">Product expired</option>
+                    <option value="not_as_described">Not as described</option>
+                    <option value="duplicate_order">Duplicate order</option>
+                    <option value="changed_mind">Changed my mind</option>
+                    <option value="delivery_delay">Delivery delay</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="cancellationDescription">Description *</label>
+                  <textarea id="cancellationDescription" name="description" rows="4" placeholder="Please provide detailed reason for cancellation..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label>Select Items to Cancel</label>
+                  <div class="items-selection">
+                    <% order.items.forEach((item, index)=> { %>
+                      <div class="item-checkbox">
+                        <input type="checkbox" id="item_<%= index %>" name="items[<%= index %>][productId]" value="<%= item.product._id || item.product %>" checked>
+                        <label for="item_<%= index %>">
+                          <img src="<%= item.image || 'https://via.placeholder.com/40' %>" alt="<%= item.name %>">
+                          <div class="item-info">
+                            <div class="item-name"><%= item.name %></div>
+                            <div class="item-meta">Qty: <%= item.quantity %> × ₹<%= item.price %></div>
+                          </div>
+                        </label>
+                        <input type="number" name="items[<%= index %>][quantity]" value="<%= item.quantity %>" min="1" max="<%= item.quantity %>" style="width: 60px;">
+                      </div>
+                      <% }) %>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Pickup Address</label>
+                  <div class="address-display">
+                    <strong><%= order.address.fullName %></strong><br>
+                    <%= order.address.address %><br>
+                    <%= order.address.city %>, <%= order.address.state %> - <%= order.address.pincode %><br>
+                    Phone: <%= order.address.phone %>
+                  </div>
+                  <input type="hidden" name="pickupAddress[fullName]" value="<%= order.address.fullName %>">
+                  <input type="hidden" name="pickupAddress[phone]" value="<%= order.address.phone %>">
+                  <input type="hidden" name="pickupAddress[address]" value="<%= order.address.address %>">
+                  <input type="hidden" name="pickupAddress[city]" value="<%= order.address.city %>">
+                  <input type="hidden" name="pickupAddress[state]" value="<%= order.address.state %>">
+                  <input type="hidden" name="pickupAddress[pincode]" value="<%= order.address.pincode %>">
+                  <input type="hidden" name="pickupAddress[landmark]" value="<%= order.address.landmark || '' %>">
+                </div>
+
+                <div class="modal-actions">
+                  <button type="button" class="btn-secondary" onclick="closeCancellationModal()">Cancel</button>
+                  <button type="submit" class="btn-primary">Submit Request</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <script>
+            function openCancellationModal() {
+              document.getElementById('cancellationModal').style.display = 'flex';
+              document.body.style.overflow = 'hidden';
+            }
+
+            function closeCancellationModal() {
+              document.getElementById('cancellationModal').style.display = 'none';
+              document.body.style.overflow = 'auto';
+            }
+
+            // Close modal when clicking outside
+            document.getElementById('cancellationModal').addEventListener('click', function(e) {
+              if (e.target === this) {
+                closeCancellationModal();
+              }
+            });
+
+            // Handle form submission
+            document.getElementById('cancellationForm').addEventListener('submit', async function(e) {
+              e.preventDefault();
+
+              const formData = new FormData(this);
+              const data = {
+                orderId: formData.get('orderId'),
+                reason: formData.get('reason'),
+                description: formData.get('description'),
+                items: [],
+                pickupAddress: {
+                  fullName: formData.get('pickupAddress[fullName]'),
+                  phone: formData.get('pickupAddress[phone]'),
+                  address: formData.get('pickupAddress[address]'),
+                  city: formData.get('pickupAddress[city]'),
+                  state: formData.get('pickupAddress[state]'),
+                  pincode: formData.get('pickupAddress[pincode]'),
+                  landmark: formData.get('pickupAddress[landmark]')
+                }
+              };
+
+              // Collect selected items
+              const itemCheckboxes = document.querySelectorAll('.item-checkbox input[type="checkbox"]:checked');
+              itemCheckboxes.forEach((checkbox, index) => {
+                const quantityInput = checkbox.closest('.item-checkbox').querySelector('input[type="number"]');
+                data.items.push({
+                  productId: checkbox.value,
+                  quantity: parseInt(quantityInput.value)
+                });
+              });
+
+              if (data.items.length === 0) {
+                alert('Please select at least one item to cancel');
+                return;
+              }
+
+              try {
+                const response = await fetch('/api/cancellations', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                  alert('Cancellation request submitted successfully! You will be notified once it\'s processed.');
+                  closeCancellationModal();
+                  location.reload();
+                } else {
+                  alert(result.message || 'Error submitting cancellation request');
+                }
+              } catch (err) {
+                console.error('Error:', err);
+                alert('Error submitting cancellation request');
+              }
+            });
+          </script>
+          <script src="/js/script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Delivery Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1c8125; --primary-dark: #145a1a; --secondary: #e67e22;
+            --bg: #f8f9fa; --surface: #ffffff; --text: #1a1a1a;
+            --text-muted: #6c757d; --border: #e9ecef;
+            --success: #28a745; --danger: #dc3545; --warning: #ffc107;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #121212; --surface: #1e1e1e; --text: #e0e0e0;
+            --text-muted: #a0a0a0; --border: #2d2d2d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        
+        .header {
+            background: var(--surface);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { color: var(--primary); font-size: 28px; }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .flash {
+            padding: 12px 16px; border-radius: 8px; margin-bottom: 20px;
+        }
+        .flash.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flash.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+            font-weight: 700;
+            margin: 0 auto 15px;
+            overflow: hidden;
+            object-fit: cover;
+        }
+        
+        .avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-header { text-align: center; }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-weight: 500; color: var(--text-muted); }
+        .info-value { font-weight: 600; color: var(--text); }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-badge.active { background: #d4edda; color: #155724; }
+        .status-badge.pending { background: #fff3cd; color: #856404; }
+        .status-badge.verified { background: #d1ecf1; color: #0c5460; }
+        .status-badge.not-uploaded { background: #f8d7da; color: #721c24; }
+
+        .doc-section {
+            margin-top: 20px;
+        }
+
+        .doc-item {
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .doc-item.has-file {
+            border-color: var(--success);
+            background: #f0f9f0;
+        }
+
+        .doc-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .doc-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--bg);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .doc-details h4 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            color: var(--text);
+        }
+
+        .doc-details p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .doc-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .view-doc-btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+
+        .view-doc-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .no-doc-text {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-style: italic;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-menu a {
+            padding: 10px 16px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .edit-profile-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .edit-profile-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+                <p style="color: var(--text-muted);">Manage your profile and documents</p>
+            </div>
+            <a href="/agent/dashboard" class="btn btn-outline">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <% if (locals.success && locals.success.length > 0) { %>
+            <div class="flash success"><%= success %></div>
+        <% } %>
+        <% if (locals.error && locals.error.length > 0) { %>
+            <div class="flash error"><%= error %></div>
+        <% } %>
+
+        <a href="/agent/profile/edit" class="edit-profile-btn">
+            <i class="fas fa-user-edit"></i> Edit Profile
+        </a>
+
+        <div class="nav-menu">
+            <a href="/agent/profile" class="active"><i class="fas fa-user"></i> Profile</a>
+            <a href="/agent/deliveries"><i class="fas fa-shipping-fast"></i> My Deliveries</a>
+            <a href="/agent/login"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+
+        <div class="profile-grid">
+            <!-- Profile Info -->
+            <div class="card">
+                <div class="profile-header">
+                    <div class="avatar-large">
+                        <% if (agent.profileImage) { %>
+                            <img src="<%= agent.profileImage %>" alt="<%= agent.name %>">
+                        <% } else { %>
+                            <%= agent.name.charAt(0).toUpperCase() %>
+                        <% } %>
+                    </div>
+                    <h2><%= agent.name %></h2>
+                    <p style="color: var(--text-muted); margin: 5px 0;"><%= agent.employeeId || 'Pending' %></p>
+                    <div style="margin-top: 10px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <span class="status-badge <%= agent.isActive ? 'active' : 'pending' %>">
+                            <%= agent.isActive ? 'Active' : 'Pending Approval' %>
+                        </span>
+                        <% if (agent.policeVerification?.status === 'verified') { %>
+                            <span class="status-badge verified">
+                                <i class="fas fa-check-circle"></i> Verified
+                            </span>
+                        <% } else { %>
+                            <span class="status-badge pending">
+                                <i class="fas fa-clock"></i> Pending Verification
+                            </span>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <div class="info-row">
+                        <span class="info-label"><i class="fas fa-envelope"></i> Email</span>
+                        <span class="info-value"><%= agent.email %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="fas fa-phone"></i> Phone</span>
+                        <span class="info-value"><%= agent.phone %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="fas fa-motorcycle"></i> Vehicle</span>
+                        <span class="info-value"><%= agent.vehicleType %> - <%= agent.vehicleNumber %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="fas fa-map-marker-alt"></i> City</span>
+                        <span class="info-value"><%= agent.address?.city || 'N/A' %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="fas fa-calendar"></i> Joining Date</span>
+                        <span class="info-value"><%= new Date(agent.joiningDate).toLocaleDateString('en-IN') %></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Section (View Only) -->
+            <div class="card">
+                <h3 class="card-title">
+                    <i class="fas fa-file-alt"></i> Your Documents
+                </h3>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">
+                    These are your uploaded documents. To update any information or documents, click the Edit Profile button above.
+                </p>
+
+                <div class="doc-section">
+                    <!-- Profile Image -->
+                    <div class="doc-item <%= agent.profileImage ? 'has-file' : '' %>">
+                        <div class="doc-info">
+                            <div class="doc-icon">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="doc-details">
+                                <h4>Profile Picture</h4>
+                                <p><%= agent.profileImage ? 'Uploaded' : 'Not uploaded' %></p>
+                            </div>
+                        </div>
+                        <div class="doc-actions">
+                            <% if (agent.profileImage) { %>
+                                <a href="<%= agent.profileImage %>" target="_blank" class="view-doc-btn">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            <% } else { %>
+                                <span class="no-doc-text">Not uploaded</span>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Aadhar Card -->
+                    <div class="doc-item <%= agent.aadharImage ? 'has-file' : '' %>">
+                        <div class="doc-info">
+                            <div class="doc-icon">
+                                <i class="fas fa-address-card"></i>
+                            </div>
+                            <div class="doc-details">
+                                <h4>Aadhar Card</h4>
+                                <p><%= agent.aadharNumber || 'Not provided' %></p>
+                            </div>
+                        </div>
+                        <div class="doc-actions">
+                            <% if (agent.aadharImage) { %>
+                                <a href="<%= agent.aadharImage %>" target="_blank" class="view-doc-btn">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            <% } else { %>
+                                <span class="no-doc-text">Not uploaded</span>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- PAN Card -->
+                    <div class="doc-item <%= agent.panImage ? 'has-file' : '' %>">
+                        <div class="doc-info">
+                            <div class="doc-icon">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                            <div class="doc-details">
+                                <h4>PAN Card</h4>
+                                <p><%= agent.panNumber || 'Not provided' %></p>
+                            </div>
+                        </div>
+                        <div class="doc-actions">
+                            <% if (agent.panImage) { %>
+                                <a href="<%= agent.panImage %>" target="_blank" class="view-doc-btn">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            <% } else { %>
+                                <span class="no-doc-text">Not uploaded</span>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Driving License -->
+                    <div class="doc-item <%= agent.drivingLicense && agent.drivingLicense.startsWith('http') ? 'has-file' : '' %>">
+                        <div class="doc-info">
+                            <div class="doc-icon">
+                                <i class="fas fa-id-badge"></i>
+                            </div>
+                            <div class="doc-details">
+                                <h4>Driving License</h4>
+                                <p><%= agent.drivingLicense && agent.drivingLicense.startsWith('http') ? 'Uploaded' : 'Not uploaded' %></p>
+                            </div>
+                        </div>
+                        <div class="doc-actions">
+                            <% if (agent.drivingLicense && agent.drivingLicense.startsWith('http')) { %>
+                                <a href="<%= agent.drivingLicense %>" target="_blank" class="view-doc-btn">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            <% } else { %>
+                                <span class="no-doc-text">Not uploaded</span>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle RC -->
+                    <div class="doc-item <%= agent.vehicleRC ? 'has-file' : '' %>">
+                        <div class="doc-info">
+                            <div class="doc-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="doc-details">
+                                <h4>Vehicle RC</h4>
+                                <p><%= agent.vehicleRC ? 'Uploaded' : 'Not uploaded' %></p>
+                            </div>
+                        </div>
+                        <div class="doc-actions">
+                            <% if (agent.vehicleRC) { %>
+                                <a href="<%= agent.vehicleRC %>" target="_blank" class="view-doc-btn">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            <% } else { %>
+                                <span class="no-doc-text">Not uploaded</span>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Insurance -->
+                    <div class="doc-item <%= agent.vehicleInsurance ? 'has-file' : '' %>">
+                        <div class="doc-info">
+                            <div class="doc-icon">
+                                <i class="fas fa-file-contract"></i>
+                            </div>
+                            <div class="doc-details">
+                                <h4>Vehicle Insurance</h4>
+                                <p><%= agent.vehicleInsurance ? 'Uploaded' : 'Not uploaded' %></p>
+                            </div>
+                        </div>
+                        <div class="doc-actions">
+                            <% if (agent.vehicleInsurance) { %>
+                                <a href="<%= agent.vehicleInsurance %>" target="_blank" class="view-doc-btn">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            <% } else { %>
+                                <span class="no-doc-text">Not uploaded</span>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bank Details -->
+                <% if (agent.bankDetails && (agent.bankDetails.accountNumber || agent.bankDetails.upiId)) { %>
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--border);">
+                        <h4 style="margin-bottom: 15px; color: var(--primary);">
+                            <i class="fas fa-university"></i> Bank Details
+                        </h4>
+                        <div class="info-row">
+                            <span class="info-label">Account Holder</span>
+                            <span class="info-value"><%= agent.bankDetails.accountHolderName || 'N/A' %></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Account Number</span>
+                            <span class="info-value"><%= agent.bankDetails.accountNumber ? 'XXXX' + agent.bankDetails.accountNumber.slice(-4) : 'N/A' %></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">IFSC Code</span>
+                            <span class="info-value"><%= agent.bankDetails.ifscCode || 'N/A' %></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Bank Name</span>
+                            <span class="info-value"><%= agent.bankDetails.bankName || 'N/A' %></span>
+                        </div>
+                        <% if (agent.bankDetails.upiId) { %>
+                            <div class="info-row">
+                                <span class="info-label">UPI ID</span>
+                                <span class="info-value"><%= agent.bankDetails.upiId %></span>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    <script src="/js/theme.js"></script>
+</body>
+</html>

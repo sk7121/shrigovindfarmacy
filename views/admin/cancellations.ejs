@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cancellation Requests — Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary: #1c8125;
+        --primary-dark: #145a1a;
+        --bg: #f8f9fa;
+        --surface: #ffffff;
+        --text: #1a1a1a;
+        --text-muted: #6c757d;
+        --border: #e9ecef;
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --success: #28a745;
+        --warning: #ffc107;
+        --danger: #dc3545;
+      }
+      [data-theme="dark"] {
+        --bg: #121212;
+        --surface: #1e1e1e;
+        --text: #e0e0e0;
+        --text-muted: #a0a0a0;
+        --border: #2d2d2d;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      .admin-header {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 0;
+      }
+      .header-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        color: var(--text);
+      }
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+      }
+
+      .main-content {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+      }
+      .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+      }
+
+      .filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+      }
+      .filter-select {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .cancellations-table {
+        background: var(--surface);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th {
+        background: var(--bg);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border);
+      }
+      td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      tr:hover {
+        background: var(--bg);
+      }
+
+      .request-id {
+        font-weight: 700;
+        color: var(--primary);
+      }
+      .customer-info {
+        font-size: 0.9rem;
+      }
+      .customer-name {
+        font-weight: 600;
+      }
+      .customer-email {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: inline-block;
+      }
+      .status-pending {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+      }
+      .status-approved {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+      }
+      .status-assigned {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+      }
+      .status-otp_generated {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+      }
+      .status-picked_up {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+      }
+      .status-refunded {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+      }
+      .status-rejected {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+      }
+
+      .btn-view {
+        padding: 0.5rem 1rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 0.875rem;
+      }
+      .btn-view:hover {
+        background: var(--primary-dark);
+      }
+
+      .btn-assign {
+        padding: 0.5rem 1rem;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.875rem;
+      }
+      .btn-assign:hover {
+        background: #2980b9;
+      }
+
+      .btn-approve {
+        padding: 0.5rem 1rem;
+        background: var(--success);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.875rem;
+      }
+      .btn-approve:hover {
+        background: #218838;
+      }
+
+      .btn-reject {
+        padding: 0.5rem 1rem;
+        background: var(--danger);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.875rem;
+      }
+      .btn-reject:hover {
+        background: #c82333;
+      }
+
+      .agent-select {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-size: 0.8rem;
+      }
+
+      @media (max-width: 768px) {
+        .header-inner,
+        .main-content {
+          padding: 0 1rem;
+        }
+        .filters {
+          flex-direction: column;
+        }
+        table {
+          font-size: 0.875rem;
+        }
+        .filters {
+          gap: 0.5rem;
+        }
+      }
+    </style>
+    <!-- Theme Script -->
+    <script src="/js/theme.js"></script>
+  </head>
+  <body>
+    <div class="admin-header">
+      <div class="header-inner">
+        <a href="/admin" class="logo">
+          <div class="logo-icon"><i class="fas fa-cog"></i></div>
+          <span>Admin Panel</span>
+        </a>
+        <nav>
+          <a href="/admin/orders">Orders</a>
+          <a href="/admin/cancellations" class="active">Cancellations</a>
+          <a href="/admin/delivery">Delivery</a>
+          <a href="/logout">Logout</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <h1 class="page-title">Cancellation Requests</h1>
+
+      <div class="filters">
+        <select id="statusFilter" class="filter-select">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="assigned">Assigned</option>
+          <option value="otp_generated">OTP Generated</option>
+          <option value="picked_up">Picked Up</option>
+          <option value="refunded">Refunded</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <button
+          onclick="loadCancellations()"
+          class="btn-view"
+          style="height: fit-content"
+        >
+          Filter
+        </button>
+      </div>
+
+      <div class="cancellations-table">
+        <table id="cancellationsTable">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Reason</th>
+              <th>Refund Amount</th>
+              <th>Status</th>
+              <th>Agent</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="cancellationsBody">
+            <!-- Data will be loaded here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Assign Agent Modal -->
+    <div id="assignModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Assign Delivery Agent</h3>
+          <button class="modal-close" onclick="closeAssignModal()">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body" style="padding: 1.5rem">
+          <form id="assignForm">
+            <input type="hidden" id="assignRequestId" />
+            <div class="form-group">
+              <label for="agentSelect">Select Delivery Agent</label>
+              <select
+                id="agentSelect"
+                required
+                style="
+                  width: 100%;
+                  padding: 0.75rem;
+                  border: 1px solid var(--border);
+                  border-radius: 8px;
+                "
+              >
+                <!-- Agents will be loaded here -->
+              </select>
+            </div>
+            <div class="modal-actions" style="margin-top: 1rem">
+              <button
+                type="button"
+                class="btn-secondary"
+                onclick="closeAssignModal()"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn-primary">Assign Agent</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentPage = 1;
+      let currentStatus = "";
+
+      async function loadCancellations() {
+        currentStatus = document.getElementById("statusFilter").value;
+
+        try {
+          const response = await fetch(
+            `/api/cancellations/admin/all?status=${currentStatus}&page=${currentPage}`,
+          );
+          const data = await response.json();
+
+          if (data.success) {
+            renderCancellations(data.data);
+          }
+        } catch (error) {
+          console.error("Error loading cancellations:", error);
+        }
+      }
+
+      function renderCancellations(cancellations) {
+        const tbody = document.getElementById("cancellationsBody");
+        tbody.innerHTML = "";
+
+        cancellations.forEach((request) => {
+          const row = document.createElement("tr");
+
+          row.innerHTML = `
+          <td><span class="request-id">${request.trackingId}</span></td>
+          <td>${request.order.tracking?.orderId || request.order._id}</td>
+          <td>
+            <div class="customer-info">
+              <div class="customer-name">${request.user.name}</div>
+              <div class="customer-email">${request.user.email}</div>
+            </div>
+          </td>
+          <td>${request.reason.replace("_", " ")}</td>
+          <td>₹${request.refundAmount}</td>
+          <td><span class="status-badge status-${request.status}">${request.status.replace("_", " ")}</span></td>
+          <td>${request.assignedAgent ? request.assignedAgent.name : "Not Assigned"}</td>
+          <td>
+            <button class="btn-view" onclick="viewRequest('${request._id}')">View</button>
+            ${getActionButtons(request)}
+          </td>
+        `;
+
+          tbody.appendChild(row);
+        });
+      }
+
+      function getActionButtons(request) {
+        let buttons = "";
+
+        if (request.status === "pending") {
+          buttons += `<button class="btn-approve" onclick="updateStatus('${request._id}', 'approved')">Approve</button>`;
+          buttons += `<button class="btn-reject" onclick="rejectRequest('${request._id}')">Reject</button>`;
+        } else if (request.status === "approved") {
+          buttons += `<button class="btn-assign" onclick="openAssignModal('${request._id}')">Assign Agent</button>`;
+        } else if (request.status === "picked_up") {
+          buttons += `<button class="btn-approve" onclick="processRefund('${request._id}')">Process Refund</button>`;
+        }
+
+        return buttons;
+      }
+
+      async function updateStatus(requestId, status) {
+        try {
+          const response = await fetch(
+            `/api/cancellations/${requestId}/status`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status }),
+            },
+          );
+
+          const result = await response.json();
+          if (result.success) {
+            loadCancellations();
+          } else {
+            alert(result.message);
+          }
+        } catch (error) {
+          console.error("Error updating status:", error);
+          alert("Error updating request status");
+        }
+      }
+
+      async function rejectRequest(requestId) {
+        const reason = prompt("Please provide rejection reason:");
+        if (!reason) return;
+
+        try {
+          const response = await fetch(
+            `/api/cancellations/${requestId}/status`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                status: "rejected",
+                rejectionReason: reason,
+              }),
+            },
+          );
+
+          const result = await response.json();
+          if (result.success) {
+            loadCancellations();
+          } else {
+            alert(result.message);
+          }
+        } catch (error) {
+          console.error("Error rejecting request:", error);
+          alert("Error rejecting request");
+        }
+      }
+
+      async function processRefund(requestId) {
+        if (!confirm("Are you sure you want to process the refund?")) return;
+
+        try {
+          const response = await fetch(
+            `/api/cancellations/${requestId}/refund`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+
+          const result = await response.json();
+          if (result.success) {
+            loadCancellations();
+          } else {
+            alert(result.message);
+          }
+        } catch (error) {
+          console.error("Error processing refund:", error);
+          alert("Error processing refund");
+        }
+      }
+
+      function viewRequest(requestId) {
+        window.location.href = `/admin/cancellations/${requestId}`;
+      }
+
+      async function openAssignModal(requestId) {
+        document.getElementById("assignRequestId").value = requestId;
+        document.getElementById("assignModal").style.display = "flex";
+
+        // Load available agents
+        try {
+          const response = await fetch("/api/delivery-agents");
+          const data = await response.json();
+
+          if (data.success) {
+            const agentSelect = document.getElementById("agentSelect");
+            agentSelect.innerHTML = '<option value="">Select Agent</option>';
+
+            data.data.forEach((agent) => {
+              if (agent.isActive && agent.isAvailable) {
+                agentSelect.innerHTML += `<option value="${agent._id}">${agent.name} (${agent.phone})</option>`;
+              }
+            });
+          }
+        } catch (error) {
+          console.error("Error loading agents:", error);
+        }
+      }
+
+      function closeAssignModal() {
+        document.getElementById("assignModal").style.display = "none";
+      }
+
+      document
+        .getElementById("assignForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const requestId = document.getElementById("assignRequestId").value;
+          const agentId = document.getElementById("agentSelect").value;
+
+          if (!agentId) {
+            alert("Please select an agent");
+            return;
+          }
+
+          try {
+            const response = await fetch(
+              `/api/cancellations/${requestId}/status`,
+              {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  status: "assigned",
+                  assignedAgent: agentId,
+                }),
+              },
+            );
+
+            const result = await response.json();
+            if (result.success) {
+              closeAssignModal();
+              loadCancellations();
+            } else {
+              alert(result.message);
+            }
+          } catch (error) {
+            console.error("Error assigning agent:", error);
+            alert("Error assigning agent");
+          }
+        });
+
+      // Load initial data
+      loadCancellations();
+    </script>
+
+    <style>
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .modal-content {
+        background: var(--surface);
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .modal-header h3 {
+        margin: 0;
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+      .modal-body {
+        padding: 1.5rem;
+      }
+      .form-group {
+        margin-bottom: 1rem;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+      }
+      .btn-secondary {
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders Management — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root { --primary: #1c8125; --primary-dark: #145a1a; --bg: #f8f9fa; --surface: #ffffff; --text: #1a1a1a; --text-muted: #6c757d; --border: #e9ecef; --shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    [data-theme="dark"] { --bg: #121212; --surface: #1e1e1e; --text: #e0e0e0; --text-muted: #a0a0a0; --border: #2d2d2d; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    
+    .admin-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 0; }
+    .header-inner { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--text); }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; }
+    
+    .main-content { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+    .page-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 1.5rem; }
+    
+    .orders-table { background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: var(--bg); padding: 1rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    td { padding: 1rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: var(--bg); }
+    
+    .order-id { font-weight: 700; color: var(--primary); }
+    .customer-info { font-size: 0.9rem; }
+    .customer-name { font-weight: 600; }
+    .customer-email { font-size: 0.85rem; color: var(--text-muted); }
+    
+    .status-badge { padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 600; font-size: 0.8rem; display: inline-block; }
+    .status-pending, .status-confirmed { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+    .status-processing, .status-shipped { background: rgba(52, 152, 219, 0.1); color: #3498db; }
+    .status-delivered { background: rgba(40, 167, 69, 0.1); color: #28a745; }
+    .status-cancelled { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+    
+    .btn-view { padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; font-size: 0.875rem; }
+    .btn-view:hover { background: var(--primary-dark); }
+    
+    @media (max-width: 768px) { .header-inner, .main-content { padding: 0 1rem; } table { font-size: 0.875rem; } }
+  </style>
+  <!-- Theme Script -->
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+  <header class="admin-header">
+    <div class="header-inner">
+      <a href="/admin/home" class="logo">
+        <img src="https://res.cloudinary.com/drufdfmfr/image/upload/v1772726044/favicon_uuzvml.svg" alt="Shri Govind Pharmacy" class="logo-favicon">
+        <div class="logo-text"><span class="logo-main">Shri Govind</span><span class="logo-sub">Admin Panel</span></div>
+      </a>
+      <div>
+        <a href="/admin/home" style="padding: 0.5rem 1rem; background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 8px; text-decoration: none; margin-right: 0.5rem;">Dashboard</a>
+        <a href="/logout" style="padding: 0.5rem 1rem; background: var(--danger); color: white; border: none; border-radius: 8px; text-decoration: none;">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <h1 class="page-title"><i class="fas fa-box"></i> Orders Management</h1>
+    
+    <div class="orders-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Payment</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.forEach(order => { %>
+            <tr>
+              <td><span class="order-id"><%= order.tracking.orderId %></span></td>
+              <td>
+                <div class="customer-info">
+                  <div class="customer-name"><%= order.user?.name || 'N/A' %></div>
+                  <div class="customer-email"><%= order.user?.email || 'N/A' %></div>
+                </div>
+              </td>
+              <td><%= order.items.length %> items</td>
+              <td><strong>₹<%= Math.round(order.pricing.total) %></strong></td>
+              <td><%= order.payment.method.toUpperCase() %></td>
+              <td><span class="status-badge status-<%= order.status %>"><%= order.status.replace('_', ' ') %></span></td>
+              <td><%= new Date(order.createdAt).toLocaleDateString('en-IN') %></td>
+              <td><a href="/admin/orders/<%= order._id %>" class="btn-view"><i class="fas fa-eye"></i> View</a></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

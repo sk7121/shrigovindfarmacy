@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Deliveries - Delivery Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1c8125; --primary-dark: #145a1a; --secondary: #e67e22;
+            --bg: #f8f9fa; --surface: #ffffff; --text: #1a1a1a;
+            --text-muted: #6c757d; --border: #e9ecef;
+            --success: #28a745; --danger: #dc3545; --warning: #ffc107;
+            --info: #17a2b8; --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #121212; --surface: #1e1e1e; --text: #e0e0e0;
+            --text-muted: #a0a0a0; --border: #2d2d2d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        .header {
+            background: var(--surface);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header h1 { color: var(--primary); font-size: 28px; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        .nav-menu {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .nav-menu a {
+            padding: 10px 16px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border-left: 4px solid var(--primary);
+        }
+        .stat-box .value { font-size: 28px; font-weight: 700; color: var(--primary); }
+        .stat-box .label { font-size: 13px; color: var(--text-muted); margin-top: 5px; }
+        .stat-box.active { border-left-color: var(--info); }
+        .stat-box.completed { border-left-color: var(--success); }
+        .stat-box.pending { border-left-color: var(--warning); }
+
+        /* Filters */
+        .filters-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .filters-title { font-size: 16px; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .filter-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: flex-end;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { border: 2px solid var(--border); background: transparent; color: var(--text); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-sm { padding: 6px 12px; font-size: 13px; }
+        .btn-block { width: 100%; justify-content: center; }
+
+        /* Delivery Cards */
+        .deliveries-list {
+            display: grid;
+            gap: 15px;
+        }
+        .delivery-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .delivery-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .delivery-card.urgent {
+            border-left: 4px solid var(--danger);
+        }
+        .delivery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .delivery-id {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 16px;
+        }
+        .delivery-id small {
+            display: block;
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 3px;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        .status-badge.assigned { background: #fff3cd; color: #856404; }
+        .status-badge.picked_up { background: #d1ecf1; color: #0c5460; }
+        .status-badge.in_transit { background: #cce5ff; color: #004085; }
+        .status-badge.out_for_delivery { background: #e2e3e5; color: #383d41; }
+        .status-badge.delivered { background: #d4edda; color: #155724; }
+        .status-badge.failed { background: #f8d7da; color: #721c24; }
+        .status-badge.cancelled { background: #e2e3e5; color: #383d41; }
+
+        .delivery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .delivery-info {
+            font-size: 14px;
+        }
+        .delivery-info label {
+            color: var(--text-muted);
+            font-size: 12px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .delivery-info strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .delivery-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--surface);
+            border-radius: 12px;
+        }
+        .empty-state i {
+            font-size: 64px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        .empty-state h3 {
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+        .empty-state p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .pagination button,
+        .pagination a {
+            padding: 8px 16px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .pagination button:hover,
+        .pagination a:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .pagination .active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .flash {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .flash.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flash.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            .delivery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1><i class="fas fa-shipping-fast"></i> My Deliveries</h1>
+                <p style="color: var(--text-muted);">Manage and track your delivery assignments</p>
+            </div>
+            <a href="/agent/dashboard" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <% if (locals.success && locals.success.length > 0) { %>
+            <div class="flash success"><%= success %></div>
+        <% } %>
+        <% if (locals.error && locals.error.length > 0) { %>
+            <div class="flash error"><%= error %></div>
+        <% } %>
+
+        <div class="nav-menu">
+            <a href="/agent/deliveries" class="<%= !currentStatus && !currentType ? 'active' : '' %>">
+                <i class="fas fa-list"></i> All
+            </a>
+            <a href="/agent/deliveries?status=assigned" class="<%= currentStatus === 'assigned' && currentType !== 'cancellations' ? 'active' : '' %>">
+                <i class="fas fa-inbox"></i> Assigned
+            </a>
+            <a href="/agent/deliveries?status=out_for_delivery" class="<%= currentStatus === 'out_for_delivery' ? 'active' : '' %>">
+                <i class="fas fa-shipping-fast"></i> Out for Delivery
+            </a>
+            <a href="/agent/deliveries?status=delivered" class="<%= currentStatus === 'delivered' ? 'active' : '' %>">
+                <i class="fas fa-check-circle"></i> Completed
+            </a>
+            <a href="/agent/deliveries?type=cancellations" class="<%= currentType === 'cancellations' ? 'active' : '' %>">
+                <i class="fas fa-undo"></i> Cancellations
+            </a>
+            <a href="/agent/deliveries?status=failed,cancelled" class="<%= currentStatus === 'failed,cancelled' ? 'active' : '' %>">
+                <i class="fas fa-times-circle"></i> Failed/Cancelled
+            </a>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="value"><%= deliveries.length || 0 %></div>
+                <div class="label">Total Deliveries</div>
+            </div>
+            <div class="stat-box active">
+                <div class="value"><%= deliveries.filter(d => ['assigned', 'picked_up', 'in_transit', 'out_for_delivery'].includes(d.status)).length || 0 %></div>
+                <div class="label">Active</div>
+            </div>
+            <div class="stat-box completed">
+                <div class="value"><%= deliveries.filter(d => d.status === 'delivered').length || 0 %></div>
+                <div class="label">Completed</div>
+            </div>
+            <div class="stat-box pending">
+                <div class="value"><%= deliveries.filter(d => ['assigned', 'pending'].includes(d.status)).length || 0 %></div>
+                <div class="label">Pending</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-card">
+            <div class="filters-header">
+                <h3 class="filters-title"><i class="fas fa-filter"></i> Filter & Search</h3>
+            </div>
+            <form id="filterForm">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label><i class="fas fa-search"></i> Search</label>
+                        <input type="text" id="searchInput" placeholder="Order ID, Customer name...">
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-filter"></i> Status</label>
+                        <select id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="assigned" <%= currentStatus === 'assigned' ? 'selected' : '' %>>Assigned</option>
+                            <option value="picked_up" <%= currentStatus === 'picked_up' ? 'selected' : '' %>>Picked Up</option>
+                            <option value="in_transit" <%= currentStatus === 'in_transit' ? 'selected' : '' %>>In Transit</option>
+                            <option value="out_for_delivery" <%= currentStatus === 'out_for_delivery' ? 'selected' : '' %>>Out for Delivery</option>
+                            <option value="delivered" <%= currentStatus === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                            <option value="failed">Failed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-sort"></i> Sort By</label>
+                        <select id="sortFilter">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="status">Status</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button type="button" class="btn btn-outline" onclick="resetFilters()">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Deliveries/Cancellations List -->
+        <% if (currentType === 'cancellations' && cancellationRequests && cancellationRequests.length > 0) { %>
+            <div class="deliveries-list">
+                <% cancellationRequests.forEach(request => { %>
+                    <div class="delivery-card">
+                        <div class="delivery-header">
+                            <div class="delivery-id">
+                                <i class="fas fa-undo"></i> <%= request.trackingId %>
+                                <small>Order: <%= request.order?.tracking?.orderId || request.order?._id || 'N/A' %></small>
+                            </div>
+                            <span class="status-badge <%= request.status %>">
+                                <%= request.status.replace(/_/g, ' ') %>
+                            </span>
+                        </div>
+
+                        <div class="delivery-grid">
+                            <div class="delivery-info">
+                                <label><i class="fas fa-user"></i> Customer</label>
+                                <strong><%= request.user?.name || 'N/A' %></strong>
+                            </div>
+                            <div class="delivery-info">
+                                <label><i class="fas fa-phone"></i> Phone</label>
+                                <strong><%= request.user?.phone || 'N/A' %></strong>
+                            </div>
+                            <div class="delivery-info">
+                                <label><i class="fas fa-map-marker-alt"></i> Pickup Address</label>
+                                <strong><%= request.pickupAddress?.address || 'N/A' %></strong><br>
+                                <%= request.pickupAddress?.city || '' %>, <%= request.pickupAddress?.pincode || '' %>
+                            </div>
+                            <div class="delivery-info">
+                                <label><i class="fas fa-money-bill-wave"></i> Refund Amount</label>
+                                <strong style="color: var(--warning);">₹<%= request.refundAmount %></strong>
+                            </div>
+                            <% if (request.cancellationOTP?.code) { %>
+                                <div class="delivery-info">
+                                    <label><i class="fas fa-key"></i> Pickup OTP</label>
+                                    <strong style="font-size: 1.2em; letter-spacing: 2px;"><%= request.cancellationOTP.code %></strong>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <div class="delivery-actions">
+                            <button onclick="openPickupModal('<%= request._id %>')" class="btn btn-primary btn-sm">
+                                <i class="fas fa-camera"></i> Start Pickup
+                            </button>
+                            <% if (request.pickupAddress?.phone) { %>
+                                <a href="tel:<%= request.pickupAddress.phone %>" class="btn btn-outline btn-sm">
+                                    <i class="fas fa-phone"></i> Call Customer
+                                </a>
+                            <% } %>
+                            <% if (request.pickupAddress?.address) { %>
+                                <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(request.pickupAddress.address + ', ' + request.pickupAddress.city + ', ' + request.pickupAddress.pincode) %>" 
+                                   target="_blank" 
+                                   class="btn btn-outline btn-sm">
+                                    <i class="fas fa-map-marked-alt"></i> Navigate
+                                </a>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else if (deliveries && deliveries.length > 0) { %>
+            <div class="deliveries-list">
+                <% deliveries.forEach(delivery => { %>
+                    <div class="delivery-card <%= delivery.priority === 'high' ? 'urgent' : '' %>">
+                        <div class="delivery-header">
+                            <div class="delivery-id">
+                                <i class="fas fa-qrcode"></i> <%= delivery.qrCode %>
+                                <small>Order: <%= delivery.order?.orderId || delivery.order?._id || 'N/A' %></small>
+                            </div>
+                            <span class="status-badge <%= delivery.status %>">
+                                <%= delivery.status.replace(/_/g, ' ') %>
+                            </span>
+                        </div>
+
+                        <div class="delivery-grid">
+                            <div class="delivery-info">
+                                <label><i class="fas fa-user"></i> Customer</label>
+                                <strong><%= delivery.deliveryAddress?.fullName || delivery.order?.shippingInfo?.name || 'N/A' %></strong>
+                            </div>
+                            <div class="delivery-info">
+                                <label><i class="fas fa-phone"></i> Phone</label>
+                                <strong><%= delivery.deliveryAddress?.phone || delivery.order?.shippingInfo?.phone || 'N/A' %></strong>
+                            </div>
+                            <div class="delivery-info">
+                                <label><i class="fas fa-map-marker-alt"></i> Address</label>
+                                <strong><%= delivery.deliveryAddress?.address || delivery.order?.shippingInfo?.address || 'N/A' %></strong><br>
+                                <%= delivery.deliveryAddress?.city || '' %>, <%= delivery.deliveryAddress?.pincode || '' %>
+                            </div>
+                            <div class="delivery-info">
+                                <label><i class="fas fa-money-bill-wave"></i> COD Amount</label>
+                                <strong style="color: <%= delivery.codAmount > 0 ? 'var(--warning)' : 'var(--success)' %>;">
+                                    <%= delivery.codAmount > 0 ? '₹' + delivery.codAmount : 'Paid Online' %>
+                                </strong>
+                            </div>
+                            <% if (delivery.estimatedDelivery) { %>
+                                <div class="delivery-info">
+                                    <label><i class="fas fa-clock"></i> Estimated Delivery</label>
+                                    <strong><%= new Date(delivery.estimatedDelivery).toLocaleString('en-IN') %></strong>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <div class="delivery-actions">
+                            <a href="/agent/delivery/<%= delivery._id %>" class="btn btn-primary btn-sm">
+                                <i class="fas fa-arrow-right"></i> Manage Delivery
+                            </a>
+                            <% if (delivery.deliveryAddress?.phone) { %>
+                                <a href="tel:<%= delivery.deliveryAddress.phone %>" class="btn btn-outline btn-sm">
+                                    <i class="fas fa-phone"></i> Call Customer
+                                </a>
+                            <% } %>
+                            <% if (delivery.deliveryAddress?.address) { %>
+                                <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(delivery.deliveryAddress.address + ', ' + delivery.deliveryAddress.city + ', ' + delivery.deliveryAddress.pincode) %>" 
+                                   target="_blank" 
+                                   class="btn btn-outline btn-sm">
+                                    <i class="fas fa-map-marked-alt"></i> Navigate
+                                </a>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>
+                    <% if (currentType === 'cancellations') { %>
+                        No Cancellation Pickups
+                    <% } else { %>
+                        No Deliveries Found
+                    <% } %>
+                </h3>
+                <p>
+                    <% if (currentType === 'cancellations') { %>
+                        You don't have any cancellation pickups assigned. Check back later!
+                    <% } else if (currentStatus) { %>
+                        No deliveries with this status. Try selecting a different filter.
+                    <% } else { %>
+                        You don't have any deliveries yet. Check back later!
+                    <% } %>
+                </p>
+                <a href="/agent/deliveries<%= currentType === 'cancellations' ? '?type=cancellations' : '' %>" class="btn btn-primary">
+                    <i class="fas fa-redo"></i> Refresh
+                </a>
+            </div>
+        <% } %>
+
+        <!-- Pagination -->
+        <% if (totalPages && totalPages > 1) { %>
+            <div class="pagination">
+                <% if (currentPage > 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>&status=<%= currentStatus || '' %>">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                <% } %>
+                
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a href="?page=<%= i %>&status=<%= currentStatus || '' %>" class="<%= i === currentPage ? 'active' : '' %>">
+                        <%= i %>
+                    </a>
+                <% } %>
+                
+                <% if (currentPage < totalPages) { %>
+                    <a href="?page=<%= currentPage + 1 %>&status=<%= currentStatus || '' %>">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        // Filter functionality
+        const filterForm = document.getElementById('filterForm');
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const sortFilter = document.getElementById('sortFilter');
+
+        // Load saved filters from localStorage
+        window.addEventListener('load', () => {
+            const savedSearch = localStorage.getItem('deliverySearch');
+            const savedStatus = localStorage.getItem('deliveryStatus');
+            const savedSort = localStorage.getItem('deliverySort');
+            
+            if (savedSearch) searchInput.value = savedSearch;
+            if (savedStatus) statusFilter.value = savedStatus;
+            if (savedSort) sortFilter.value = savedSort;
+        });
+
+        filterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const search = searchInput.value.trim();
+            const status = statusFilter.value;
+            const sort = sortFilter.value;
+            
+            // Save to localStorage
+            localStorage.setItem('deliverySearch', search);
+            localStorage.setItem('deliveryStatus', status);
+            localStorage.setItem('deliverySort', sort);
+            
+            // Apply filters
+            applyFilters(search, status, sort);
+        });
+
+        function applyFilters(search, status, sort) {
+            const cards = document.querySelectorAll('.delivery-card');
+            
+            cards.forEach(card => {
+                let show = true;
+                
+                // Search filter
+                if (search) {
+                    const searchText = card.textContent.toLowerCase();
+                    if (!searchText.includes(search.toLowerCase())) {
+                        show = false;
+                    }
+                }
+                
+                // Status filter
+                if (status) {
+                    const statusBadge = card.querySelector('.status-badge');
+                    if (statusBadge && !statusBadge.classList.contains(status)) {
+                        show = false;
+                    }
+                }
+                
+                card.style.display = show ? 'block' : 'none';
+            });
+            
+            // Sort (client-side for demo)
+            if (sort === 'status') {
+                const list = document.querySelector('.deliveries-list');
+                const cardsArray = Array.from(cards);
+                cardsArray.sort((a, b) => {
+                    const statusA = a.querySelector('.status-badge')?.className || '';
+                    const statusB = b.querySelector('.status-badge')?.className || '';
+                    return statusA.localeCompare(statusB);
+                });
+                cardsArray.forEach(card => list.appendChild(card));
+            }
+        }
+
+        function resetFilters() {
+            searchInput.value = '';
+            statusFilter.value = '';
+            sortFilter.value = 'newest';
+            
+            localStorage.removeItem('deliverySearch');
+            localStorage.removeItem('deliveryStatus');
+            localStorage.removeItem('deliverySort');
+            
+            window.location.href = '/agent/deliveries';
+        }
+
+        // Auto-hide flash messages
+        setTimeout(() => {
+            document.querySelectorAll('.flash').forEach(flash => {
+                flash.style.transition = 'opacity 0.5s';
+                flash.style.opacity = '0';
+                setTimeout(() => flash.remove(), 500);
+            });
+        }, 5000);
+
+        // Refresh page every 2 minutes for real-time updates
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                window.location.reload();
+            }
+        }, 2 * 60 * 1000);
+
+        // Cancellation Pickup Modal Functions
+        function openPickupModal(requestId) {
+            document.getElementById('pickupRequestId').value = requestId;
+            document.getElementById('pickupModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePickupModal() {
+            document.getElementById('pickupModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            // Reset form
+            document.getElementById('pickupForm').reset();
+            document.getElementById('otpSection').style.display = 'none';
+            document.getElementById('photoSection').style.display = 'none';
+        }
+
+        // Handle pickup form submission
+        document.getElementById('pickupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const requestId = document.getElementById('pickupRequestId').value;
+            const otp = document.getElementById('pickupOtp').value;
+            const pickupProof = document.getElementById('pickupProof').files[0];
+
+            if (!otp) {
+                alert('Please enter the OTP');
+                return;
+            }
+
+            if (!pickupProof) {
+                alert('Please upload a photo of the picked up items');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('otp', otp);
+            formData.append('pickupProof', pickupProof);
+
+            try {
+                const response = await fetch(`/api/cancellations/${requestId}/verify`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('Pickup verified successfully!');
+                    closePickupModal();
+                    window.location.reload();
+                } else {
+                    alert(result.message || 'Error verifying pickup');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error verifying pickup');
+            }
+        });
+
+        // Show OTP input when starting pickup
+        function startPickup() {
+            document.getElementById('otpSection').style.display = 'block';
+            document.getElementById('pickupOtp').focus();
+        }
+
+        // Show photo upload after OTP verification
+        document.getElementById('pickupOtp').addEventListener('input', function() {
+            if (this.value.length === 6) {
+                document.getElementById('photoSection').style.display = 'block';
+            }
+        });
+    </script>
+
+    <!-- Cancellation Pickup Modal -->
+    <div id="pickupModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Cancellation Pickup Verification</h3>
+                <button class="modal-close" onclick="closePickupModal()">&times;</button>
+            </div>
+            <form id="pickupForm" enctype="multipart/form-data">
+                <input type="hidden" id="pickupRequestId">
+
+                <div class="modal-body" style="padding: 1.5rem;">
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <button type="button" class="btn btn-primary" onclick="startPickup()" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                            <i class="fas fa-play"></i> Start Pickup Process
+                        </button>
+                    </div>
+
+                    <div id="otpSection" style="display: none; margin-bottom: 2rem;">
+                        <h4 style="margin-bottom: 1rem; color: var(--primary);">Step 1: Enter OTP</h4>
+                        <p style="margin-bottom: 1rem; color: var(--text-muted);">Enter the 6-digit OTP shared with the customer</p>
+                        <input type="text" id="pickupOtp" placeholder="Enter 6-digit OTP" maxlength="6" pattern="[0-9]{6}" style="width: 100%; padding: 1rem; font-size: 1.2rem; text-align: center; letter-spacing: 0.5rem; border: 2px solid var(--border); border-radius: 8px;">
+                    </div>
+
+                    <div id="photoSection" style="display: none;">
+                        <h4 style="margin-bottom: 1rem; color: var(--primary);">Step 2: Upload Photo Proof</h4>
+                        <p style="margin-bottom: 1rem; color: var(--text-muted);">Take a clear photo of the items being picked up</p>
+                        <input type="file" id="pickupProof" accept="image/*" capture="environment" required style="width: 100%; padding: 1rem; border: 2px dashed var(--border); border-radius: 8px; background: var(--bg);">
+                        <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">Supported formats: JPG, PNG, WebP. Max size: 5MB</small>
+                    </div>
+                </div>
+
+                <div class="modal-actions" style="padding: 1.5rem; border-top: 1px solid var(--border); background: var(--bg);">
+                    <button type="button" class="btn btn-secondary" onclick="closePickupModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Complete Pickup</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: var(--surface); border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border); }
+        .modal-header h3 { margin: 0; }
+        .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+        .modal-body { padding: 1.5rem; }
+        .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; }
+        .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; }
+    </style>
+
+    <script src="/js/theme.js"></script>
+</body>
+</html>

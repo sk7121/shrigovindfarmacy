@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Prescription - Shri Govind Pharmacy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/account.css">
+    <script src="/js/theme.js"></script>
+    <style>
+        :root {
+            --primary: #1c8125;
+            --primary-dark: #145a1a;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+        }
+        [data-theme="dark"] {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #2d2d2d;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .page-header {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .page-header h1 {
+            color: var(--primary);
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+        .page-header p {
+            color: var(--text-muted);
+            margin: 0;
+        }
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        @media (max-width: 768px) {
+            .upload-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .upload-form {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+            background: var(--surface);
+            color: var(--text);
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .file-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--surface);
+        }
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(28, 129, 37, 0.05);
+        }
+        .file-upload-area.has-files {
+            border-color: var(--primary);
+            background: rgba(28, 129, 37, 0.05);
+        }
+        .file-upload-area i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        .file-upload-area p {
+            margin: 5px 0;
+            color: var(--text-muted);
+        }
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+        .preview-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            border: 2px solid var(--border);
+        }
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .preview-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--danger);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .info-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .info-card {
+            background: var(--surface);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .info-card h3 {
+            color: var(--primary);
+            margin: 0 0 15px 0;
+            font-size: 18px;
+        }
+        .info-card ul {
+            margin: 0;
+            padding-left: 20px;
+            color: var(--text-muted);
+        }
+        .info-card li {
+            margin-bottom: 10px;
+        }
+        .info-card i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ff9800;
+        }
+        .status-verified {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success);
+        }
+        .status-rejected {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--danger);
+        }
+        .prescription-list {
+            margin-top: 30px;
+        }
+        .prescription-item {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .prescription-info {
+            flex: 1;
+        }
+        .prescription-number {
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+        .prescription-meta {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .prescription-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        }
+        .toast.success {
+            background: var(--success);
+        }
+        .toast.error {
+            background: var(--danger);
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .auto-refill-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .auto-refill-toggle input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fa-solid fa-file-prescription"></i> Upload Prescription</h1>
+            <p>Upload your prescription and we'll verify it within 24 hours. Get medicines delivered to your doorstep!</p>
+        </div>
+
+        <div class="upload-grid">
+            <!-- Upload Form -->
+            <div class="upload-form">
+                <form id="prescriptionForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-image"></i> Prescription Images</label>
+                        <div class="file-upload-area" id="dropZone">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <p><strong>Click to upload</strong> or drag and drop</p>
+                            <p style="font-size: 13px;">PNG, JPG up to 5MB (max 5 images)</p>
+                            <input type="file" id="prescriptionImages" name="images" accept="image/*" multiple>
+                        </div>
+                        <div class="preview-images" id="previewContainer"></div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-user-doctor"></i> Doctor Name</label>
+                            <input type="text" name="doctorName" placeholder="Dr. Rajesh Kumar">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-id-card"></i> Doctor Registration No.</label>
+                            <input type="text" name="doctorRegistrationNumber" placeholder="MMC12345">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-hospital"></i> Clinic/Hospital Name</label>
+                            <input type="text" name="clinicName" placeholder="City Hospital">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-calendar"></i> Prescription Date</label>
+                            <input type="date" name="prescriptionDate" id="prescriptionDate">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-location-dot"></i> Clinic Address</label>
+                        <textarea name="clinicAddress" placeholder="Full address of clinic/hospital" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-clock"></i> Validity (Optional)</label>
+                        <select name="validDays">
+                            <option value="">Auto-detect from prescription</option>
+                            <option value="30">30 Days</option>
+                            <option value="90">90 Days</option>
+                            <option value="180">6 Months</option>
+                            <option value="365">1 Year</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-rotate"></i> Auto-Refill</label>
+                        <div class="auto-refill-toggle">
+                            <input type="checkbox" name="autoRefill" id="autoRefill">
+                            <label for="autoRefill" style="margin: 0; cursor: pointer;">Enable automatic refills</label>
+                        </div>
+                        <select name="autoRefillFrequency" id="autoRefillFrequency" style="margin-top: 10px; display: none;">
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly" selected>Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-note-sticky"></i> Additional Notes</label>
+                        <textarea name="notes" placeholder="Any special instructions or requirements" rows="3"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="submitBtn">
+                        <i class="fa-solid fa-upload"></i> Upload Prescription
+                    </button>
+                </form>
+            </div>
+
+            <!-- Info Cards -->
+            <div class="info-cards">
+                <div class="info-card">
+                    <h3><i class="fa-solid fa-circle-info"></i> How It Works</h3>
+                    <ul>
+                        <li><i class="fa-solid fa-check"></i> Upload clear images of your prescription</li>
+                        <li><i class="fa-solid fa-check"></i> Our pharmacist will verify within 24 hours</li>
+                        <li><i class="fa-solid fa-check"></i> Once verified, you can order medicines</li>
+                        <li><i class="fa-solid fa-check"></i> Get doorstep delivery with auto-refill option</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3><i class="fa-solid fa-triangle-exclamation"></i> Important Guidelines</h3>
+                    <ul>
+                        <li><i class="fa-solid fa-circle-exclamation"></i> Prescription must be from a registered doctor</li>
+                        <li><i class="fa-solid fa-circle-exclamation"></i> All details should be clearly visible</li>
+                        <li><i class="fa-solid fa-circle-exclamation"></i> Prescription should not be expired</li>
+                        <li><i class="fa-solid fa-circle-exclamation"></i> For controlled substances, original prescription required</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3><i class="fa-solid fa-gift"></i> Benefits</h3>
+                    <ul>
+                        <li><i class="fa-solid fa-check"></i> Fast verification (within 24 hours)</li>
+                        <li><i class="fa-solid fa-check"></i> Secure digital storage</li>
+                        <li><i class="fa-solid fa-check"></i> Easy reordering with auto-refill</li>
+                        <li><i class="fa-solid fa-check"></i> 10% discount on first prescription order</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- User's Prescriptions List -->
+        <div class="prescription-list" id="prescriptionsList">
+            <h2 style="margin-bottom: 20px;"><i class="fa-solid fa-file-prescription"></i> My Prescriptions</h2>
+            <div id="prescriptionsContainer">
+                <p style="text-align: center; color: var(--text-muted); padding: 40px;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px;"></i><br>
+                    Loading prescriptions...
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set default prescription date to today
+        document.getElementById('prescriptionDate').valueAsDate = new Date();
+
+        // Auto-refill toggle
+        document.getElementById('autoRefill').addEventListener('change', function() {
+            document.getElementById('autoRefillFrequency').style.display = this.checked ? 'block' : 'none';
+        });
+
+        // File upload handling
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('prescriptionImages');
+        const previewContainer = document.getElementById('previewContainer');
+        let uploadedFiles = [];
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--primary)';
+            dropZone.style.background = 'rgba(28, 129, 37, 0.1)';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = 'var(--border)';
+            dropZone.style.background = '';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--border)';
+            dropZone.style.background = '';
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            
+            for (const file of files) {
+                if (!validTypes.includes(file.type)) {
+                    showToast('Only JPG and PNG images are allowed', 'error');
+                    continue;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('File size should be less than 5MB', 'error');
+                    continue;
+                }
+
+                if (uploadedFiles.length >= 5) {
+                    showToast('Maximum 5 images allowed', 'error');
+                    break;
+                }
+
+                uploadedFiles.push(file);
+                displayPreview(file);
+            }
+
+            if (uploadedFiles.length > 0) {
+                dropZone.classList.add('has-files');
+                dropZone.innerHTML = '<i class="fa-solid fa-check-circle"></i><p><strong>' + uploadedFiles.length + ' image(s) selected</strong></p><p>Click to add more</p>';
+            }
+        }
+
+        function displayPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <button type="button" class="remove-btn" onclick="removeFile(${uploadedFiles.length - 1})">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                `;
+                previewContainer.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeFile(index) {
+            uploadedFiles.splice(index, 1);
+            previewContainer.innerHTML = '';
+            uploadedFiles.forEach(file => displayPreview(file));
+            
+            if (uploadedFiles.length === 0) {
+                dropZone.classList.remove('has-files');
+                dropZone.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i><p><strong>Click to upload</strong> or drag and drop</p><p style="font-size: 13px;">PNG, JPG up to 5MB (max 5 images)</p>';
+            } else {
+                dropZone.innerHTML = '<i class="fa-solid fa-check-circle"></i><p><strong>' + uploadedFiles.length + ' image(s) selected</strong></p><p>Click to add more</p>';
+            }
+        }
+
+        // Form submission
+        document.getElementById('prescriptionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (uploadedFiles.length === 0) {
+                showToast('Please upload at least one prescription image', 'error');
+                return;
+            }
+
+            // Validate file sizes
+            for (const file of uploadedFiles) {
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast(`File "${file.name}" is larger than 5MB. Please use smaller files.`, 'error');
+                    return;
+                }
+            }
+
+            const formData = new FormData();
+            uploadedFiles.forEach(file => {
+                formData.append('images', file);
+            });
+
+            formData.append('doctorName', document.querySelector('[name="doctorName"]').value);
+            formData.append('doctorRegistrationNumber', document.querySelector('[name="doctorRegistrationNumber"]').value);
+            formData.append('clinicName', document.querySelector('[name="clinicName"]').value);
+            formData.append('clinicAddress', document.querySelector('[name="clinicAddress"]').value);
+            formData.append('prescriptionDate', document.querySelector('[name="prescriptionDate"]').value);
+            formData.append('validDays', document.querySelector('[name="validDays"]').value);
+            formData.append('autoRefill', document.getElementById('autoRefill').checked);
+            formData.append('autoRefillFrequency', document.querySelector('[name="autoRefillFrequency"]').value);
+            formData.append('notes', document.querySelector('[name="notes"]').value);
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading... Please wait';
+
+            try {
+                console.log('[Frontend] Uploading prescription...', uploadedFiles.length, 'files');
+                
+                const response = await fetch('/api/prescription/upload', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                // Check if response is OK
+                if (!response.ok) {
+                    console.error('[Frontend] HTTP error:', response.status);
+                    
+                    // Handle authentication errors
+                    if (response.status === 401 || response.status === 403) {
+                        const errorData = await response.json();
+                        showToast(errorData.message || 'Session expired. Please login again.', 'error');
+                        if (errorData.redirect) {
+                            setTimeout(() => {
+                                window.location.href = errorData.redirect;
+                            }, 2000);
+                        }
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        return;
+                    }
+                }
+
+                const result = await response.json();
+                console.log('[Frontend] Server response:', result);
+
+                if (result.success) {
+                    showToast('Prescription uploaded successfully! Our pharmacist will verify it within 24 hours.', 'success');
+                    document.getElementById('prescriptionForm').reset();
+                    uploadedFiles = [];
+                    previewContainer.innerHTML = '';
+                    dropZone.classList.remove('has-files');
+                    dropZone.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i><p><strong>Click to upload</strong> or drag and drop</p><p style="font-size: 13px;">PNG, JPG up to 5MB (max 5 images)</p>';
+                    loadPrescriptions();
+                } else {
+                    console.error('[Frontend] Upload failed:', result.message);
+                    showToast(result.message || 'Upload failed. Please try again.', 'error');
+                    if (result.errorId) {
+                        console.error('[Frontend] Error ID:', result.errorId);
+                    }
+                }
+            } catch (error) {
+                console.error('[Frontend] Network error:', error);
+                // Check if it's a network connectivity issue
+                if (!navigator.onLine) {
+                    showToast('You are offline. Please check your internet connection and try again.', 'error');
+                } else {
+                    showToast('Network error. Please check your connection and try again.', 'error');
+                    console.error('Error details:', error);
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        });
+
+        // Load user's prescriptions
+        async function loadPrescriptions() {
+            try {
+                const response = await fetch('/api/prescriptions', {
+                    credentials: 'include'
+                });
+                const result = await response.json();
+
+                if (result.success && result.prescriptions.length > 0) {
+                    let html = '';
+                    result.prescriptions.forEach(rx => {
+                        const statusClass = `status-${rx.status}`;
+                        const statusIcon = rx.status === 'verified' ? 'fa-check-circle' : rx.status === 'pending' ? 'fa-clock' : 'fa-times-circle';
+                        
+                        html += `
+                            <div class="prescription-item">
+                                <div class="prescription-info">
+                                    <div class="prescription-number">
+                                        <i class="fa-solid fa-file-prescription"></i> ${rx.prescriptionNumber}
+                                    </div>
+                                    <div class="prescription-meta">
+                                        <i class="fa-regular fa-calendar"></i> ${new Date(rx.createdAt).toLocaleDateString('en-IN')}
+                                        &nbsp;|&nbsp;
+                                        <span class="status-badge ${statusClass}">
+                                            <i class="fa-solid ${statusIcon}"></i> ${rx.status.toUpperCase()}
+                                        </span>
+                                        ${rx.doctorName ? `&nbsp;|&nbsp;<i class="fa-solid fa-user-doctor"></i> ${rx.doctorName}` : ''}
+                                    </div>
+                                </div>
+                                <div class="prescription-actions">
+                                    <button class="btn-sm btn-outline" onclick="viewPrescription('${rx._id}')">
+                                        <i class="fa-solid fa-eye"></i> View
+                                    </button>
+                                    ${rx.status === 'pending' ? `
+                                    <button class="btn-sm btn-outline" onclick="deletePrescription('${rx._id}')" style="color: var(--danger); border-color: var(--danger);">
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('prescriptionsContainer').innerHTML = html;
+                } else {
+                    document.getElementById('prescriptionsContainer').innerHTML = `
+                        <p style="text-align: center; color: var(--text-muted); padding: 40px;">
+                            <i class="fa-solid fa-file-prescription" style="font-size: 48px; opacity: 0.3;"></i><br><br>
+                            No prescriptions uploaded yet.<br>Upload your first prescription to get started!
+                        </p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading prescriptions:', error);
+            }
+        }
+
+        // View prescription
+        function viewPrescription(id) {
+            window.location.href = `/prescription/${id}`;
+        }
+
+        // Delete prescription
+        async function deletePrescription(id) {
+            if (!confirm('Are you sure you want to delete this prescription?')) return;
+
+            try {
+                const response = await fetch(`/api/prescription/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Prescription deleted successfully', 'success');
+                    loadPrescriptions();
+                } else {
+                    showToast(result.message || 'Delete failed', 'error');
+                }
+            } catch (error) {
+                showToast('Network error. Please try again.', 'error');
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${message}`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
+        }
+
+        // Load prescriptions on page load
+        loadPrescriptions();
+    </script>
+</body>
+
+</html>

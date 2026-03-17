@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test OTP System | Shri Govind Pharmacy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0fdf4;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 { color: #22c55e; }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #dcfce7;
+            border-radius: 8px;
+        }
+        input, button {
+            padding: 12px 20px;
+            margin: 10px 0;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 2px solid #e2e8f0;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4ade80;
+        }
+        button {
+            background: #4ade80;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #22c55e;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        .success { background: #f0fdf4; border: 1px solid #4ade80; color: #15803d; }
+        .error { background: #fef2f2; border: 1px solid #f87171; color: #dc2626; }
+        .info { background: #eff6ff; border: 1px solid #60a5fa; color: #2563eb; }
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🧪 OTP System Test</h1>
+        <p>Test the OTP email verification system</p>
+
+        <!-- Test 1: Send OTP -->
+        <div class="test-section">
+            <h2>1️⃣ Send OTP</h2>
+            <p>Enter your Gmail address to receive OTP:</p>
+            <input type="email" id="email" placeholder="yourname@gmail.com" style="width: 100%; box-sizing: border-box;">
+            <button onclick="sendOTP()">📧 Send OTP</button>
+            <div id="sendResult" class="result"></div>
+        </div>
+
+        <!-- Test 2: Verify OTP -->
+        <div class="test-section">
+            <h2>2️⃣ Verify OTP</h2>
+            <p>Enter the 6-digit OTP you received:</p>
+            <input type="text" id="otp" placeholder="123456" maxlength="6" style="width: 200px; letter-spacing: 5px; font-size: 20px;">
+            <button onclick="verifyOTP()">✅ Verify OTP</button>
+            <div id="verifyResult" class="result"></div>
+        </div>
+
+        <!-- Test 3: Resend OTP -->
+        <div class="test-section">
+            <h2>3️⃣ Resend OTP</h2>
+            <p>Didn't receive OTP? Request again:</p>
+            <button onclick="resendOTP()">🔄 Resend OTP</button>
+            <div id="resendResult" class="result"></div>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
+            <h3>📋 Instructions:</h3>
+            <ol>
+                <li>Enter your <strong>real Gmail</strong> address in Test 1</li>
+                <li>Click "Send OTP" - you should receive email in 5-30 seconds</li>
+                <li>Check your Gmail inbox (and spam folder)</li>
+                <li>Copy the 6-digit OTP from email</li>
+                <li>Enter OTP in Test 2 and click "Verify"</li>
+                <li>If successful, your email is verified! ✅</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let testEmail = '';
+
+        async function sendOTP() {
+            const email = document.getElementById('email').value;
+            const resultDiv = document.getElementById('sendResult');
+            const button = event.target;
+
+            if (!email || !email.includes('@')) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '❌ Please enter a valid email address';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            testEmail = email;
+            button.disabled = true;
+            button.innerHTML = '⏳ Sending...';
+
+            try {
+                const response = await fetch('/api/otp/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        purpose: 'email_verification',
+                        name: 'Test User'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        ✅ <strong>OTP Sent Successfully!</strong><br>
+                        Check your email: <code>${email}</code><br>
+                        OTP expires in: <strong>10 minutes</strong><br>
+                        <small>Check spam folder if not in inbox</small>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ ${result.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Network error: ${error.message}`;
+            }
+
+            resultDiv.style.display = 'block';
+            button.disabled = false;
+            button.innerHTML = '📧 Send OTP';
+        }
+
+        async function verifyOTP() {
+            const otp = document.getElementById('otp').value;
+            const resultDiv = document.getElementById('verifyResult');
+            const button = event.target;
+
+            if (!otp || otp.length !== 6) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '❌ Please enter complete 6-digit OTP';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            button.disabled = true;
+            button.innerHTML = '⏳ Verifying...';
+
+            try {
+                const response = await fetch('/api/otp/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: testEmail,
+                        otp: otp,
+                        purpose: 'email_verification'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        ✅ <strong>Email Verified Successfully!</strong><br>
+                        Your email <code>${testEmail}</code> is now verified.
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ ${result.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Network error: ${error.message}`;
+            }
+
+            resultDiv.style.display = 'block';
+            button.disabled = false;
+            button.innerHTML = '✅ Verify OTP';
+        }
+
+        async function resendOTP() {
+            const resultDiv = document.getElementById('resendResult');
+            const button = event.target;
+
+            if (!testEmail) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '❌ Please send OTP first';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            button.disabled = true;
+            button.innerHTML = '⏳ Sending...';
+
+            try {
+                const response = await fetch('/api/otp/resend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: testEmail,
+                        purpose: 'email_verification'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        ✅ <strong>OTP Resent!</strong><br>
+                        Check your email: <code>${testEmail}</code>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ ${result.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Network error: ${error.message}`;
+            }
+
+            resultDiv.style.display = 'block';
+            button.disabled = false;
+            button.innerHTML = '🔄 Resend OTP';
+        }
+    </script>
+</body>
+</html>

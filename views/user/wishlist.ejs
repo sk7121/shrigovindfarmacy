@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Wishlist — Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --secondary: #e67e22;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --heart: #e74c3c;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .page-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-main {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    .logo-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .btn-link {
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-link:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* Main Content */
+    .wishlist-main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      color: var(--primary);
+    }
+
+    .breadcrumb i {
+      font-size: 0.75rem;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .page-title i {
+      color: var(--heart);
+    }
+
+    .page-subtitle {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    /* Wishlist Grid */
+    .wishlist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .wishlist-card {
+      background: var(--surface);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .wishlist-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-image {
+      position: relative;
+      height: 250px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    .wishlist-card:hover .card-image img {
+      transform: scale(1.05);
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--danger);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s;
+    }
+
+    .remove-btn:hover {
+      background: var(--danger);
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .card-details {
+      padding: 1.25rem;
+    }
+
+    .card-brand {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-rating {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .stars {
+      color: #f1c40f;
+    }
+
+    .rating-count {
+      color: var(--text-muted);
+    }
+
+    .card-price {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .current-price {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .old-price {
+      text-decoration: line-through;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .discount {
+      background: rgba(28, 129, 37, 0.1);
+      color: var(--primary);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-cart {
+      flex: 1;
+      padding: 0.75rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-cart:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .empty-icon {
+      font-size: 5rem;
+      color: var(--heart);
+      opacity: 0.3;
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-state h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-primary {
+      padding: 0.75rem 2rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface);
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+    }
+
+    .toast.show {
+      display: flex;
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--danger);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+
+      .header-inner,
+      .wishlist-main {
+        padding: 0 1rem;
+      }
+
+      .wishlist-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-inner">
+      <a href="/home" class="logo">
+        <img src="https://res.cloudinary.com/drufdfmfr/image/upload/v1772726044/favicon_uuzvml.svg" alt="Shri Govind Pharmacy" class="logo-favicon">
+        <div class="logo-text">
+          <span class="logo-main">Shri Govind</span>
+          <span class="logo-sub">Pharmacy</span>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <a href="/home" class="btn-link"><i class="fas fa-home"></i> Home</a>
+        <a href="/user/cart" class="btn-link"><i class="fas fa-shopping-cart"></i> Cart</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="wishlist-main">
+    <div class="breadcrumb">
+      <a href="/home"><i class="fas fa-home"></i> Home</a>
+      <i class="fas fa-chevron-right"></i>
+      <span>My Wishlist</span>
+    </div>
+
+    <h1 class="page-title">
+      <i class="fas fa-heart"></i>
+      My Wishlist
+    </h1>
+    <p class="page-subtitle">
+      <%= wishlist.items.length %> <%= wishlist.items.length === 1 ? 'item' : 'items' %> saved for later
+    </p>
+
+    <% if (wishlist.items.length === 0) { %>
+    <!-- Empty State -->
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="fas fa-heart-broken"></i>
+      </div>
+      <h2>Your wishlist is empty</h2>
+      <p>Save products you love by clicking the heart icon</p>
+      <a href="/home#product" class="btn-primary">
+        <i class="fas fa-shopping-bag"></i> Browse Products
+      </a>
+    </div>
+    <% } else { %>
+    <!-- Wishlist Grid -->
+    <div class="wishlist-grid">
+      <% wishlist.items.forEach(item => { %>
+      <div class="wishlist-card" data-product-id="<%= item.product._id %>">
+        <div class="card-image">
+          <img src="<%= item.product.image || 'https://via.placeholder.com/300' %>" alt="<%= item.product.name %>">
+          <button class="remove-btn" onclick="removeFromWishlist('<%= item.product._id %>')" title="Remove">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="card-details">
+          <div class="card-brand"><%= item.product.category || 'Product' %></div>
+          <h3 class="card-title"><%= item.product.name %></h3>
+          <div class="card-rating">
+            <div class="stars">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star-half-alt"></i>
+            </div>
+            <span class="rating-count">(128)</span>
+          </div>
+          <div class="card-price">
+            <span class="current-price">₹<%= item.product.price %></span>
+            <% if (item.product.oldPrice) { %>
+            <span class="old-price">₹<%= item.product.oldPrice %></span>
+            <span class="discount"><%= Math.round((1 - item.product.price / item.product.oldPrice) * 100) %>% off</span>
+            <% } %>
+          </div>
+          <div class="card-actions">
+            <button class="btn-cart" onclick="addToCart('<%= item.product._id %>')">
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem;">
+      <a href="/home#product" class="btn-primary" style="background: var(--bg); color: var(--text); border: 1px solid var(--border);">
+        <i class="fas fa-plus"></i> Add More Products
+      </a>
+    </div>
+    <% } %>
+  </main>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <i class="fas fa-check-circle" style="color: var(--success); font-size: 1.25rem;"></i>
+    <span id="toast-message">Item removed from wishlist</span>
+  </div>
+
+  <script>
+    // Remove from wishlist
+    async function removeFromWishlist(productId) {
+      try {
+        const response = await fetch(`/wishlist/remove/${productId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Remove card from DOM
+          const card = document.querySelector(`[data-product-id="${productId}"]`);
+          if (card) {
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.9)';
+            setTimeout(() => card.remove(), 300);
+          }
+
+          // Update count
+          const countEl = document.querySelector('.page-subtitle');
+          const currentCount = parseInt(countEl.textContent);
+          const newCount = currentCount - 1;
+          countEl.textContent = `${newCount} ${newCount === 1 ? 'item' : 'items'} saved for later`;
+
+          // Show toast
+          showToast('Item removed from wishlist');
+
+          // Check if empty
+          if (newCount === 0) {
+            setTimeout(() => location.reload(), 1000);
+          }
+        }
+      } catch (err) {
+        console.log(err);
+        showToast('Error removing item', true);
+      }
+    }
+
+    // Add to cart
+    async function addToCart(productId) {
+      try {
+        const response = await fetch(`/user/add-to-cart/${productId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            quantity: 1
+          })
+        });
+
+        if (response.ok) {
+          showToast('Added to cart successfully! 🛒', false, 'Go to Cart', '/user/cart');
+        } else {
+          showToast('Error adding to cart', true);
+        }
+      } catch (err) {
+        console.log(err);
+        showToast('Error adding to cart', true);
+      }
+    }
+
+    // Show toast
+    function showToast(message, isError = false, actionText = null, actionUrl = null) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+      const toastIcon = toast.querySelector('i');
+
+      toastMessage.textContent = message;
+      toastIcon.className = isError ? 'fas fa-times-circle' : 'fas fa-check-circle';
+      toastIcon.style.color = isError ? 'var(--danger)' : 'var(--success)';
+
+      // Add action button if provided
+      let actionHTML = '';
+      if (actionText && actionUrl) {
+        actionHTML = `<a href="${actionUrl}" class="toast-action" style="margin-left: 12px; padding: 6px 14px; background: var(--success); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 0.8rem; white-space: nowrap;">${actionText}</a>`;
+      }
+
+      // Update toast content with action button
+      toastMessage.innerHTML = message + actionHTML;
+
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+
+
+</body>
+
+</html>

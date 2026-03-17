@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointment Details — Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/css/appointment-detail.css">
+  <script src="/js/theme.js"></script>
+  
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+
+  <!-- ══ TOPBAR ══ -->
+  <div class="topbar">
+    <i class="fa-solid fa-leaf"></i>
+    100% Natural Ayurvedic Products &nbsp;|&nbsp;
+    Free Delivery on Orders ₹499+ &nbsp;|&nbsp;
+    Call: +91 <%= appointment.doctor?.contact?.phone || '9876543210' %>
+  </div>
+
+  <!-- ══ HEADER ══ -->
+  <header class="main-header">
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-flex">
+          <a href="/home" class="logo">
+            <i class="fa-solid fa-mortar-pestle"></i>
+            <div class="logo-text">
+              <span class="logo-main">Shri Govind Pharmacy</span>
+              <span class="brand-sub">Ayurvedic &amp; Herbal Wellness</span>
+            </div>
+          </a>
+          <div class="nav-actions">
+            <a href="/account" class="btn btn-outline">
+              <i class="fa-solid fa-user"></i> My Account
+            </a>
+            <a href="/home" class="btn btn-outline">
+              <i class="fa-solid fa-house"></i> Home
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ══ BREADCRUMB ══ -->
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/home"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <a href="/account"><i class="fa-solid fa-user"></i> Account</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span>Appointment Details</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MAIN CONTENT ══ -->
+  <main class="appointment-page">
+    <div class="container">
+      
+      <!-- Success Banner -->
+      <% if (appointment.status === 'Pending' || appointment.status === 'Confirmed') { %>
+      <div class="success-banner">
+        <div class="success-icon">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="success-content">
+          <h3>Appointment Booked Successfully!</h3>
+          <p>Your consultation with Dr. <%= appointment.doctor?.name || 'Doctor' %> is scheduled.</p>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="appointment-grid">
+        
+        <!-- Left: Appointment Details -->
+        <div class="appointment-main">
+          
+          <div class="detail-card">
+            <div class="card-header">
+              <h2><i class="fa-solid fa-calendar-check"></i> Appointment Details</h2>
+              <span class="status-badge status-<%= appointment.status.toLowerCase() %>">
+                <%= appointment.status %>
+              </span>
+            </div>
+
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-label">
+                  <i class="fa-regular fa-calendar"></i> Date
+                </div>
+                <div class="detail-value">
+                  <%= new Date(appointment.appointmentDate).toLocaleDateString('en-IN', { 
+                    weekday: 'long',
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                  }) %>
+                </div>
+              </div>
+
+              <div class="detail-item">
+                <div class="detail-label">
+                  <i class="fa-regular fa-clock"></i> Time
+                </div>
+                <div class="detail-value">
+                  <%= appointment.appointmentTime %>
+                </div>
+              </div>
+
+              <div class="detail-item">
+                <div class="detail-label">
+                  <i class="fa-solid fa-video"></i> Type
+                </div>
+                <div class="detail-value">
+                  <%= appointment.appointmentType %>
+                </div>
+              </div>
+
+              <div class="detail-item">
+                <div class="detail-label">
+                  <i class="fa-solid fa-hashtag"></i> Appointment ID
+                </div>
+                <div class="detail-value">
+                  #<%= appointment._id.toString().slice(-8).toUpperCase() %>
+                </div>
+              </div>
+            </div>
+
+            <% if (appointment.reason || appointment.symptoms) { %>
+            <div class="detail-section">
+              <h4><i class="fa-solid fa-clipboard-list"></i> Consultation Details</h4>
+              
+              <% if (appointment.reason) { %>
+              <div class="info-row">
+                <span class="info-label">Reason:</span>
+                <span class="info-value"><%= appointment.reason %></span>
+              </div>
+              <% } %>
+
+              <% if (appointment.symptoms && appointment.symptoms.length > 0) { %>
+              <div class="info-row">
+                <span class="info-label">Symptoms:</span>
+                <span class="info-value"><%= appointment.symptoms.join(', ') %></span>
+              </div>
+              <% } %>
+            </div>
+            <% } %>
+
+            <% if (appointment.medicalHistory || appointment.currentMedications) { %>
+            <div class="detail-section">
+              <h4><i class="fa-solid fa-file-medical"></i> Medical Information</h4>
+              
+              <% if (appointment.medicalHistory) { %>
+              <div class="info-row">
+                <span class="info-label">Medical History:</span>
+                <span class="info-value"><%= appointment.medicalHistory %></span>
+              </div>
+              <% } %>
+
+              <% if (appointment.currentMedications) { %>
+              <div class="info-row">
+                <span class="info-label">Current Medications:</span>
+                <span class="info-value"><%= appointment.currentMedications %></span>
+              </div>
+              <% } %>
+            </div>
+            <% } %>
+
+            <% if (appointment.notes) { %>
+            <div class="detail-section">
+              <h4><i class="fa-solid fa-file-medical"></i> Doctor's Notes</h4>
+
+              <div class="info-row">
+                <span class="info-label">Notes:</span>
+                <span class="info-value"><%= appointment.notes %></span>
+              </div>
+            </div>
+            <% } %>
+
+            <% if (appointment.status === 'Pending' || appointment.status === 'Confirmed') { %>
+            <div class="action-buttons">
+              <a href="https://wa.me/91<%= appointment.doctor?.contact?.whatsapp || appointment.doctor?.contact?.phone %>?text=Hello%20Doctor%2C%20I%20have%20an%20appointment%20scheduled%20(ID%3A%20<%= appointment._id.toString().slice(-8).toUpperCase() %>)" 
+                 target="_blank" 
+                 class="btn btn-whatsapp">
+                <i class="fa-brands fa-whatsapp"></i> Contact on WhatsApp
+              </a>
+              <form action="/api/appointment/<%= appointment._id %>/cancel" method="POST" style="display:inline;" 
+                    onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                <button type="submit" class="btn btn-danger">
+                  <i class="fa-solid fa-xmark"></i> Cancel Appointment
+                </button>
+              </form>
+            </div>
+            <% } %>
+
+            <% if (appointment.status === 'Completed') { %>
+            <div class="action-buttons">
+              <a href="/doctor" class="btn btn-primary">
+                <i class="fa-solid fa-rotate"></i> Book Follow-up
+              </a>
+            </div>
+            <% } %>
+          </div>
+
+        </div>
+
+        <!-- Right: Doctor Info -->
+        <aside class="appointment-sidebar">
+          
+          <div class="doctor-card">
+            <div class="doctor-image">
+              <% if (appointment.doctor?.image) { %>
+                <img src="<%= appointment.doctor.image %>" alt="Dr. <%= appointment.doctor.name %>">
+              <% } else { %>
+                <div class="doctor-placeholder">
+                  <i class="fa-solid fa-user-doctor"></i>
+                </div>
+              <% } %>
+            </div>
+            
+            <div class="doctor-info">
+              <h3>Dr. <%= appointment.doctor?.name || 'Doctor' %></h3>
+              <p class="doctor-title"><%= appointment.doctor?.title || 'Ayurvedic Physician' %></p>
+              
+              <% if (appointment.doctor?.qualifications && appointment.doctor.qualifications.length > 0) { %>
+              <div class="doctor-qualifications">
+                <% appointment.doctor.qualifications.slice(0, 2).forEach(q => { %>
+                  <span class="qualification"><%= q.degree %></span>
+                <% }) %>
+              </div>
+              <% } %>
+
+              <div class="doctor-stats">
+                <div class="stat">
+                  <i class="fa-solid fa-star"></i>
+                  <span><%= (appointment.doctor?.stats?.averageRating || 4.9).toFixed(1) %> Rating</span>
+                </div>
+                <div class="stat">
+                  <i class="fa-solid fa-briefcase"></i>
+                  <span><%= appointment.doctor?.experience?.years || 20 %>+ Years</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="doctor-contact">
+              <div class="contact-item">
+                <i class="fa-solid fa-phone"></i>
+                <span><%= appointment.doctor?.contact?.phone || 'N/A' %></span>
+              </div>
+              <div class="contact-item">
+                <i class="fa-brands fa-whatsapp"></i>
+                <span><%= appointment.doctor?.contact?.whatsapp || appointment.doctor?.contact?.phone || 'N/A' %></span>
+              </div>
+              <div class="contact-item">
+                <i class="fa-solid fa-envelope"></i>
+                <span><%= appointment.doctor?.contact?.email || 'N/A' %></span>
+              </div>
+            </div>
+
+            <a href="https://wa.me/91<%= appointment.doctor?.contact?.whatsapp || appointment.doctor?.contact?.phone %>" 
+               target="_blank" 
+               class="btn btn-whatsapp-full">
+              <i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp
+            </a>
+          </div>
+
+          <div class="help-card">
+            <h4><i class="fa-solid fa-circle-question"></i> Need Help?</h4>
+            <p>For any queries regarding your appointment, please contact us:</p>
+            <div class="help-contacts">
+              <a href="tel:+91<%= appointment.doctor?.contact?.phone %>">
+                <i class="fa-solid fa-phone"></i> Call Us
+              </a>
+              <a href="mailto:<%= appointment.doctor?.contact?.email %>">
+                <i class="fa-solid fa-envelope"></i> Email Us
+              </a>
+            </div>
+          </div>
+
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="appointment-footer">
+    <div class="container">
+      <p>&copy; 2025 Shri Govind Pharmacy. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="/home">Home</a>
+        <a href="/account">My Account</a>
+        <a href="/doctor">Book Appointment</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div id="toastZone"></div>
+
+  <script>
+    // Show success message if coming from booking
+    <% if (typeof success !== 'undefined' && success) { %>
+      toast('Appointment booked successfully!', 'success');
+    <% } %>
+
+    function toast(msg, type = 'success') {
+      const zone = document.getElementById('toastZone');
+      const t = document.createElement('div');
+      t.className = 'toast ' + type;
+      t.innerHTML = `<div class="t-dot"></div>${msg}`;
+      zone.appendChild(t);
+      setTimeout(() => {
+        t.style.animation = 'toastPop 0.3s reverse';
+        setTimeout(() => t.remove(), 300);
+      }, 3500);
+    }
+  </script>
+</body>
+
+</html>

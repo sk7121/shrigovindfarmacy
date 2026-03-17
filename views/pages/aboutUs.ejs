@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us – Shri Govind Pharmacy</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/theme.js"></script>
+
+  <style>
+    .about-hero {
+      background: linear-gradient(135deg, var(--primary-color, #1c8125), #2d9d3a);
+      color: white;
+      padding: 5rem 1rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .about-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .about-hero h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    .about-hero p {
+      font-size: 1.2rem;
+      max-width: 700px;
+      margin: 0 auto;
+      opacity: 0.95;
+      position: relative;
+    }
+    .about-section {
+      padding: 4rem 1rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .about-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .about-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    .about-card i {
+      font-size: 2.5rem;
+      color: var(--primary-color, #1c8125);
+      margin-bottom: 1rem;
+    }
+    .about-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-color, #333);
+    }
+    .about-card p {
+      color: var(--muted-color, #666);
+      line-height: 1.7;
+    }
+    .story-section {
+      background: #f8f9fa;
+      padding: 4rem 1rem;
+    }
+    .story-content {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .story-content h2 {
+      font-size: 2rem;
+      color: var(--primary-color, #1c8125);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .story-content p {
+      font-size: 1.05rem;
+      line-height: 1.9;
+      color: var(--text-color, #333);
+      margin-bottom: 1.5rem;
+    }
+    .values-section {
+      padding: 4rem 1rem;
+      background: white;
+    }
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .value-item {
+      text-align: center;
+      padding: 2rem;
+    }
+    .value-item i {
+      width: 80px;
+      height: 80px;
+      background: rgba(28, 129, 37, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 2rem;
+      color: var(--primary-color, #1c8125);
+    }
+    .value-item h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-color, #333);
+    }
+    .value-item p {
+      color: var(--muted-color, #666);
+      font-size: 0.95rem;
+    }
+    .stats-section {
+      background: linear-gradient(135deg, var(--primary-color, #1c8125), #2d9d3a);
+      color: white;
+      padding: 4rem 1rem;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .stat-item h3 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .stat-item p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    .license-section {
+      background: #fff8e1;
+      border-left: 4px solid #ff9800;
+      padding: 2rem;
+      border-radius: 0 12px 12px 0;
+      margin: 3rem auto;
+      max-width: 900px;
+    }
+    .license-section h3 {
+      color: #f57c00;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .license-section ul {
+      list-style: none;
+      padding: 0;
+    }
+    .license-section li {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .license-section li:last-child {
+      border-bottom: none;
+    }
+    .license-label {
+      font-weight: 600;
+      color: var(--text-color, #333);
+    }
+    .license-value {
+      color: var(--muted-color, #666);
+    }
+    .team-section {
+      padding: 4rem 1rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .team-section h2 {
+      text-align: center;
+      font-size: 2rem;
+      color: var(--primary-color, #1c8125);
+      margin-bottom: 3rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary-color, #1c8125);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 2rem;
+      transition: gap 0.2s;
+    }
+    .back-link:hover {
+      gap: 0.75rem;
+    }
+    [data-theme="dark"] .about-card,
+    [data-theme="dark"] .value-item {
+      background: #2a2a2a;
+    }
+    [data-theme="dark"] .story-section {
+      background: #1a1a1a;
+    }
+    [data-theme="dark"] .license-section {
+      background: rgba(255, 152, 0, 0.1);
+    }
+  </style>
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+  <header class="main-header">
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-flex">
+          <a href="/home" class="logo">
+            <i class="fa-solid fa-mortar-pestle logo-ico"></i>
+            <div class="logo-text">
+              <span class="logo-main">Shri Govind Pharmacy</span>
+              <span class="brand-sub">Ayurvedic &amp; Herbal Wellness</span>
+            </div>
+          </a>
+          <div class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+              <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+            <a href="/home" class="btn btn-outline">
+              <i class="fa-solid fa-house"></i>
+              <span>Home</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/home"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right bc-sep"></i>
+        <span>About Us</span>
+      </nav>
+    </div>
+  </div>
+
+  <section class="about-hero">
+    <h1>About Shri Govind Pharmacy</h1>
+    <p>Your Trusted Partner in Ayurvedic Health &amp; Natural Wellness Since 1998</p>
+  </section>
+
+  <div class="about-section">
+    <a href="/home" class="back-link">
+      <i class="fa-solid fa-arrow-left"></i>
+      Back to Home
+    </a>
+
+    <div class="about-grid">
+      <div class="about-card">
+        <i class="fa-solid fa-seedling"></i>
+        <h3>100% Natural &amp; Ayurvedic</h3>
+        <p>All our products are derived from natural herbs and follow traditional Ayurvedic formulations approved by AYUSH.</p>
+      </div>
+
+      <div class="about-card">
+        <i class="fa-solid fa-certificate"></i>
+        <h3>AYUSH Certified</h3>
+        <p>We are a licensed Ayurvedic pharmacy with all necessary certifications and comply with government regulations.</p>
+      </div>
+
+      <div class="about-card">
+        <i class="fa-solid fa-user-doctor"></i>
+        <h3>Expert Guidance</h3>
+        <p>Our team includes qualified Ayurvedic practitioners who provide personalized consultations and recommendations.</p>
+      </div>
+
+      <div class="about-card">
+        <i class="fa-solid fa-heart"></i>
+        <h3>Customer First</h3>
+        <p>We prioritize customer health and satisfaction above everything else with transparent practices and honest advice.</p>
+      </div>
+
+      <div class="about-card">
+        <i class="fa-solid fa-flask"></i>
+        <h3>Quality Tested</h3>
+        <p>Every product undergoes rigorous quality checks to ensure purity, potency, and safety for consumption.</p>
+      </div>
+
+      <div class="about-card">
+        <i class="fa-solid fa-truck-fast"></i>
+        <h3>Pan-India Delivery</h3>
+        <p>We deliver authentic Ayurvedic medicines across India with fast, reliable shipping and secure packaging.</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="story-section">
+    <div class="story-content">
+      <h2><i class="fa-solid fa-book-open"></i> Our Story</h2>
+      <p>Shri Govind Pharmacy was established in <strong>1998</strong> with a simple mission: to make authentic Ayurvedic medicines accessible to everyone while preserving the ancient wisdom of Ayurveda.</p>
+      <p>Founded by <strong>Shri Govind Ji Sharma</strong>, a passionate advocate of natural healing, our pharmacy started as a small store in Sikar, Rajasthan. Over the past 25+ years, we have grown into a trusted name in Ayurvedic healthcare, serving thousands of satisfied customers.</p>
+      <p>Today, under the leadership of the next generation, we continue to uphold our commitment to quality, authenticity, and customer care. Our online presence allows us to serve customers across India while maintaining the same personal touch and expert guidance that made us famous locally.</p>
+      <p>We source our products only from <strong>GMP-certified manufacturers</strong> and established Ayurvedic companies, ensuring that every medicine we dispense meets the highest standards of quality and efficacy.</p>
+    </div>
+  </section>
+
+  <section class="values-section">
+    <div class="values-grid">
+      <div class="value-item">
+        <i class="fa-solid fa-shield-halved"></i>
+        <h3>Authenticity</h3>
+        <p>Only genuine, certified Ayurvedic products from trusted manufacturers</p>
+      </div>
+      <div class="value-item">
+        <i class="fa-solid fa-hand-holding-heart"></i>
+        <h3>Integrity</h3>
+        <p>Transparent pricing, honest advice, and ethical business practices</p>
+      </div>
+      <div class="value-item">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <h3>Expertise</h3>
+        <p>Qualified staff and Ayurvedic practitioners for proper guidance</p>
+      </div>
+      <div class="value-item">
+        <i class="fa-solid fa-users"></i>
+        <h3>Trust</h3>
+        <p>Building long-term relationships through consistent quality and care</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <h3>25+</h3>
+        <p>Years of Service</p>
+      </div>
+      <div class="stat-item">
+        <h3>50,000+</h3>
+        <p>Happy Customers</p>
+      </div>
+      <div class="stat-item">
+        <h3>1,000+</h3>
+        <p>Products Available</p>
+      </div>
+      <div class="stat-item">
+        <h3>28</h3>
+        <p>States Served</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="license-section">
+    <h3><i class="fa-solid fa-file-shield"></i> Licenses &amp; Certifications</h3>
+    <p style="margin-bottom: 1.5rem; color: var(--muted-color, #666);">We operate in full compliance with Indian pharmaceutical and Ayurvedic regulations. Our licenses and certifications include:</p>
+    <ul>
+      <li>
+        <span class="license-label"><i class="fa-solid fa-license"></i> Drug License Number:</span>
+        <span class="license-value">DL-RAJ-2025-00452 (Ayurvedic Pharmacy)</span>
+      </li>
+      <li>
+        <span class="license-label"><i class="fa-solid fa-certificate"></i> AYUSH License:</span>
+        <span class="license-value">MH/AYU/2025/12345</span>
+      </li>
+      <li>
+        <span class="license-label"><i class="fa-solid fa-building"></i> FSSAI License:</span>
+        <span class="license-value">12345678901234</span>
+      </li>
+      <li>
+        <span class="license-label"><i class="fa-solid fa-shop"></i> GST Number:</span>
+        <span class="license-value">08AABCS1234F1Z5</span>
+      </li>
+      <li>
+        <span class="license-label"><i class="fa-solid fa-user-tie"></i> Registered Pharmacist:</span>
+        <span class="license-value">Ramesh Kumar Sharma (Reg. No. A-00452)</span>
+      </li>
+    </ul>
+  </div>
+
+  <section class="team-section">
+    <h2><i class="fa-solid fa-users-line"></i> Why Choose Us?</h2>
+    <div class="about-grid">
+      <div class="about-card">
+        <i class="fa-solid fa-clock"></i>
+        <h3>25+ Years Experience</h3>
+        <p>Decades of expertise in Ayurvedic medicines and natural healing solutions.</p>
+      </div>
+
+      <div class="about-card">
+        <i class="fa-solid fa-comments"></i>
+        <h3>Free Consultations</h3>
+        <p>Expert Ayurvedic guidance at no extra cost to help you choose the right products.</p>
+      </div>
+
+      <div class="about-card">
+        <i class="fa-solid fa-indian-rupee-sign"></i>
+        <h3>Fair Pricing</h3>
+        <p>Competitive prices with regular discounts and offers for our customers.</p>
+      </div>
+
+      <div class="about-card">
+        <i class="fa-solid fa-headset"></i>
+        <h3>Dedicated Support</h3>
+        <p>Responsive customer service available to answer your queries and concerns.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer" style="margin-top: 4rem;">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2025 Shri Govind Pharmacy. All Rights Reserved.</p>
+        <div class="fb-links">
+          <a href="/privacy-policy">Privacy Policy</a>
+          <a href="/terms-conditions">Terms of Service</a>
+          <a href="/refund-policy">Refund Policy</a>
+          <a href="/sitemap.xml">Sitemap</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/theme.js"></script>
+</body>
+
+</html>

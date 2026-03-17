@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescription Detail - Shri Govind Pharmacy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="/js/theme.js"></script>
+    <style>
+        :root {
+            --primary: #1c8125;
+            --primary-dark: #145a1a;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+        }
+        [data-theme="dark"] {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #2d2d2d;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        .page-header {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .page-header h1 {
+            margin: 0;
+            color: var(--primary);
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+        @media (max-width: 1024px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .card h3 {
+            margin: 0 0 20px 0;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .info-item {
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        .info-item label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .info-item .value {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ff9800;
+        }
+        .status-verified {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success);
+        }
+        .status-rejected {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--danger);
+        }
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .image-item {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .image-item:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+        }
+        .image-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+        }
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid var(--warning);
+            color: #ff9800;
+        }
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .alert-info {
+            background: rgba(13, 110, 253, 0.1);
+            border-left: 4px solid #0d6efd;
+            color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1><i class="fa-solid fa-file-prescription"></i> Prescription Details</h1>
+                <p style="margin: 10px 0 0 0; color: var(--text-muted);">
+                    <%= prescription.prescriptionNumber %>
+                </p>
+            </div>
+            <div>
+                <a href="/prescription-upload" class="btn btn-outline">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+
+        <!-- Status Alert -->
+        <% if (prescription.status === 'pending') { %>
+            <div class="alert alert-warning">
+                <i class="fa-solid fa-clock"></i>
+                <strong>Your prescription is under review.</strong> Our pharmacist will verify it within 24 hours.
+            </div>
+        <% } else if (prescription.status === 'verified') { %>
+            <div class="alert alert-success">
+                <i class="fa-solid fa-check-circle"></i>
+                <strong>Your prescription has been verified!</strong> You can now order medicines using this prescription.
+                <% if (prescription.validUntil) { %>
+                    Valid until <%= new Date(prescription.validUntil).toLocaleDateString('en-IN') %>.
+                <% } %>
+            </div>
+        <% } else if (prescription.status === 'rejected') { %>
+            <div class="alert alert-info">
+                <i class="fa-solid fa-info-circle"></i>
+                <strong>This prescription was rejected.</strong>
+                <% if (prescription.rejectionReason) { %>
+                    <br><br>
+                    <strong>Reason:</strong> <%= prescription.rejectionReason %>
+                <% } %>
+                <br><br>
+                <a href="/prescription-upload" class="btn btn-primary" style="margin-top: 10px;">
+                    <i class="fa-solid fa-upload"></i> Upload New Prescription
+                </a>
+            </div>
+        <% } %>
+
+        <div class="grid-2">
+            <!-- Left: Details -->
+            <div>
+                <!-- Prescription Info -->
+                <div class="card">
+                    <h3><i class="fa-solid fa-file-prescription"></i> Prescription Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Prescription Number</label>
+                            <div class="value"><%= prescription.prescriptionNumber %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Status</label>
+                            <div class="value">
+                                <span class="status-badge status-<%= prescription.status %>">
+                                    <%= prescription.status.toUpperCase() %>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label>Prescription Date</label>
+                            <div class="value"><%= new Date(prescription.prescriptionDate).toLocaleDateString('en-IN') %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Uploaded On</label>
+                            <div class="value"><%= new Date(prescription.createdAt).toLocaleDateString('en-IN') %></div>
+                        </div>
+                        <% if (prescription.validUntil) { %>
+                        <div class="info-item">
+                            <label>Valid Until</label>
+                            <div class="value"><%= new Date(prescription.validUntil).toLocaleDateString('en-IN') %></div>
+                        </div>
+                        <% } %>
+                        <% if (prescription.verifiedAt) { %>
+                        <div class="info-item">
+                            <label>Verified On</label>
+                            <div class="value"><%= new Date(prescription.verifiedAt).toLocaleDateString('en-IN') %></div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Doctor Info -->
+                <div class="card">
+                    <h3><i class="fa-solid fa-user-doctor"></i> Doctor Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Doctor Name</label>
+                            <div class="value"><%= prescription.doctorName || 'Not provided' %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Registration Number</label>
+                            <div class="value"><%= prescription.doctorRegistrationNumber || 'Not provided' %></div>
+                        </div>
+                        <div class="info-item" style="grid-column: span 2;">
+                            <label>Clinic/Hospital</label>
+                            <div class="value"><%= prescription.clinicName || 'Not provided' %></div>
+                        </div>
+                        <div class="info-item" style="grid-column: span 2;">
+                            <label>Clinic Address</label>
+                            <div class="value"><%= prescription.clinicAddress || 'Not provided' %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Images -->
+                <div class="card">
+                    <h3><i class="fa-solid fa-images"></i> Prescription Images</h3>
+                    <div class="images-grid">
+                        <% if (prescription.images && prescription.images.length > 0) { %>
+                            <% prescription.images.forEach(img => { %>
+                                <div class="image-item" onclick="openModal('<%= img.url %>')">
+                                    <img src="<%= img.url %>" alt="Prescription Image">
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <p style="color: var(--text-muted);">No images uploaded</p>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <% if (prescription.notes) { %>
+                <div class="card">
+                    <h3><i class="fa-solid fa-note-sticky"></i> Additional Notes</h3>
+                    <p style="white-space: pre-wrap;"><%= prescription.notes %></p>
+                </div>
+                <% } %>
+            </div>
+
+            <!-- Right: Actions -->
+            <div>
+                <% if (prescription.status === 'verified') { %>
+                <div class="card">
+                    <h3><i class="fa-solid fa-bag-shopping"></i> Order Medicines</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 15px;">
+                        Browse our catalog and add medicines to your cart using this prescription.
+                    </p>
+                    <a href="/home" class="btn btn-primary" style="width: 100%; text-align: center;">
+                        <i class="fa-solid fa-store"></i> Start Shopping
+                    </a>
+                </div>
+                <% } %>
+
+                <% if (prescription.autoRefill?.enabled) { %>
+                <div class="card">
+                    <h3><i class="fa-solid fa-rotate"></i> Auto-Refill</h3>
+                    <div class="info-item">
+                        <label>Status</label>
+                        <div class="value" style="color: var(--success);">
+                            <i class="fa-solid fa-check-circle"></i> Enabled
+                        </div>
+                    </div>
+                    <div class="info-item" style="margin-top: 10px;">
+                        <label>Frequency</label>
+                        <div class="value"><%= prescription.autoRefill.frequency %></div>
+                    </div>
+                    <div class="info-item" style="margin-top: 10px;">
+                        <label>Next Refill</label>
+                        <div class="value"><%= prescription.autoRefill.nextRefillDate ? new Date(prescription.autoRefill.nextRefillDate).toLocaleDateString('en-IN') : 'Not scheduled' %></div>
+                    </div>
+                </div>
+                <% } %>
+
+                <div class="card">
+                    <h3><i class="fa-solid fa-circle-info"></i> Need Help?</h3>
+                    <p style="color: var(--text-muted); font-size: 14px;">
+                        Our pharmacist is available to answer your questions.
+                    </p>
+                    <a href="/contact" class="btn btn-outline" style="width: 100%; text-align: center; margin-top: 10px;">
+                        <i class="fa-solid fa-phone"></i> Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="modal-close">&times;</span>
+        <img id="modalImage" src="" alt="Full size image">
+    </div>
+
+    <script>
+        function openModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

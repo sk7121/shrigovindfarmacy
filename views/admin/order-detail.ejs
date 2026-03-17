@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order <%= order.tracking.orderId %> — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .admin-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .btn-link {
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+    }
+
+    .main-content {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .breadcrumb {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .order-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .order-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .item-image {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .item-details {
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: 600;
+    }
+
+    .item-meta {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+    }
+
+    .summary-total {
+      border-top: 2px solid var(--border);
+      padding-top: 1rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .status-select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn-update {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .address-box {
+      background: var(--bg);
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+
+      .header-inner,
+      .main-content {
+        padding: 0 1rem;
+      }
+
+      .order-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <!-- Theme Script -->
+  <script src="/js/theme.js"></script>
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success">
+      <%= success[0] %>
+    </div>
+    <% } %>
+      <% if (error && error.length) { %>
+        <div class="flash error">
+          <%= error[0] %>
+        </div>
+        <% } %>
+
+          <header class="admin-header">
+            <div class="header-inner">
+              <a href="/admin/home" class="logo">
+                <img src="https://res.cloudinary.com/drufdfmfr/image/upload/v1772726044/favicon_uuzvml.svg"
+                  alt="Shri Govind Pharmacy" class="logo-favicon">
+                <div class="logo-text"><span class="logo-main">Shri Govind</span><span class="logo-sub">Admin
+                    Panel</span></div>
+              </a>
+              <a href="/admin/orders" class="btn-link"><i class="fas fa-arrow-left"></i> Back to Orders</a>
+            </div>
+          </header>
+
+          <main class="main-content">
+            <div class="breadcrumb">
+              <a href="/admin/home">Home</a>
+              <i class="fas fa-chevron-right"></i>
+              <a href="/admin/orders">Orders</a>
+              <i class="fas fa-chevron-right"></i>
+              <span>
+                <%= order.tracking.orderId %>
+              </span>
+            </div>
+
+            <div class="order-grid">
+              <div>
+                <div class="card">
+                  <h2 class="card-title">Order Items</h2>
+                  <% order.items.forEach(item=> { %>
+                    <div class="order-item">
+                      <img src="<%= item.image || 'https://via.placeholder.com/60' %>" class="item-image">
+                      <div class="item-details">
+                        <div class="item-name">
+                          <%= item.name %>
+                        </div>
+                        <div class="item-meta">Qty: <%= item.quantity %> × ₹<%= item.price %>
+                        </div>
+                      </div>
+                      <div style="font-weight: 700;">₹<%= item.subtotal %>
+                      </div>
+                    </div>
+                    <% }) %>
+                </div>
+
+                <div class="card">
+                  <h2 class="card-title"><i class="fas fa-user"></i> Customer Information</h2>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                      <div style="font-size: 0.875rem; color: var(--text-muted);">Name</div>
+                      <div style="font-weight: 600;">
+                        <%= order.user?.name %>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="font-size: 0.875rem; color: var(--text-muted);">Email</div>
+                      <div style="font-weight: 600;">
+                        <%= order.user?.email %>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="font-size: 0.875rem; color: var(--text-muted);">Phone</div>
+                      <div style="font-weight: 600;">
+                        <%= order.user?.phone %>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="font-size: 0.875rem; color: var(--text-muted);">Order Date</div>
+                      <div style="font-weight: 600;">
+                        <%= new Date(order.createdAt).toLocaleDateString('en-IN') %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <h2 class="card-title"><i class="fas fa-map-marker-alt"></i> Delivery Address</h2>
+                  <div class="address-box">
+                    <strong>
+                      <%= order.address.fullName %>
+                    </strong><br>
+                    <%= order.address.address %><br>
+                      <%= order.address.city %>, <%= order.address.state %> - <%= order.address.pincode %><br>
+                            Phone: <%= order.address.phone %>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="card">
+                  <h2 class="card-title">Order Summary</h2>
+                  <div class="summary-row"><span>Subtotal</span><span>₹<%= Math.round(order.pricing.subtotal) %></span>
+                  </div>
+                  <div class="summary-row"><span>GST</span><span>₹<%= Math.round(order.pricing.gst) %></span></div>
+                  <div class="summary-row"><span>Delivery</span><span style="color: var(--success);">FREE</span></div>
+                  <div class="summary-row summary-total"><span>Total</span><span>₹<%= Math.round(order.pricing.total) %>
+                        </span></div>
+
+                  <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">Payment</div>
+                    <div style="font-weight: 600; margin-top: 0.25rem;">
+                      <%= order.payment.method.toUpperCase() %>
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">Status: <%=
+                        order.payment.status %>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <h2 class="card-title"><i class="fas fa-tasks"></i> Update Status</h2>
+                  <form id="status-form">
+                    <select class="status-select" id="status" name="status" value="<%= order.status %>">
+                      <option value="pending" <%=order.status==='pending' ? 'selected' : '' %>>Pending</option>
+                      <option value="confirmed" <%=order.status==='confirmed' ? 'selected' : '' %>>Confirmed</option>
+                      <option value="processing" <%=order.status==='processing' ? 'selected' : '' %>>Processing</option>
+                      <option value="shipped" <%=order.status==='shipped' ? 'selected' : '' %>>Shipped</option>
+                      <option value="out_for_delivery" <%=order.status==='out_for_delivery' ? 'selected' : '' %>>Out for
+                        Delivery</option>
+                      <option value="delivered" <%=order.status==='delivered' ? 'selected' : '' %>>Delivered</option>
+                      <option value="cancelled" <%=order.status==='cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    </select>
+                    <button type="submit" class="btn-update"><i class="fas fa-check"></i> Update Status</button>
+                  </form>
+                </div>
+
+                <% if (order.deliveryAgent) { %>
+                  <div class="card">
+                    <h2 class="card-title"><i class="fas fa-truck"></i> Delivery Agent</h2>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                      <% if (order.deliveryAgent.profileImage) { %>
+                        <img src="<%= order.deliveryAgent.profileImage %>" alt="Agent"
+                          style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                        <% } else { %>
+                          <div
+                            style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white;">
+                            <i class="fas fa-user"></i>
+                          </div>
+                          <% } %>
+                            <div>
+                              <div style="font-weight: 600; margin-bottom: 0.25rem;">
+                                <%= order.deliveryAgent.name %>
+                              </div>
+                              <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+                                <i class="fas fa-phone"></i>
+                                <%= order.deliveryAgent.phone %>
+                              </div>
+                              <% if (order.deliveryAgent.vehicleType && order.deliveryAgent.vehicleNumber) { %>
+                                <div style="font-size: 0.875rem; color: var(--text-muted);">
+                                  <i
+                                    class="fas fa-<%= order.deliveryAgent.vehicleType === 'bike' ? 'motorcycle' : order.deliveryAgent.vehicleType === 'scooter' ? 'motorcycle' : order.deliveryAgent.vehicleType === 'car' ? 'car' : 'truck' %>"></i>
+                                  <%= order.deliveryAgent.vehicleType.charAt(0).toUpperCase() +
+                                    order.deliveryAgent.vehicleType.slice(1) %> - <%= order.deliveryAgent.vehicleNumber
+                                      %>
+                                </div>
+                                <% } %>
+                            </div>
+                    </div>
+                    <% if (order.deliveryOTP && order.deliveryOTP.code) { %>
+                      <div
+                        style="margin-top: 1rem; padding: 0.75rem; background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 6px;">
+                        <div
+                          style="font-size: 0.75rem; color: var(--warning); font-weight: 600; margin-bottom: 0.25rem;">
+                          <i class="fas fa-key"></i> Delivery OTP
+                        </div>
+                        <div
+                          style="font-size: 1rem; font-weight: 700; color: var(--text); letter-spacing: 1px; text-align: center;">
+                          <%= order.deliveryOTP.code %>
+                        </div>
+                      </div>
+                      <% } %>
+                  </div>
+                  <% } %>
+              </div>
+            </div>
+          </main>
+
+          <script>
+            document.getElementById('status-form').addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const status = document.getElementById('status').value;
+
+              try {
+                const response = await fetch('/admin/orders/<%= order._id %>/status', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ status })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                  alert('Order status updated successfully!');
+                  location.reload();
+                } else {
+                  alert(result.message || 'Error updating status');
+                }
+              } catch (err) {
+                alert('Error updating status');
+              }
+            });
+          </script>
+</body>
+
+</html>

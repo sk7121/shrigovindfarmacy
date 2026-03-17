@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Login - Shri Govind Pharmacy</title>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-light: #86efac;
+            --primary-dark: #22c55e;
+            --text-dark: #17252a;
+            --text-muted: #6b7c85;
+            --bg-light: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            --radius: 14px;
+            --error: #ef4444;
+            --success: #22c55e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 480px;
+            width: 100%;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 40px 30px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 15px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 8px 20px rgba(74, 222, 128, 0.3);
+        }
+
+        .logo-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+        }
+
+        .logo-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 222, 128, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7c85, #475569);
+        }
+
+        .alert {
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .otp-input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .otp-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.1);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            color: var(--text-muted);
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: var(--border-color);
+            z-index: 0;
+        }
+
+        .divider span {
+            background: var(--card-bg);
+            padding: 0 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .timer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .timer.expired {
+            color: var(--error);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div class="logo-title">Shri Govind Pharmacy</div>
+                <div class="logo-subtitle">Your Health, Our Priority</div>
+            </div>
+
+            <div class="header">
+                <h1 id="page-title">OTP Login</h1>
+                <p id="page-description">Enter your email to receive a login OTP</p>
+            </div>
+
+            <div id="alert" class="alert"></div>
+
+            <!-- Step 1: Email Form -->
+            <form id="email-form">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                </div>
+                <button type="submit" class="btn" id="send-otp-btn">
+                    <i class="fas fa-paper-plane"></i> Send OTP
+                </button>
+            </form>
+
+            <!-- Step 2: OTP Verification -->
+            <form id="otp-form" class="hidden">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="otp-email" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label>Enter 6-Digit OTP</label>
+                    <div class="otp-inputs">
+                        <input type="text" class="otp-input" maxlength="1" data-index="0" required>
+                        <input type="text" class="otp-input" maxlength="1" data-index="1" required>
+                        <input type="text" class="otp-input" maxlength="1" data-index="2" required>
+                        <input type="text" class="otp-input" maxlength="1" data-index="3" required>
+                        <input type="text" class="otp-input" maxlength="1" data-index="4" required>
+                        <input type="text" class="otp-input" maxlength="1" data-index="5" required>
+                    </div>
+                    <input type="hidden" id="otp-value">
+                </div>
+
+                <div class="timer" id="timer">
+                    <i class="fas fa-clock"></i> OTP expires in <span id="countdown">10:00</span>
+                </div>
+
+                <button type="submit" class="btn" id="verify-otp-btn">
+                    <i class="fas fa-check-circle"></i> Verify & Login
+                </button>
+
+                <button type="button" class="btn btn-secondary hidden" id="resend-otp-btn">
+                    <i class="fas fa-redo"></i> Resend OTP
+                </button>
+            </form>
+
+            <div class="back-link">
+                <a href="/login">
+                    <i class="fas fa-arrow-left"></i> Back to Login
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const emailForm = document.getElementById('email-form');
+        const otpForm = document.getElementById('otp-form');
+        const alertDiv = document.getElementById('alert');
+        const emailInput = document.getElementById('email');
+        const otpEmailInput = document.getElementById('otp-email');
+        const otpInputs = document.querySelectorAll('.otp-input');
+        const otpValueInput = document.getElementById('otp-value');
+        const sendOtpBtn = document.getElementById('send-otp-btn');
+        const verifyOtpBtn = document.getElementById('verify-otp-btn');
+        const resendOtpBtn = document.getElementById('resend-otp-btn');
+        const countdownSpan = document.getElementById('countdown');
+        const timerDiv = document.getElementById('timer');
+
+        let expiryTime = null;
+        let timerInterval = null;
+
+        // Show alert
+        function showAlert(message, type) {
+            alertDiv.textContent = message;
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.style.display = 'block';
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Send OTP
+        emailForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+
+            if (!email) {
+                showAlert('Please enter your email address', 'error');
+                return;
+            }
+
+            sendOtpBtn.disabled = true;
+            sendOtpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            try {
+                const response = await fetch('/api/auth/otp-login/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('OTP sent successfully! Please check your email.', 'success');
+                    showOTPForm(email);
+                    startTimer(data.expiresAt);
+                } else {
+                    showAlert(data.message, 'error');
+                    sendOtpBtn.disabled = false;
+                    sendOtpBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'error');
+                sendOtpBtn.disabled = false;
+                sendOtpBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
+            }
+        });
+
+        // Show OTP form
+        function showOTPForm(email) {
+            emailForm.classList.add('hidden');
+            otpForm.classList.remove('hidden');
+            otpEmailInput.value = email;
+            document.getElementById('page-title').textContent = 'Enter OTP';
+            document.getElementById('page-description').textContent = 'Check your email for the 6-digit OTP';
+            otpInputs[0].focus();
+        }
+
+        // OTP input handling
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                if (value && index < 5) {
+                    otpInputs[index + 1].focus();
+                }
+                updateOTPValue();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    verifyOTP();
+                }
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = e.clipboardData.getData('text').slice(0, 6);
+                if (/^\d+$/.test(pasteData)) {
+                    pasteData.split('').forEach((char, i) => {
+                        if (otpInputs[i]) {
+                            otpInputs[i].value = char;
+                        }
+                    });
+                    otpInputs[Math.min(pasteData.length - 1, 5)].focus();
+                    updateOTPValue();
+                }
+            });
+        });
+
+        function updateOTPValue() {
+            otpValueInput.value = Array.from(otpInputs).map(input => input.value).join('');
+        }
+
+        // Verify OTP
+        otpForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            verifyOTP();
+        });
+
+        async function verifyOTP() {
+            const email = otpEmailInput.value.trim();
+            const otp = otpValueInput.value;
+
+            if (otp.length !== 6) {
+                showAlert('Please enter complete 6-digit OTP', 'error');
+                return;
+            }
+
+            verifyOtpBtn.disabled = true;
+            verifyOtpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+
+            try {
+                const response = await fetch('/api/auth/otp-login/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/home';
+                    }, 1000);
+                } else {
+                    showAlert(data.message, 'error');
+                    verifyOtpBtn.disabled = false;
+                    verifyOtpBtn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Login';
+                    
+                    if (data.message.includes('expired') || data.message.includes('Maximum attempts')) {
+                        resendOtpBtn.classList.remove('hidden');
+                    }
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'error');
+                verifyOtpBtn.disabled = false;
+                verifyOtpBtn.innerHTML = '<i class="fas fa-check-circle"></i> Verify & Login';
+            }
+        }
+
+        // Resend OTP
+        resendOtpBtn.addEventListener('click', async () => {
+            const email = otpEmailInput.value.trim();
+            
+            resendOtpBtn.disabled = true;
+            resendOtpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            try {
+                const response = await fetch('/api/auth/otp-login/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('OTP resent successfully! Please check your email.', 'success');
+                    startTimer(data.expiresAt);
+                    resendOtpBtn.classList.add('hidden');
+                    
+                    // Clear OTP inputs
+                    otpInputs.forEach(input => input.value = '');
+                    otpValueInput.value = '';
+                    otpInputs[0].focus();
+                } else {
+                    showAlert(data.message, 'error');
+                    resendOtpBtn.disabled = false;
+                    resendOtpBtn.innerHTML = '<i class="fas fa-redo"></i> Resend OTP';
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'error');
+                resendOtpBtn.disabled = false;
+                resendOtpBtn.innerHTML = '<i class="fas fa-redo"></i> Resend OTP';
+            }
+        });
+
+        // Timer
+        function startTimer(expiresAt) {
+            expiryTime = new Date(expiresAt).getTime();
+            updateCountdown();
+            timerInterval = setInterval(updateCountdown, 1000);
+        }
+
+        function updateCountdown() {
+            const now = Date.now();
+            const distance = expiryTime - now;
+
+            if (distance < 0) {
+                clearInterval(timerInterval);
+                countdownSpan.textContent = 'EXPIRED';
+                timerDiv.classList.add('expired');
+                resendOtpBtn.classList.remove('hidden');
+                return;
+            }
+
+            const minutes = Math.floor(distance / 60000);
+            const seconds = Math.floor((distance % 60000) / 1000);
+            countdownSpan.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Pre-fill email from URL if available
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailFromUrl = urlParams.get('email');
+        if (emailFromUrl) {
+            emailInput.value = emailFromUrl;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Details — Shri Govind Pharmacy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1c8125;
+            --primary-dark: #145a1a;
+            --secondary: #e67e22;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #2d2d2d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { border: 2px solid var(--border); background: transparent; }
+        .btn-success { background: var(--success); color: white; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--text-muted); font-weight: 500; }
+        .info-value { font-weight: 600; }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        .status-badge.delivered { background: #d4edda; color: #155724; }
+        .status-badge.in_transit { background: #cce5ff; color: #004085; }
+        .status-badge.out_for_delivery { background: #d6d8d9; color: #1b1e21; }
+        .status-badge.pending_assignment { background: #f8d7da; color: #721c24; }
+        .status-badge.assigned { background: #fff3cd; color: #856404; }
+        
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+            border-left: 2px solid var(--border);
+            padding-left: 20px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+        .timeline-item:last-child { border-left: none; }
+        .timeline-time { font-size: 12px; color: var(--text-muted); }
+        .timeline-status { font-weight: 600; margin: 4px 0; }
+        .timeline-notes { font-size: 13px; color: var(--text-muted); }
+        
+        .qr-section {
+            text-align: center;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 15px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .flash.success { background: #d4edda; color: #155724; }
+        .flash.error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <% if (locals.success && locals.success.length > 0) { %>
+            <div class="flash-messages">
+                <div class="flash success"><%= success %></div>
+            </div>
+        <% } %>
+        <% if (locals.error && locals.error.length > 0) { %>
+            <div class="flash-messages">
+                <div class="flash error"><%= error %></div>
+            </div>
+        <% } %>
+
+        <div class="header">
+            <div>
+                <h1 style="color: var(--primary);">Delivery Details</h1>
+                <p style="color: var(--text-muted);">QR: <code><%= delivery.qrCode %></code></p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode" style="background: transparent; border: 2px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; color: var(--text);">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+                <a href="/admin/delivery/<%= delivery._id %>/label" class="btn btn-outline" target="_blank">
+                    <i class="fas fa-print"></i> Print Label
+                </a>
+                <a href="/admin/deliveries" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-info-circle"></i> Delivery Information</h3>
+                <div class="info-row">
+                    <span class="info-label">Order ID</span>
+                    <span class="info-value"><%= delivery.order?.tracking?.orderId || 'N/A' %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status</span>
+                    <span class="status-badge <%= delivery.status %>"><%= delivery.status.replace(/_/g, ' ') %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Priority</span>
+                    <span class="info-value"><%= delivery.priority %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Assigned To</span>
+                    <span class="info-value"><%= delivery.assignedTo?.name || 'Unassigned' %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Shipping Partner</span>
+                    <span class="info-value"><%= delivery.shippingPartner?.name || 'Not assigned' %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Estimated Delivery</span>
+                    <span class="info-value"><%= delivery.estimatedDelivery ? new Date(delivery.estimatedDelivery).toLocaleString() : 'Not set' %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">COD Amount</span>
+                    <span class="info-value"><%= delivery.codAmount > 0 ? '₹' + delivery.codAmount : 'Not COD' %></span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-map-marker-alt"></i> Delivery Address</h3>
+                <div style="line-height: 1.8;">
+                    <strong><%= delivery.deliveryAddress?.fullName || 'N/A' %></strong><br>
+                    <%= delivery.deliveryAddress?.address || '' %><br>
+                    <%= delivery.deliveryAddress?.city %>, <%= delivery.deliveryAddress?.state %> <%= delivery.deliveryAddress?.pincode %><br>
+                    <i class="fas fa-phone"></i> <%= delivery.deliveryAddress?.phone || 'N/A' %><br>
+                    <% if (delivery.deliveryAddress?.landmark) { %>
+                        <i class="fas fa-landmark"></i> Landmark: <%= delivery.deliveryAddress.landmark %>
+                    <% } %>
+                </div>
+                
+                <% if (delivery.instructions) { %>
+                    <div style="margin-top: 15px; padding: 12px; background: #fff3cd; border-radius: 6px;">
+                        <strong><i class="fas fa-exclamation-triangle"></i> Instructions:</strong>
+                        <%= delivery.instructions %>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-qrcode"></i> QR Code</h3>
+                <div class="qr-section">
+                    <img src="<%= qrLabel.qrCodeUrl %>" alt="QR Code" class="qr-code" style="object-fit: contain;">
+                    <p style="font-size: 12px; color: var(--text-muted);">Scan to verify delivery</p>
+                    <a href="/admin/delivery/qr/<%= delivery.qrCode %>" class="btn btn-primary" style="margin-top: 10px;">
+                        <i class="fas fa-download"></i> Download QR
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-tasks"></i> Quick Actions</h3>
+                
+                <% if (delivery.status === 'pending_assignment') { %>
+                    <form action="/admin/delivery/<%= delivery._id %>/assign" method="POST" style="margin-bottom: 15px;">
+                        <div class="form-group">
+                            <label>Assign to Agent</label>
+                            <select name="agentId" class="form-control" required>
+                                <option value="">Select Agent</option>
+                                <% agents.forEach(agent => { %>
+                                    <option value="<%= agent._id %>"><%= agent.name %> (<%= agent.employeeId %>)</option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <textarea name="notes" class="form-control" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-user-check"></i> Assign Agent
+                        </button>
+                    </form>
+                    <form action="/admin/delivery/<%= delivery._id %>/auto-assign" method="POST">
+                        <button type="submit" class="btn btn-outline" style="width: 100%;">
+                            <i class="fas fa-magic"></i> Auto Assign
+                        </button>
+                    </form>
+                <% } %>
+
+                <% if (delivery.assignedTo && ['assigned', 'picked_up', 'in_transit'].includes(delivery.status)) { %>
+                    <form action="/admin/delivery/<%= delivery._id %>/status" method="POST">
+                        <div class="form-group">
+                            <label>Update Status</label>
+                            <select name="status" class="form-control" required>
+                                <option value="">Select Status</option>
+                                <option value="picked_up">Picked Up</option>
+                                <option value="in_transit">In Transit</option>
+                                <option value="out_for_delivery">Out for Delivery</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="failed_attempt">Failed Attempt</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <textarea name="notes" class="form-control" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success" style="width: 100%;">
+                            <i class="fas fa-check"></i> Update Status
+                        </button>
+                    </form>
+                <% } %>
+
+                <% if (delivery.status !== 'delivered' && delivery.status !== 'cancelled') { %>
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border);">
+                    <form action="/admin/delivery/<%= delivery._id %>/cancel" method="POST" onsubmit="return confirm('Are you sure you want to cancel this delivery?');">
+                        <div class="form-group">
+                            <label>Cancellation Reason</label>
+                            <textarea name="reason" class="form-control" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-danger" style="width: 100%;">
+                            <i class="fas fa-times"></i> Cancel Delivery
+                        </button>
+                    </form>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h3 class="card-title"><i class="fas fa-history"></i> Delivery Timeline</h3>
+            <div class="timeline">
+                <% if (delivery.timeline && delivery.timeline.length > 0) { %>
+                    <% delivery.timeline.slice().reverse().forEach(event => { %>
+                        <div class="timeline-item">
+                            <div class="timeline-time"><%= new Date(event.timestamp).toLocaleString() %></div>
+                            <div class="timeline-status"><%= event.status.replace(/_/g, ' ') %></div>
+                            <% if (event.notes) { %>
+                                <div class="timeline-notes"><%= event.notes %></div>
+                            <% } %>
+                            <% if (event.location) { %>
+                                <div class="timeline-notes"><i class="fas fa-map-marker-alt"></i> <%= event.location %></div>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p style="color: var(--text-muted); text-align: center; padding: 20px;">No timeline events</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme.js"></script>
+</body>
+</html>

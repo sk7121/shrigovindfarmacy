@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Delivery Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1c8125; --primary-dark: #145a1a; --secondary: #e67e22;
+            --bg: #f8f9fa; --surface: #ffffff; --text: #1a1a1a;
+            --text-muted: #6c757d; --border: #e9ecef;
+            --success: #28a745; --danger: #dc3545; --warning: #ffc107;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #121212; --surface: #1e1e1e; --text: #e0e0e0;
+            --text-muted: #a0a0a0; --border: #2d2d2d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
+
+        .edit-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .flash {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .flash.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flash.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .flash.warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group input[readonly] {
+            background: var(--bg);
+            cursor: not-allowed;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--border);
+            background: transparent;
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+
+        .info-box p {
+            font-size: 13px;
+            color: #856404;
+            line-height: 1.6;
+        }
+
+        .info-box i {
+            margin-right: 8px;
+        }
+
+        .document-upload {
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .document-upload.has-file {
+            border-color: var(--success);
+            background: #f0f9f0;
+        }
+
+        .document-upload label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .current-file {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .current-file a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.pending { background: #fff3cd; color: #856404; }
+        .status-badge.verified { background: #d4edda; color: #155724; }
+        .status-badge.rejected { background: #f8d7da; color: #721c24; }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .edit-container {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="edit-container">
+        <div class="header">
+            <h1><i class="fas fa-user-edit"></i> Edit Profile</h1>
+            <p>Update your information. Changes will require admin verification.</p>
+        </div>
+
+        <% if (locals.success && locals.success.length > 0) { %>
+            <div class="flash success"><%= success %></div>
+        <% } %>
+        <% if (locals.error && locals.error.length > 0) { %>
+            <div class="flash error"><%= error %></div>
+        <% } %>
+
+        <div class="info-box">
+            <p>
+                <i class="fas fa-info-circle"></i>
+                <strong>Note:</strong> After updating your profile, your changes will be reviewed by our admin team.
+                Some features may be limited until your changes are verified. This usually takes 24-48 hours.
+            </p>
+        </div>
+
+        <form action="/agent/profile/edit" method="POST" enctype="multipart/form-data">
+            <!-- Personal Information -->
+            <div class="form-section">
+                <h2 class="section-title"><i class="fas fa-user"></i> Personal Information</h2>
+
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Full Name</label>
+                    <input type="text" name="name" value="<%= agent.name %>" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email Address</label>
+                        <input type="email" name="email" value="<%= agent.email %>" readonly>
+                        <small style="color: var(--text-muted);">Email cannot be changed</small>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Phone Number</label>
+                        <input type="tel" name="phone" value="<%= agent.phone %>" pattern="[6-9][0-9]{9}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-id-card"></i> Employee ID</label>
+                    <input type="text" value="<%= agent.employeeId || 'Pending' %>" readonly>
+                </div>
+            </div>
+
+            <!-- Vehicle Information -->
+            <div class="form-section">
+                <h2 class="section-title"><i class="fas fa-motorcycle"></i> Vehicle Information</h2>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-motorcycle"></i> Vehicle Type</label>
+                        <select name="vehicleType" required>
+                            <option value="bike" <%= agent.vehicleType === 'bike' ? 'selected' : '' %>>Motorcycle</option>
+                            <option value="scooter" <%= agent.vehicleType === 'scooter' ? 'selected' : '' %>>Scooter</option>
+                            <option value="cycle" <%= agent.vehicleType === 'cycle' ? 'selected' : '' %>>Bicycle</option>
+                            <option value="car" <%= agent.vehicleType === 'car' ? 'selected' : '' %>>Car</option>
+                            <option value="van" <%= agent.vehicleType === 'van' ? 'selected' : '' %>>Van</option>
+                            <option value="truck" <%= agent.vehicleType === 'truck' ? 'selected' : '' %>>Truck</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-id-card"></i> Vehicle Number</label>
+                        <input type="text" name="vehicleNumber" value="<%= agent.vehicleNumber || '' %>" required style="text-transform: uppercase;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="form-section">
+                <h2 class="section-title"><i class="fas fa-map-marker-alt"></i> Address & Coverage</h2>
+
+                <div class="form-group">
+                    <label><i class="fas fa-home"></i> Street Address</label>
+                    <input type="text" name="address.street" value="<%= agent.address?.street || '' %>" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-city"></i> City</label>
+                        <input type="text" name="address.city" value="<%= agent.address?.city || '' %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-map"></i> State</label>
+                        <input type="text" name="address.state" value="<%= agent.address?.state || '' %>" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-mail-bulk"></i> Pincode</label>
+                    <input type="text" name="address.pincode" value="<%= agent.address?.pincode || '' %>" pattern="[0-9]{6}" required>
+                </div>
+            </div>
+
+            <!-- ID Documents -->
+            <div class="form-section">
+                <h2 class="section-title"><i class="fas fa-id-card"></i> Identity Documents</h2>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-address-card"></i> Aadhar Number</label>
+                        <input type="text" name="aadharNumber" value="<%= agent.aadharNumber || '' %>" placeholder="XXXX-XXXX-XXXX">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-id-card"></i> PAN Number</label>
+                        <input type="text" name="panNumber" value="<%= agent.panNumber || '' %>" placeholder="ABCDE1234F" style="text-transform: uppercase;">
+                    </div>
+                </div>
+
+                <!-- Aadhar Card Upload -->
+                <div class="document-upload <%= agent.aadharImage ? 'has-file' : '' %>">
+                    <label>
+                        <span><i class="fas fa-address-card"></i> Aadhar Card Image</span>
+                        <% if (agent.aadharImage) { %>
+                            <span class="status-badge verified"><i class="fas fa-check"></i> Uploaded</span>
+                        <% } else { %>
+                            <span class="status-badge pending"><i class="fas fa-clock"></i> Not Uploaded</span>
+                        <% } %>
+                    </label>
+                    <input type="file" name="aadharImage" accept="image/*,.pdf">
+                    <% if (agent.aadharImage) { %>
+                        <div class="current-file">
+                            <i class="fas fa-file"></i>
+                            <a href="<%= agent.aadharImage %>" target="_blank">View Current Document</a>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- PAN Card Upload -->
+                <div class="document-upload <%= agent.panImage ? 'has-file' : '' %>">
+                    <label>
+                        <span><i class="fas fa-id-card"></i> PAN Card Image</span>
+                        <% if (agent.panImage) { %>
+                            <span class="status-badge verified"><i class="fas fa-check"></i> Uploaded</span>
+                        <% } else { %>
+                            <span class="status-badge pending"><i class="fas fa-clock"></i> Not Uploaded</span>
+                        <% } %>
+                    </label>
+                    <input type="file" name="panImage" accept="image/*,.pdf">
+                    <% if (agent.panImage) { %>
+                        <div class="current-file">
+                            <i class="fas fa-file"></i>
+                            <a href="<%= agent.panImage %>" target="_blank">View Current Document</a>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Driving License Upload -->
+                <div class="document-upload <%= agent.drivingLicense && agent.drivingLicense.startsWith('http') ? 'has-file' : '' %>">
+                    <label>
+                        <span><i class="fas fa-id-badge"></i> Driving License</span>
+                        <% if (agent.drivingLicense && agent.drivingLicense.startsWith('http')) { %>
+                            <span class="status-badge verified"><i class="fas fa-check"></i> Uploaded</span>
+                        <% } else { %>
+                            <span class="status-badge pending"><i class="fas fa-clock"></i> Not Uploaded</span>
+                        <% } %>
+                    </label>
+                    <input type="file" name="drivingLicense" accept="image/*,.pdf">
+                    <% if (agent.drivingLicense && agent.drivingLicense.startsWith('http')) { %>
+                        <div class="current-file">
+                            <i class="fas fa-file"></i>
+                            <a href="<%= agent.drivingLicense %>" target="_blank">View Current Document</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Vehicle Documents -->
+            <div class="form-section">
+                <h2 class="section-title"><i class="fas fa-file-alt"></i> Vehicle Documents</h2>
+
+                <!-- Vehicle RC Upload -->
+                <div class="document-upload <%= agent.vehicleRC ? 'has-file' : '' %>">
+                    <label>
+                        <span><i class="fas fa-file-alt"></i> Vehicle Registration Certificate (RC)</span>
+                        <% if (agent.vehicleRC) { %>
+                            <span class="status-badge verified"><i class="fas fa-check"></i> Uploaded</span>
+                        <% } else { %>
+                            <span class="status-badge pending"><i class="fas fa-clock"></i> Not Uploaded</span>
+                        <% } %>
+                    </label>
+                    <input type="file" name="vehicleRC" accept="image/*,.pdf">
+                    <% if (agent.vehicleRC) { %>
+                        <div class="current-file">
+                            <i class="fas fa-file"></i>
+                            <a href="<%= agent.vehicleRC %>" target="_blank">View Current Document</a>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Vehicle Insurance Upload -->
+                <div class="document-upload <%= agent.vehicleInsurance ? 'has-file' : '' %>">
+                    <label>
+                        <span><i class="fas fa-file-contract"></i> Vehicle Insurance</span>
+                        <% if (agent.vehicleInsurance) { %>
+                            <span class="status-badge verified"><i class="fas fa-check"></i> Uploaded</span>
+                        <% } else { %>
+                            <span class="status-badge pending"><i class="fas fa-clock"></i> Not Uploaded</span>
+                        <% } %>
+                    </label>
+                    <input type="file" name="vehicleInsurance" accept="image/*,.pdf">
+                    <% if (agent.vehicleInsurance) { %>
+                        <div class="current-file">
+                            <i class="fas fa-file"></i>
+                            <a href="<%= agent.vehicleInsurance %>" target="_blank">View Current Document</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Bank Details -->
+            <div class="form-section">
+                <h2 class="section-title"><i class="fas fa-university"></i> Bank Details (For Payment)</h2>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Account Holder Name</label>
+                        <input type="text" name="bankDetails.accountHolderName" value="<%= agent.bankDetails?.accountHolderName || '' %>">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-hashtag"></i> Account Number</label>
+                        <input type="text" name="bankDetails.accountNumber" value="<%= agent.bankDetails?.accountNumber || '' %>">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-building"></i> IFSC Code</label>
+                        <input type="text" name="bankDetails.ifscCode" value="<%= agent.bankDetails?.ifscCode || '' %>" placeholder="e.g., SBIN0001234">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-landmark"></i> Bank Name</label>
+                        <input type="text" name="bankDetails.bankName" value="<%= agent.bankDetails?.bankName || '' %>">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-mobile-alt"></i> UPI ID (Optional)</label>
+                    <input type="text" name="bankDetails.upiId" value="<%= agent.bankDetails?.upiId || '' %>" placeholder="yourname@upi">
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-save"></i> Save Changes & Submit for Verification
+                </button>
+            </div>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="/agent/profile" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Profile
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Auto-format Aadhar number
+        document.querySelector('input[name="aadharNumber"]')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            if (value.length > 4) {
+                value = value.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+            }
+            e.target.value = value;
+        });
+
+        // Auto-format PAN number
+        document.querySelector('input[name="panNumber"]')?.addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // Auto-format vehicle number
+        document.querySelector('input[name="vehicleNumber"]')?.addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // Show file name when selected
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const fileName = this.files[0]?.name;
+                if (fileName) {
+                    const label = this.closest('.document-upload').querySelector('label span:first-child');
+                    const existingBadge = this.closest('.document-upload').querySelector('.status-badge');
+                    if (existingBadge) {
+                        existingBadge.remove();
+                    }
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'status-badge verified';
+                    newBadge.innerHTML = '<i class="fas fa-check"></i> ' + fileName;
+                    label.parentElement.appendChild(newBadge);
+                }
+            });
+        });
+    </script>
+    <script src="/js/theme.js"></script>
+</body>
+</html>

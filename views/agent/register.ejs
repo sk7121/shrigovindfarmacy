@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Agent Registration — Shri Govind Pharmacy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1c8125; --primary-dark: #145a1a; --secondary: #e67e22;
+            --bg: #f8f9fa; --surface: #ffffff; --text: #1a1a1a;
+            --text-muted: #6c757d; --border: #e9ecef;
+            --success: #28a745; --danger: #dc3545; --warning: #ffc107;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #121212; --surface: #1e1e1e; --text: #e0e0e0;
+            --text-muted: #a0a0a0; --border: #2d2d2d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .register-container {
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+        }
+        
+        .flash {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .flash.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flash.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text);
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            background: var(--surface);
+            color: var(--text);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .form-footer p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .info-box p {
+            font-size: 13px;
+            color: #004085;
+            line-height: 1.6;
+        }
+        
+        .info-box i {
+            margin-right: 8px;
+        }
+        
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .register-container {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-motorcycle"></i>
+            </div>
+            <h1>Become a Delivery Partner</h1>
+            <p>Join Shri Govind Pharmacy's delivery network</p>
+        </div>
+
+        <% if (locals.success && locals.success.length > 0) { %>
+            <div class="flash success"><%= success %></div>
+        <% } %>
+        <% if (locals.error && locals.error.length > 0) { %>
+            <div class="flash error"><%= error %></div>
+        <% } %>
+
+        <div class="info-box">
+            <p><i class="fas fa-info-circle"></i>
+                <strong>Note:</strong> After registration, your account will be reviewed by our admin team.
+                You will receive a notification once your account is approved. This usually takes 24-48 hours.
+            </p>
+            <p style="margin-top: 10px;">
+                <i class="fas fa-upload"></i>
+                <strong>Document Upload:</strong> Upload your ID proofs below (Aadhar, PAN, Driving License).
+                All documents are optional but will speed up the approval process.
+            </p>
+        </div>
+
+        <form action="/agent/register" method="POST" enctype="multipart/form-data">
+            <!-- Personal Information -->
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Full Name</label>
+                <input type="text" name="name" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" name="email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> Phone Number</label>
+                    <input type="tel" name="phone" placeholder="9876543210" pattern="[6-9][0-9]{9}" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" name="password" placeholder="Min 6 characters" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Confirm Password</label>
+                    <input type="password" name="confirmPassword" placeholder="Re-enter password" required>
+                </div>
+            </div>
+
+            <!-- Vehicle Information -->
+            <div class="form-group">
+                <label><i class="fas fa-motorcycle"></i> Vehicle Type</label>
+                <select name="vehicleType" required>
+                    <option value="">Select your vehicle</option>
+                    <option value="bike">Motorcycle</option>
+                    <option value="scooter">Scooter</option>
+                    <option value="cycle">Bicycle</option>
+                    <option value="car">Car</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-id-card"></i> Vehicle Number</label>
+                <input type="text" name="vehicleNumber" placeholder="e.g., MH12AB1234" required style="text-transform: uppercase;">
+            </div>
+
+            <!-- Address -->
+            <div class="form-group">
+                <label><i class="fas fa-map-marker-alt"></i> Address</label>
+                <input type="text" name="address" placeholder="Street address, area" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-city"></i> City</label>
+                    <input type="text" name="city" placeholder="City" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-map"></i> State</label>
+                    <input type="text" name="state" placeholder="State" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-mail-bulk"></i> Pincode</label>
+                <input type="text" name="pincode" placeholder="6-digit pincode" pattern="[0-9]{6}" required>
+            </div>
+
+            <!-- Document Upload Section -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 3px solid var(--primary);">
+                <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 18px;">
+                    <i class="fas fa-upload"></i> Upload Documents (Optional but Recommended)
+                </h3>
+                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                    Upload clear images or PDFs of your documents. Maximum 5MB per file.
+                    Uploading documents will speed up your approval process.
+                </p>
+
+                <!-- Profile Image -->
+                <div class="form-group" style="padding: 15px; border: 2px solid var(--primary); border-radius: 8px; margin-bottom: 15px; background: #f0f9f0;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">
+                        <i class="fas fa-user-circle"></i> Profile Picture
+                        <span style="float: right; font-weight: 400; font-size: 12px; color: var(--text-muted);">Optional</span>
+                    </label>
+                    <input type="file" name="profileImage" accept="image/*" style="width: 100%; padding: 10px; border: 2px dashed var(--border); border-radius: 8px;">
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+                        <i class="fas fa-info-circle"></i> Upload a clear photo of yourself (JPG, PNG). Max 5MB.
+                    </p>
+                </div>
+
+                <!-- Aadhar Number -->
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">
+                        <i class="fas fa-address-card"></i> Aadhar Number
+                        <span style="float: right; font-weight: 400; font-size: 12px; color: var(--text-muted);">Optional</span>
+                    </label>
+                    <input type="text" name="aadharNumber" placeholder="XXXX-XXXX-XXXX" style="width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px;">
+                </div>
+
+                <!-- PAN Number -->
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">
+                        <i class="fas fa-id-card"></i> PAN Number
+                        <span style="float: right; font-weight: 400; font-size: 12px; color: var(--text-muted);">Optional</span>
+                    </label>
+                    <input type="text" name="panNumber" placeholder="ABCDE1234F" style="width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px; text-transform: uppercase;">
+                </div>
+
+                <!-- Aadhar Card -->
+                <div class="form-group" style="padding: 15px; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">
+                        <i class="fas fa-address-card"></i> Aadhar Card
+                        <span style="float: right; font-weight: 400; font-size: 12px; color: var(--text-muted);">Optional</span>
+                    </label>
+                    <input type="file" name="aadharImage" accept="image/*,.pdf" style="width: 100%; padding: 10px; border: 2px dashed var(--border); border-radius: 8px;">
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+                        <i class="fas fa-info-circle"></i> Upload front side of Aadhar card
+                    </p>
+                </div>
+
+                <!-- PAN Card -->
+                <div class="form-group" style="padding: 15px; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">
+                        <i class="fas fa-id-card"></i> PAN Card
+                        <span style="float: right; font-weight: 400; font-size: 12px; color: var(--text-muted);">Optional</span>
+                    </label>
+                    <input type="file" name="panImage" accept="image/*,.pdf" style="width: 100%; padding: 10px; border: 2px dashed var(--border); border-radius: 8px;">
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+                        <i class="fas fa-info-circle"></i> Upload clear image of PAN card
+                    </p>
+                </div>
+
+                <!-- Driving License -->
+                <div class="form-group" style="padding: 15px; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">
+                        <i class="fas fa-id-badge"></i> Driving License
+                        <span style="float: right; font-weight: 400; font-size: 12px; color: var(--text-muted);">Optional</span>
+                    </label>
+                    <input type="file" name="drivingLicense" accept="image/*,.pdf" style="width: 100%; padding: 10px; border: 2px dashed var(--border); border-radius: 8px;">
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+                        <i class="fas fa-info-circle"></i> Upload both sides if possible
+                    </p>
+                </div>
+
+                <!-- Vehicle RC -->
+                <div class="form-group" style="padding: 15px; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">
+                        <i class="fas fa-file-alt"></i> Vehicle Registration Certificate (RC)
+                        <span style="float: right; font-weight: 400; font-size: 12px; color: var(--text-muted);">Optional</span>
+                    </label>
+                    <input type="file" name="vehicleRC" accept="image/*,.pdf" style="width: 100%; padding: 10px; border: 2px dashed var(--border); border-radius: 8px;">
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+                        <i class="fas fa-info-circle"></i> Upload vehicle RC document
+                    </p>
+                </div>
+
+                <!-- Vehicle Insurance -->
+                <div class="form-group" style="padding: 15px; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">
+                        <i class="fas fa-file-contract"></i> Vehicle Insurance
+                        <span style="float: right; font-weight: 400; font-size: 12px; color: var(--text-muted);">Optional</span>
+                    </label>
+                    <input type="file" name="vehicleInsurance" accept="image/*,.pdf" style="width: 100%; padding: 10px; border: 2px dashed var(--border); border-radius: 8px;">
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+                        <i class="fas fa-info-circle"></i> Upload valid insurance document
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bank Details Section -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 3px solid var(--primary);">
+                <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 18px;">
+                    <i class="fas fa-university"></i> Bank Details (For Payment)
+                </h3>
+                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                    Enter your bank account details to receive payments. This information can be updated later.
+                </p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Account Holder Name</label>
+                        <input type="text" name="bankDetails.accountHolderName" placeholder="e.g., John Doe" style="width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px;">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-hashtag"></i> Account Number</label>
+                        <input type="text" name="bankDetails.accountNumber" placeholder="Enter account number" style="width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px;">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-building"></i> IFSC Code</label>
+                        <input type="text" name="bankDetails.ifscCode" placeholder="e.g., SBIN0001234" style="width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-landmark"></i> Bank Name</label>
+                        <input type="text" name="bankDetails.bankName" placeholder="e.g., State Bank of India" style="width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-mobile-alt"></i> UPI ID (Optional)</label>
+                    <input type="text" name="bankDetails.upiId" placeholder="e.g., yourname@upi" style="width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px;">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Register Now
+            </button>
+        </form>
+
+        <div class="form-footer">
+            <p>Already have an account?</p>
+            <a href="/agent/login"><i class="fas fa-sign-in-alt"></i> Login Here</a>
+        </div>
+
+        <div class="form-footer" style="border: none; padding-top: 0;">
+            <p style="font-size: 12px;">
+                <a href="/home" style="color: var(--text-muted);"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Auto-format Aadhar number
+        const aadharInput = document.querySelector('input[name="aadharNumber"]');
+        if (aadharInput) {
+            aadharInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9]/g, '');
+                if (value.length > 4) {
+                    value = value.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+                }
+                e.target.value = value;
+            });
+        }
+
+        // Auto-format PAN number
+        const panInput = document.querySelector('input[name="panNumber"]');
+        if (panInput) {
+            panInput.addEventListener('input', function(e) {
+                e.target.value = e.target.value.toUpperCase();
+            });
+        }
+
+        // Auto-format vehicle number
+        const vehicleInput = document.querySelector('input[name="vehicleNumber"]');
+        if (vehicleInput) {
+            vehicleInput.addEventListener('input', function(e) {
+                e.target.value = e.target.value.toUpperCase();
+            });
+        }
+
+        // Auto-format IFSC code
+        const ifscInput = document.querySelector('input[name="bankDetails.ifscCode"]');
+        if (ifscInput) {
+            ifscInput.addEventListener('input', function(e) {
+                e.target.value = e.target.value.toUpperCase();
+            });
+        }
+    </script>
+
+    <script src="/js/theme.js"></script>
+</body>
+</html>

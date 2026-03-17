@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cancellation Request <%= request.trackingId %> — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root { --primary: #1c8125; --primary-dark: #145a1a; --bg: #f8f9fa; --surface: #ffffff; --text: #1a1a1a; --text-muted: #6c757d; --border: #e9ecef; --shadow: 0 2px 8px rgba(0,0,0,0.08); --success: #28a745; --warning: #ffc107; --danger: #dc3545; }
+    [data-theme="dark"] { --bg: #121212; --surface: #1e1e1e; --text: #e0e0e0; --text-muted: #a0a0a0; --border: #2d2d2d; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .admin-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 0; }
+    .header-inner { max-width: 1400px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--text); }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; }
+
+    .main-content { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
+    .breadcrumb { display: flex; gap: 0.5rem; font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+
+    .request-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .request-title { font-size: 1.75rem; font-weight: 700; }
+    .status-badge { padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
+    .status-pending { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+    .status-approved { background: rgba(52, 152, 219, 0.1); color: #3498db; }
+    .status-assigned, .status-otp_generated { background: rgba(52, 152, 219, 0.1); color: #3498db; }
+    .status-picked_up { background: rgba(40, 167, 69, 0.1); color: #28a745; }
+    .status-refunded { background: rgba(40, 167, 69, 0.1); color: #28a745; }
+    .status-rejected { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+
+    .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+    .card { background: var(--surface); border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow); }
+    .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+
+    .info-row { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-weight: 600; color: var(--text-muted); }
+    .info-value { text-align: right; }
+
+    .items-list { display: flex; flex-direction: column; gap: 1rem; }
+    .item { display: flex; gap: 1rem; padding: 1rem; background: var(--bg); border-radius: 8px; }
+    .item-image { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+    .item-details { flex: 1; }
+    .item-name { font-weight: 600; margin-bottom: 0.25rem; }
+    .item-meta { font-size: 0.875rem; color: var(--text-muted); }
+
+    .actions { display: flex; flex-direction: column; gap: 1rem; }
+    .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-align: center; }
+    .btn-approve { background: var(--success); color: white; }
+    .btn-reject { background: var(--danger); color: white; }
+    .btn-assign { background: #3498db; color: white; }
+    .btn-refund { background: var(--primary); color: white; }
+
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before { content: ''; position: absolute; left: 1rem; top: 0; bottom: 0; width: 2px; background: var(--border); }
+    .timeline-item { position: relative; padding: 1rem 0; }
+    .timeline-item::before { content: ''; position: absolute; left: -2rem; top: 1.5rem; width: 12px; height: 12px; border-radius: 50%; background: var(--primary); border: 3px solid var(--surface); }
+    .timeline-item.completed::before { background: var(--success); }
+    .timeline-time { font-size: 0.875rem; color: var(--text-muted); }
+    .timeline-title { font-weight: 600; margin: 0.25rem 0; }
+    .timeline-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .request-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+      .main-content { padding: 0 1rem; }
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+  <div class="admin-header">
+    <div class="header-inner">
+      <a href="/admin" class="logo">
+        <div class="logo-icon"><i class="fas fa-cog"></i></div>
+        <span>Admin Panel</span>
+      </a>
+      <nav>
+        <a href="/admin/orders">Orders</a>
+        <a href="/admin/cancellations" class="active">Cancellations</a>
+        <a href="/admin/delivery">Delivery</a>
+        <a href="/logout">Logout</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="breadcrumb">
+      <a href="/admin">Admin</a>
+      <i class="fas fa-chevron-right"></i>
+      <a href="/admin/cancellations">Cancellations</a>
+      <i class="fas fa-chevron-right"></i>
+      <span><%= request.trackingId %></span>
+    </div>
+
+    <div class="request-header">
+      <h1 class="request-title">Cancellation Request <%= request.trackingId %></h1>
+      <span class="status-badge status-<%= request.status %>"><%= request.status.replace('_', ' ').toUpperCase() %></span>
+    </div>
+
+    <div class="grid">
+      <div>
+        <div class="card">
+          <h2 class="card-title">Request Details</h2>
+          <div class="info-row">
+            <span class="info-label">Order ID</span>
+            <span class="info-value"><%= request.order.tracking?.orderId || request.order._id %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Customer</span>
+            <span class="info-value"><%= request.user.name %> (<%= request.user.email %>)</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Reason</span>
+            <span class="info-value"><%= request.reason.replace('_', ' ') %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Refund Amount</span>
+            <span class="info-value">₹<%= request.refundAmount %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Request Date</span>
+            <span class="info-value"><%= new Date(request.createdAt).toLocaleDateString() %></span>
+          </div>
+          <% if (request.assignedAgent) { %>
+          <div class="info-row">
+            <span class="info-label">Assigned Agent</span>
+            <span class="info-value"><%= request.assignedAgent.name %> (<%= request.assignedAgent.phone %>)</span>
+          </div>
+          <% } %>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Description</h2>
+          <p><%= request.description %></p>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Items to Cancel</h2>
+          <div class="items-list">
+            <% request.items.forEach(item => { %>
+            <div class="item">
+              <img src="<%= item.image || 'https://via.placeholder.com/60' %>" alt="<%= item.name %>" class="item-image">
+              <div class="item-details">
+                <div class="item-name"><%= item.name %></div>
+                <div class="item-meta">Qty: <%= item.quantity %> × ₹<%= item.price %></div>
+              </div>
+              <div class="item-price">₹<%= item.subtotal %></div>
+            </div>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Pickup Address</h2>
+          <div style="line-height: 1.6;">
+            <strong><%= request.pickupAddress.fullName %></strong><br>
+            <%= request.pickupAddress.address %><br>
+            <%= request.pickupAddress.city %>, <%= request.pickupAddress.state %> - <%= request.pickupAddress.pincode %><br>
+            Phone: <%= request.pickupAddress.phone %>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h2 class="card-title">Actions</h2>
+          <div class="actions">
+            <% if (request.status === 'pending') { %>
+              <button class="btn btn-approve" onclick="updateStatus('approved')">Approve Request</button>
+              <button class="btn btn-reject" onclick="rejectRequest()">Reject Request</button>
+            <% } else if (request.status === 'approved') { %>
+              <button class="btn btn-assign" onclick="assignAgent()">Assign Agent</button>
+            <% } else if (request.status === 'picked_up') { %>
+              <button class="btn btn-refund" onclick="processRefund()">Process Refund</button>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Timeline</h2>
+          <div class="timeline">
+            <div class="timeline-item completed">
+              <div class="timeline-time"><%= new Date(request.createdAt).toLocaleString() %></div>
+              <div class="timeline-title">Request Submitted</div>
+              <div class="timeline-desc">Customer submitted cancellation request</div>
+            </div>
+
+            <% if (['approved', 'assigned', 'otp_generated', 'picked_up', 'refunded'].includes(request.status)) { %>
+            <div class="timeline-item completed">
+              <div class="timeline-time"><%= new Date(request.createdAt).toLocaleString() %></div>
+              <div class="timeline-title">Request Approved</div>
+              <div class="timeline-desc">Admin approved the cancellation request</div>
+            </div>
+            <% } %>
+
+            <% if (['assigned', 'otp_generated', 'picked_up', 'refunded'].includes(request.status)) { %>
+            <div class="timeline-item completed">
+              <div class="timeline-time"><%= request.assignedAgent ? new Date().toLocaleString() : '' %></div>
+              <div class="timeline-title">Agent Assigned</div>
+              <div class="timeline-desc">Delivery agent assigned for pickup</div>
+            </div>
+            <% } %>
+
+            <% if (['otp_generated', 'picked_up', 'refunded'].includes(request.status)) { %>
+            <div class="timeline-item completed">
+              <div class="timeline-time"><%= request.cancellationOTP?.generatedAt ? new Date(request.cancellationOTP.generatedAt).toLocaleString() : '' %></div>
+              <div class="timeline-title">OTP Generated</div>
+              <div class="timeline-desc">Pickup OTP sent to delivery agent</div>
+            </div>
+            <% } %>
+
+            <% if (['picked_up', 'refunded'].includes(request.status)) { %>
+            <div class="timeline-item completed">
+              <div class="timeline-time"><%= request.pickedUpAt ? new Date(request.pickedUpAt).toLocaleString() : '' %></div>
+              <div class="timeline-title">Items Picked Up</div>
+              <div class="timeline-desc">Delivery agent verified and picked up items</div>
+            </div>
+            <% } %>
+
+            <% if (request.status === 'refunded') { %>
+            <div class="timeline-item completed">
+              <div class="timeline-time"><%= request.refundedAt ? new Date(request.refundedAt).toLocaleString() : '' %></div>
+              <div class="timeline-title">Refund Processed</div>
+              <div class="timeline-desc">Refund has been processed successfully</div>
+            </div>
+            <% } %>
+
+            <% if (request.status === 'rejected') { %>
+            <div class="timeline-item completed">
+              <div class="timeline-time"><%= new Date().toLocaleString() %></div>
+              <div class="timeline-title">Request Rejected</div>
+              <div class="timeline-desc"><%= request.rejectionReason || 'Request was rejected by admin' %></div>
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function updateStatus(status) {
+      try {
+        const response = await fetch(`/api/cancellations/<%= request._id %>/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          location.reload();
+        } else {
+          alert(result.message);
+        }
+      } catch (error) {
+        console.error('Error updating status:', error);
+        alert('Error updating request status');
+      }
+    }
+
+    async function rejectRequest() {
+      const reason = prompt('Please provide rejection reason:');
+      if (!reason) return;
+
+      try {
+        const response = await fetch(`/api/cancellations/<%= request._id %>/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'rejected', rejectionReason: reason })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          location.reload();
+        } else {
+          alert(result.message);
+        }
+      } catch (error) {
+        console.error('Error rejecting request:', error);
+        alert('Error rejecting request');
+      }
+    }
+
+    async function assignAgent() {
+      const agentId = prompt('Enter Agent ID to assign:');
+      if (!agentId) return;
+
+      try {
+        const response = await fetch(`/api/cancellations/<%= request._id %>/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'assigned', assignedAgent: agentId })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          location.reload();
+        } else {
+          alert(result.message);
+        }
+      } catch (error) {
+        console.error('Error assigning agent:', error);
+        alert('Error assigning agent');
+      }
+    }
+
+    async function processRefund() {
+      if (!confirm('Are you sure you want to process the refund?')) return;
+
+      try {
+        const response = await fetch(`/api/cancellations/<%= request._id %>/refund`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          location.reload();
+        } else {
+          alert(result.message);
+        }
+      } catch (error) {
+        console.error('Error processing refund:', error);
+        alert('Error processing refund');
+      }
+    }
+  </script>
+</body>
+</html>

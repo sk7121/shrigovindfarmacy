@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --secondary: #e67e22;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Toast Notifications */
+    .toast-zone {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .toast {
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 300px;
+      transform: translateX(100%);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-left: 4px solid #28a745;
+    }
+
+    .toast.error {
+      border-left: 4px solid #dc3545;
+    }
+
+    .toast.info {
+      border-left: 4px solid #17a2b8;
+    }
+
+    .toast i {
+      font-size: 1.25rem;
+    }
+
+    .toast.success i {
+      color: #28a745;
+    }
+
+    .toast.error i {
+      color: #dc3545;
+    }
+
+    .toast.info i {
+      color: #17a2b8;
+    }
+
+    @media (max-width: 768px) {
+      .toast-zone {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+      }
+
+      .toast {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+
+    /* Header */
+    .checkout-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .checkout-header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .checkout-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .checkout-logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .checkout-logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .checkout-logo-main {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    .checkout-logo-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .secure-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--success);
+    }
+
+    .secure-badge i {
+      font-size: 1rem;
+    }
+
+    .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text);
+      margin-left: 1rem;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--bg);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Progress Steps */
+    .progress-section {
+      padding: 2rem 0 0;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .progress-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 2rem;
+    }
+
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .progress-steps::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--border);
+      z-index: 0;
+    }
+
+    .progress-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+    }
+
+    .step-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: var(--text-muted);
+      transition: all 0.3s;
+    }
+
+    .progress-step.active .step-circle {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .progress-step.completed .step-circle {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .step-label {
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .progress-step.active .step-label {
+      color: var(--primary);
+    }
+
+    /* Main Content */
+    .checkout-main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      color: var(--primary);
+    }
+
+    .breadcrumb i {
+      font-size: 0.75rem;
+    }
+
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 2rem;
+    }
+
+    /* Left Column */
+    .checkout-left {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .checkout-card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .card-head h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .card-head i {
+      color: var(--primary);
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Form Fields */
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .form-label .required {
+      color: var(--danger);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(28, 129, 37, 0.1);
+    }
+
+    textarea.form-input {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    /* Order Items */
+    .order-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    .item-image {
+      width: 70px;
+      height: 70px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: var(--bg);
+    }
+
+    .item-details {
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .item-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .item-price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .item-qty {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .item-price {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Summary */
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      font-size: 0.95rem;
+    }
+
+    .summary-row.total {
+      border-top: 2px solid var(--border);
+      padding-top: 1rem;
+      margin-top: 0.5rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .summary-row.discount {
+      color: var(--success);
+    }
+
+    /* Payment Methods */
+    .payment-methods {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .payment-option {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .payment-option:hover {
+      border-color: var(--primary);
+      background: rgba(28, 129, 37, 0.05);
+    }
+
+    .payment-option.selected {
+      border-color: var(--primary);
+      background: rgba(28, 129, 37, 0.05);
+    }
+
+    .payment-option input[type="radio"] {
+      display: none;
+    }
+
+    .payment-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--bg);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--text);
+    }
+
+    .payment-svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .phonepe-icon {
+      background: linear-gradient(135deg, #5f259f 0%, #3c186e 100%);
+      color: white;
+    }
+
+    .gpay-icon {
+      background: white;
+    }
+
+    .gpay-icon .payment-svg {
+      color: #4285F4;
+    }
+
+    .razorpay-icon {
+      background: linear-gradient(135deg, #0c2451 0%, #1e3a8a 100%);
+      color: #53a0fd;
+    }
+
+    .payment-label {
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .payment-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Checkout Button */
+    .checkout-btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      transition: all 0.2s;
+    }
+
+    .checkout-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .checkout-btn:disabled {
+      background: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Trust Badges */
+    .trust-badges {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--surface);
+      border-radius: 12px;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .trust-item i {
+      color: var(--primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .checkout-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .checkout-header-inner {
+        padding: 0 1rem;
+      }
+
+      .checkout-main {
+        padding: 0 1rem;
+      }
+
+      .progress-inner {
+        padding: 0 1rem 2rem;
+      }
+
+      .trust-badges {
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+
+  <!-- Header -->
+  <header class="checkout-header">
+    <div class="checkout-header-inner">
+      <a href="/home" class="checkout-logo">
+        <div class="checkout-logo-icon">
+          <i class="fas fa-mortar-pestle"></i>
+        </div>
+        <div class="checkout-logo-text">
+          <span class="checkout-logo-main">Shri Govind</span>
+          <span class="checkout-logo-sub">Pharmacy</span>
+        </div>
+      </a>
+
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark mode">
+          <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+        <div class="secure-badge">
+          <i class="fas fa-lock"></i>
+          <span>Secure Checkout</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Progress Steps -->
+  <section class="progress-section">
+    <div class="progress-inner">
+      <div class="progress-steps">
+        <div class="progress-step completed">
+          <div class="step-circle">
+            <i class="fas fa-check"></i>
+          </div>
+          <div class="step-label">Cart</div>
+        </div>
+        <div class="progress-step active">
+          <div class="step-circle">
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
+          <div class="step-label">Address</div>
+        </div>
+        <div class="progress-step">
+          <div class="step-circle">
+            <i class="fas fa-credit-card"></i>
+          </div>
+          <div class="step-label">Payment</div>
+        </div>
+        <div class="progress-step">
+          <div class="step-circle">
+            <i class="fas fa-check"></i>
+          </div>
+          <div class="step-label">Confirmed</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="checkout-main">
+
+    <div class="breadcrumb">
+      <a href="/home"><i class="fas fa-home"></i> Home</a>
+      <i class="fas fa-chevron-right"></i>
+      <a href="/user/cart">Cart</a>
+      <i class="fas fa-chevron-right"></i>
+      <span>Checkout</span>
+    </div>
+
+    <div class="checkout-grid">
+
+      <!-- Left Column: Forms -->
+      <div class="checkout-left">
+
+        <!-- Shipping Address -->
+        <div class="checkout-card">
+          <div class="card-head">
+            <i class="fas fa-map-marker-alt"></i>
+            <h2>Shipping Address</h2>
+          </div>
+          <div class="card-body">
+            <form id="checkout-form" action="/checkout" method="POST">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="firstName">First Name <span class="required">*</span></label>
+                  <input type="text" id="firstName" name="firstName" class="form-input" required placeholder="Ramesh">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="lastName">Last Name <span class="required">*</span></label>
+                  <input type="text" id="lastName" name="lastName" class="form-input" required placeholder="Sharma">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="email">Email <span class="required">*</span></label>
+                  <input type="email" id="email" name="email" class="form-input" required placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="phone">Phone <span class="required">*</span></label>
+                  <input type="tel" id="phone" name="phone" class="form-input" required placeholder="9876543210" maxlength="10">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="address">Address <span class="required">*</span></label>
+                <textarea id="address" name="address" class="form-input" required placeholder="House no., Street, Area..."></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="city">City <span class="required">*</span></label>
+                  <input type="text" id="city" name="city" class="form-input" required placeholder="Jaipur">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="state">State <span class="required">*</span></label>
+                  <input type="text" id="state" name="state" class="form-input" required placeholder="Rajasthan">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="pincode">PIN Code <span class="required">*</span></label>
+                  <input type="text" id="pincode" name="pincode" class="form-input" required placeholder="302001" maxlength="6">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="landmark">Landmark (Optional)</label>
+                  <input type="text" id="landmark" name="landmark" class="form-input" placeholder="Near...">
+                </div>
+              </div>
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="checkout-card">
+          <div class="card-head">
+            <i class="fas fa-credit-card"></i>
+            <h2>Payment Method</h2>
+          </div>
+          <div class="card-body">
+            <div class="payment-methods">
+              <label class="payment-option selected">
+                <input type="radio" name="payment" value="cod" checked>
+                <div class="payment-icon">
+                  <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div>
+                  <div class="payment-label">Cash on Delivery</div>
+                  <div class="payment-sub">Pay when you receive</div>
+                </div>
+              </label>
+
+              <label class="payment-option">
+                <input type="radio" name="payment" value="phonepe">
+                <div class="payment-icon phonepe-icon">
+                  <svg viewBox="0 0 24 24" class="payment-svg">
+                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.12 2.34 1.87 0 .56-.39 1.39-1.93 1.39-1.43 0-2.13-.72-2.25-1.84H8.29c.09 1.63 1.05 2.69 2.61 3.04V19h2.2v-1.69c1.55-.29 2.76-1.16 2.76-2.91 0-1.9-1.61-2.73-3.55-3.26z" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="payment-label">PhonePe</div>
+                  <div class="payment-sub">Fast & secure UPI</div>
+                </div>
+              </label>
+
+              <label class="payment-option">
+                <input type="radio" name="payment" value="googlepay">
+                <div class="payment-icon gpay-icon">
+                  <svg viewBox="0 0 24 24" class="payment-svg">
+                    <path fill="currentColor" d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S14.86 2 12.2 2C6.73 2 2 6.73 2 12s4.73 10 10 10c5.1 0 8.8-3.6 8.8-8.8 0-.5-.05-.88-.05-.88zM12 5.5c1.5 0 2.5.5 2.5.5l1.1-1.1S14.5 4 12 4C7.6 4 4 7.6 4 12s3.6 8 8 8c2.5 0 4.1-1.1 4.1-1.1l-1.1-1.1s-1 .5-2.5.5c-3.3 0-5.5-2.7-5.5-6.3S9.3 5.5 12 5.5z" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="payment-label">Google Pay</div>
+                  <div class="payment-sub">Quick UPI payment</div>
+                </div>
+              </label>
+
+              <label class="payment-option">
+                <input type="radio" name="payment" value="razorpay">
+                <div class="payment-icon razorpay-icon">
+                  <svg viewBox="0 0 24 24" class="payment-svg">
+                    <path fill="currentColor" d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm-1 14H5c-.55 0-1-.45-1-1V8l8 5 8-5v9c0 .55-.45 1-1 1zm-8-7.5L6 8h12l-5 2.5z" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="payment-label">Razorpay</div>
+                  <div class="payment-sub">UPI, Cards & Net Banking</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Order Summary -->
+      <div class="checkout-right">
+
+        <div class="checkout-card">
+          <div class="card-head">
+            <i class="fas fa-receipt"></i>
+            <h2>Order Summary</h2>
+          </div>
+          <div class="card-body">
+
+            <!-- Cart Items -->
+            <div class="order-items" id="order-items">
+              <% if (typeof cart !== 'undefined' && cart && cart.items && cart.items.length > 0) { %>
+              <% cart.items.forEach(item => { %>
+              <div class="order-item">
+                <img src="<%= item.product?.image || 'https://via.placeholder.com/70' %>" alt="<%= item.product?.name %>" class="item-image">
+                <div class="item-details">
+                  <div class="item-name"><%= item.product?.name || 'Product' %></div>
+                  <div class="item-meta">Qty: <%= item.quantity %></div>
+                  <div class="item-price-row">
+                    <span class="item-qty">₹<%= item.product?.price || 0 %> × <%= item.quantity %></span>
+                    <span class="item-price">₹<%= (item.product?.price || 0) * item.quantity %></span>
+                  </div>
+                </div>
+              </div>
+              <% }) %>
+              <% } else { %>
+              <!-- Demo Items for testing -->
+              <div class="order-item">
+                <img src="https://via.placeholder.com/70" alt="Product" class="item-image">
+                <div class="item-details">
+                  <div class="item-name">Sample Product</div>
+                  <div class="item-meta">Qty: 2</div>
+                  <div class="item-price-row">
+                    <span class="item-qty">₹500 × 2</span>
+                    <span class="item-price">₹1,000</span>
+                  </div>
+                </div>
+              </div>
+              <% } %>
+            </div>
+
+            <!-- Summary -->
+            <div class="summary">
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="subtotal">₹<%= typeof total !== 'undefined' ? total : 1000 %></span>
+              </div>
+              <div class="summary-row discount">
+                <span>Discount</span>
+                <span id="discount">-₹0</span>
+              </div>
+              <div class="summary-row">
+                <span>Delivery</span>
+                <span id="delivery" style="color: var(--success);">FREE</span>
+              </div>
+              <div class="summary-row">
+                <span>GST (5%)</span>
+                <span id="gst">₹<%= Math.round((typeof total !== 'undefined' ? total : 1000) * 0.05) %></span>
+              </div>
+              <div class="summary-row total">
+                <span>Total</span>
+                <span id="total">₹<%= Math.round((typeof total !== 'undefined' ? total : 1000) * 1.05) %></span>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="checkout-btn">
+              <i class="fas fa-lock"></i>
+              Place Order (₹<%= Math.round((typeof total !== 'undefined' ? total : 1000) * 1.05) %>)
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Trust Badges -->
+        <div class="trust-badges">
+          <div class="trust-item">
+            <i class="fas fa-shield-alt"></i>
+            <span>Secure Payment</span>
+          </div>
+          <div class="trust-item">
+            <i class="fas fa-undo"></i>
+            <span>Easy Returns</span>
+          </div>
+          <div class="trust-item">
+            <i class="fas fa-truck"></i>
+            <span>Fast Delivery</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    </form>
+
+  </main>
+
+  <!-- Razorpay Script -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <script>
+    let currentPaymentId = null;
+    let currentOrderId = null;
+
+    // Payment Option Selection
+    const paymentOptions = document.querySelectorAll('.payment-option');
+
+    paymentOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        paymentOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        option.querySelector('input[type="radio"]').checked = true;
+      });
+    });
+
+    // Form Validation
+    const form = document.getElementById('checkout-form');
+    let isSubmitting = false;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      console.log('📝 Form submit triggered');
+
+      if (isSubmitting) {
+        console.log('⏸️ Already submitting, ignoring...');
+        return; // Prevent duplicate submissions
+      }
+
+      const requiredFields = form.querySelectorAll('[required]');
+      let isValid = true;
+
+      requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+          isValid = false;
+          field.style.borderColor = 'var(--danger)';
+        } else {
+          field.style.borderColor = 'var(--border)';
+        }
+      });
+
+      if (!isValid) {
+        console.log('❌ Form validation failed - empty fields');
+        showToast('Please fill in all required fields.', 'error');
+        return;
+      }
+
+      // Validate email format
+      const email = document.getElementById('email').value;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showToast('Please enter a valid email address.', 'error');
+        document.getElementById('email').style.borderColor = 'var(--danger)';
+        return;
+      }
+
+      // Validate phone (10 digits)
+      const phone = document.getElementById('phone').value;
+      const phoneRegex = /^[6-9]\d{9}$/;
+      if (!phoneRegex.test(phone)) {
+        showToast('Please enter a valid 10-digit mobile number.', 'error');
+        document.getElementById('phone').style.borderColor = 'var(--danger)';
+        return;
+      }
+
+      // Validate pincode (6 digits)
+      const pincode = document.getElementById('pincode').value;
+      const pincodeRegex = /^[1-9]\d{5}$/;
+      if (!pincodeRegex.test(pincode)) {
+        showToast('Please enter a valid 6-digit PIN code.', 'error');
+        document.getElementById('pincode').style.borderColor = 'var(--danger)';
+        return;
+      }
+
+      const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value;
+
+      // Check if payment method is selected
+      if (!paymentMethod) {
+        showToast('Please select a payment method.', 'error');
+        return;
+      }
+
+      // If Razorpay payment (PhonePe, Google Pay, or Razorpay), initiate payment
+      if (['phonepe', 'googlepay', 'razorpay'].includes(paymentMethod)) {
+        isSubmitting = true;
+        const submitBtn = document.querySelector('.checkout-btn') || form.querySelector('button[type="submit"]');
+        
+        if (!submitBtn) {
+          console.error('Submit button not found!');
+          showToast('Error: Submit button not found. Please refresh the page.', 'error');
+          isSubmitting = false;
+          return;
+        }
+        
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.disabled = true;
+
+        try {
+          await initiateRazorpayPayment(paymentMethod);
+        } catch (err) {
+          console.error('Payment error:', err);
+          isSubmitting = false;
+          submitBtn.innerHTML = originalBtnText;
+          submitBtn.disabled = false;
+          showToast('Payment error: ' + (err.message || 'Please try again'), 'error');
+        }
+      } else {
+        // COD - submit form normally
+        isSubmitting = true;
+        form.submit();
+      }
+    });
+
+    // Initiate Razorpay Payment
+    async function initiateRazorpayPayment(method) {
+      try {
+        console.log('🚀 Starting payment process...');
+        
+        const formData = new FormData(form);
+        const orderData = Object.fromEntries(formData);
+
+        // Calculate total from order summary
+        const totalElement = document.getElementById('total');
+        const totalText = totalElement?.textContent || '₹0';
+        const total = parseInt(totalText.replace(/[^\d]/g, ''));
+
+        console.log('💰 Total amount:', total);
+
+        if (total < 1) {
+          showToast('Invalid order amount. Please check your cart.', 'error');
+          console.error('Invalid amount:', total);
+          return;
+        }
+
+        // Create Razorpay order
+        console.log('📡 Creating Razorpay order...');
+        const response = await fetch('/api/payment/create-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            amount: total,
+            orderId: currentOrderId
+          })
+        });
+
+        console.log('📥 Response status:', response.status);
+        const result = await response.json();
+        console.log('📦 Response data:', result);
+
+        if (!result.success) {
+          showToast(result.message || 'Error creating payment order', 'error');
+          console.error('Order creation failed:', result);
+          return;
+        }
+
+        currentPaymentId = result.paymentId;
+        console.log('✅ Order created. Payment ID:', currentPaymentId);
+
+        // Check if Razorpay is loaded
+        if (typeof Razorpay === 'undefined') {
+          showToast('Razorpay SDK not loaded. Please refresh the page.', 'error');
+          console.error('Razorpay is not defined');
+          return;
+        }
+
+        // Open Razorpay checkout
+        console.log('🎯 Opening Razorpay checkout...');
+        const options = {
+          key: result.key,
+          amount: result.order.amount,
+          currency: result.order.currency,
+          name: 'Shri Govind Pharmacy',
+          description: 'Order Payment',
+          order_id: result.order.id,
+          handler: function(response) {
+            console.log('✅ Payment successful:', response);
+            verifyPayment(response);
+          },
+          prefill: {
+            name: orderData.firstName + ' ' + orderData.lastName,
+            email: orderData.email,
+            contact: orderData.phone
+          },
+          theme: {
+            color: '#1c8125'
+          },
+          modal: {
+            ondismiss: function() {
+              console.log('❌ Payment cancelled by user');
+              showToast('Payment was cancelled. Please try again.', 'info');
+              isSubmitting = false;
+              const submitBtn = document.querySelector('.checkout-btn') || form.querySelector('button[type="submit"]');
+              if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
+                submitBtn.disabled = false;
+              }
+            }
+          }
+        };
+
+        const rzp = new Razorpay(options);
+
+        rzp.on('payment.failed', function(response) {
+          console.error('❌ Payment failed:', response);
+          handlePaymentFailure(response.error);
+        });
+
+        console.log('🔓 Opening Razorpay...');
+        rzp.open();
+        console.log('✅ Razorpay opened successfully');
+
+      } catch (err) {
+        console.error('💥 Payment error:', err);
+        showToast('Payment error: ' + (err.message || 'Please try again'), 'error');
+      }
+    }
+
+    // Verify Payment
+    async function verifyPayment(razorpayResponse) {
+      try {
+        const response = await fetch('/api/payment/verify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            razorpay_order_id: razorpayResponse.razorpay_order_id,
+            razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+            razorpay_signature: razorpayResponse.razorpay_signature,
+            paymentId: currentPaymentId
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Payment successful, add payment details to form and submit
+          showToast('Payment successful! Placing your order...', 'success');
+
+          // Add hidden fields for payment details
+          let hiddenField = document.getElementById('razorpay_payment_id');
+          if (!hiddenField) {
+            hiddenField = document.createElement('input');
+            hiddenField.type = 'hidden';
+            hiddenField.id = 'razorpay_payment_id';
+            hiddenField.name = 'razorpay_payment_id';
+            form.appendChild(hiddenField);
+          }
+          hiddenField.value = razorpayResponse.razorpay_payment_id;
+
+          hiddenField = document.getElementById('razorpay_order_id');
+          if (!hiddenField) {
+            hiddenField = document.createElement('input');
+            hiddenField.type = 'hidden';
+            hiddenField.id = 'razorpay_order_id';
+            hiddenField.name = 'razorpay_order_id';
+            form.appendChild(hiddenField);
+          }
+          hiddenField.value = razorpayResponse.razorpay_order_id;
+
+          hiddenField = document.getElementById('razorpay_signature');
+          if (!hiddenField) {
+            hiddenField = document.createElement('input');
+            hiddenField.type = 'hidden';
+            hiddenField.id = 'razorpay_signature';
+            hiddenField.name = 'razorpay_signature';
+            form.appendChild(hiddenField);
+          }
+          hiddenField.value = razorpayResponse.razorpay_signature;
+
+          // Submit the form
+          form.submit();
+        } else {
+          showToast(result.message || 'Payment verification failed', 'error');
+          isSubmitting = false;
+          const submitBtn = document.querySelector('.checkout-btn') || form.querySelector('button[type="submit"]');
+          if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
+            submitBtn.disabled = false;
+          }
+        }
+      } catch (err) {
+        console.log('Verification error:', err);
+        showToast('Error verifying payment. Please contact support.', 'error');
+        isSubmitting = false;
+        const submitBtn = document.querySelector('.checkout-btn') || form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
+          submitBtn.disabled = false;
+        }
+      }
+    }
+
+    // Handle Payment Failure
+    async function handlePaymentFailure(error) {
+      try {
+        await fetch('/api/payment/failed', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            paymentId: currentPaymentId,
+            error
+          })
+        });
+      } catch (err) {
+        console.log('Error reporting failure:', err);
+      }
+
+      showToast('Payment failed: ' + (error?.description || 'Please try again'), 'error');
+      isSubmitting = false;
+      const submitBtn = document.querySelector('.checkout-btn') || form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
+        submitBtn.disabled = false;
+      }
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      let toastZone = document.getElementById('toastZone');
+      if (!toastZone) {
+        toastZone = document.createElement('div');
+        toastZone.id = 'toastZone';
+        toastZone.className = 'toast-zone';
+        document.body.appendChild(toastZone);
+      }
+
+      const toast = document.createElement('div');
+      toast.className = 'toast ' + type;
+      toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+      `;
+      toastZone.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // PIN Code validation
+    const pincodeInput = document.getElementById('pincode');
+    pincodeInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
+
+    // Phone validation
+    const phoneInput = document.getElementById('phone');
+    phoneInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
+  </script>
+
+</body>
+
+</html>

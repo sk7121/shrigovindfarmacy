@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Dashboard — Shri Govind Pharmacy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #1c8125;
+            --primary-dark: #145a1a;
+            --secondary: #e67e22;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #2d2d2d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        .agent-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .agent-avatar-header {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            overflow: hidden;
+        }
+
+        .agent-avatar-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Availability Toggle */
+        .availability-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: var(--bg);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .availability-toggle:hover {
+            background: var(--border);
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            background: var(--danger);
+            border-radius: 13px;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--success);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        .toggle-label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            border: 2px solid var(--border);
+            background: transparent;
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .stat-card .subtext {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* Notifications */
+        .notifications-section {
+            margin-bottom: 30px;
+        }
+
+        .notification-card {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification-card.info {
+            background: #d1ecf1;
+            border-left: 4px solid var(--info);
+        }
+
+        .notification-card.warning {
+            background: #fff3cd;
+            border-left: 4px solid var(--warning);
+        }
+
+        .notification-card.success {
+            background: #d4edda;
+            border-left: 4px solid var(--success);
+        }
+
+        .notification-card i {
+            font-size: 20px;
+        }
+
+        .notification-card.info i {
+            color: var(--info);
+        }
+
+        .notification-card.warning i {
+            color: var(--warning);
+        }
+
+        .notification-card.success i {
+            color: var(--success);
+        }
+
+        .notification-card .message {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .notification-card .dismiss {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        /* Sections */
+        .section {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Delivery Cards */
+        .delivery-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .delivery-card:hover {
+            box-shadow: var(--shadow);
+            border-color: var(--primary);
+        }
+
+        .delivery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .delivery-id {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .delivery-id small {
+            display: block;
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status-badge.assigned {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.picked_up {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-badge.in_transit {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-badge.out_for_delivery {
+            background: #d6d8d9;
+            color: #1b1e21;
+        }
+
+        .status-badge.delivered {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge.returned {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .delivery-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            font-size: 14px;
+        }
+
+        .info-item label {
+            color: var(--text-muted);
+            font-size: 12px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .info-item strong {
+            color: var(--text);
+        }
+
+        .delivery-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Sidebar */
+        .sidebar-section {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Performance Chart */
+        .chart-container {
+            position: relative;
+            height: 200px;
+            margin-top: 20px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .quick-action-btn {
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .quick-action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .quick-action-btn i {
+            font-size: 24px;
+        }
+
+        .quick-action-btn span {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Ratings */
+        .rating-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .rating-item:last-child {
+            border-bottom: none;
+        }
+
+        .rating-stars {
+            color: var(--warning);
+            margin-bottom: 5px;
+        }
+
+        .rating-comment {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .rating-date {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* Earnings Summary */
+        .earnings-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .earnings-row:last-child {
+            border-bottom: none;
+        }
+
+        .earnings-label {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .earnings-value {
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        /* Flash Messages */
+        .flash {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .flash.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="agent-info">
+                    <div class="agent-avatar-header">
+                        <% if (agent.profileImage) { %>
+                            <img src="<%= agent.profileImage %>" alt="<%= agent.name %>">
+                            <% } else { %>
+                                <%= agent.name.charAt(0).toUpperCase() %>
+                                    <% } %>
+                    </div>
+                    <div>
+                        <h1>
+                            <%= agent.name %>
+                        </h1>
+                        <p style="color: var(--text-muted); font-size: 14px;">
+                            <%= agent.employeeId %> • <%= agent.vehicleType %> - <%= agent.vehicleNumber %>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="availability-toggle" onclick="toggleAvailability()">
+                    <div class="toggle-switch <%= agent.isAvailable ? 'active' : '' %>" id="availabilityToggle"></div>
+                    <span class="toggle-label" id="availabilityLabel">
+                        <%= agent.isAvailable ? 'Online' : 'Offline' %>
+                    </span>
+                </div>
+                <a href="/agent/profile" class="btn btn-outline"><i class="fas fa-user"></i> Profile</a>
+                <a href="/agent/deliveries" class="btn btn-primary"><i class="fas fa-list"></i> All Deliveries</a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <% if (locals.success && locals.success.length> 0) { %>
+            <div class="flash success">
+                <%= success %>
+            </div>
+            <% } %>
+                <% if (locals.error && locals.error.length> 0) { %>
+                    <div class="flash error">
+                        <%= error %>
+                    </div>
+                    <% } %>
+
+                        <!-- Notifications -->
+                        <% if (notifications && notifications.length> 0) { %>
+                            <div class="notifications-section">
+                                <% notifications.forEach(notification=> { %>
+                                    <div class="notification-card <%= notification.type %>">
+                                        <i class="fas <%= notification.icon %>"></i>
+                                        <span class="message">
+                                            <%= notification.message %>
+                                        </span>
+                                        <button class="dismiss" onclick="this.parentElement.remove()"><i
+                                                class="fas fa-times"></i></button>
+                                    </div>
+                                    <% }) %>
+                            </div>
+                            <% } %>
+
+                                <!-- Statistics Grid -->
+                                <div class="stats-grid">
+                                    <div class="stat-card">
+                                        <div class="icon"><i class="fas fa-box"></i></div>
+                                        <div class="value">
+                                            <%= agent.stats?.totalDeliveries || 0 %>
+                                        </div>
+                                        <div class="label">Total Deliveries</div>
+                                        <div class="subtext">Today: <%= todayStats.deliveries %>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="icon"><i class="fas fa-clipboard-list"></i></div>
+                                        <div class="value">
+                                            <%= assignedOrders.length %>
+                                        </div>
+                                        <div class="label">Assigned Orders</div>
+                                        <div class="subtext">Ready for delivery</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="icon"><i class="fas fa-star"></i></div>
+                                        <div class="value">
+                                            <%= agent.stats?.averageRating || '0' %>
+                                        </div>
+                                        <div class="label">Average Rating</div>
+                                        <div class="subtext">⭐ Recent: <%= recentRatings.length %> reviews</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="icon"><i class="fas fa-clock"></i></div>
+                                        <div class="value">
+                                            <%= performanceMetrics.onTimeRate %>%
+                                        </div>
+                                        <div class="label">On-Time Rate</div>
+                                        <div class="subtext">Last 30 days</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="icon"><i class="fas fa-tasks"></i></div>
+                                        <div class="value">
+                                            <%= assignedOrders.length %>
+                                        </div>
+                                        <div class="label">Active Orders</div>
+                                        <div class="subtext">Max: <%= agent.maxConcurrentDeliveries %>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="icon"><i class="fas fa-rupee-sign"></i></div>
+                                        <div class="value">₹<%= todayStats.earnings %>
+                                        </div>
+                                        <div class="label">Today's Earnings</div>
+                                        <div class="subtext">Week: ₹<%= weekStats.earnings %>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="main-grid">
+                                    <!-- Main Content -->
+                                    <div>
+                                        <!-- Assigned Orders -->
+                                        <div class="section">
+                                            <div class="section-header">
+                                                <h2 class="section-title"><i class="fas fa-clipboard-list"></i> Assigned
+                                                    Orders</h2>
+                                                <a href="/agent/orders" class="btn btn-primary btn-sm">View All</a>
+                                            </div>
+
+                                            <% if (assignedOrders && assignedOrders.length> 0) { %>
+                                                <% assignedOrders.slice(0, 5).forEach(order=> { %>
+                                                    <div class="delivery-card">
+                                                        <div class="delivery-header">
+                                                            <div class="delivery-id">
+                                                                <i class="fas fa-hashtag"></i>
+                                                                <%= order.tracking.orderId %>
+                                                            </div>
+                                                            <span class="status-badge <%= order.status %>">
+                                                                <%= order.status.replace(/_/g, ' ' ) %>
+                                                            </span>
+                                                        </div>
+                                                        <div class="delivery-info">
+                                                            <div class="info-item">
+                                                                <label><i class="fas fa-user"></i> Customer</label>
+                                                                <strong>
+                                                                    <%= order.shippingAddress?.name || 'N/A' %>
+                                                                </strong>
+                                                            </div>
+                                                            <div class="info-item">
+                                                                <label><i class="fas fa-map-marker-alt"></i>
+                                                                    Address</label>
+                                                                <%= order.shippingAddress?.address || 'N/A' %><br>
+                                                                    <%= order.shippingAddress?.city %>, <%=
+                                                                            order.shippingAddress?.pincode %>
+                                                            </div>
+                                                            <div class="info-item">
+                                                                <label><i class="fas fa-phone"></i> Phone</label>
+                                                                <strong>
+                                                                    <%= order.shippingAddress?.phone || 'N/A' %>
+                                                                </strong>
+                                                            </div>
+                                                            <div class="info-item">
+                                                                <label><i class="fas fa-money-bill-wave"></i>
+                                                                    Payment</label>
+                                                                <strong
+                                                                    style="color: <%= order.payment.method === 'cod' ? 'var(--warning)' : 'var(--success)' %>;">
+                                                                    <%= order.payment.method==='cod' ? '₹' +
+                                                                        order.pricing.total + ' (COD)' : 'Paid Online'
+                                                                        %>
+                                                                </strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="delivery-actions">
+                                                            <% if (order.status==='assigned' ) { %>
+                                                                <button
+                                                                    onclick="updateOrderStatus('<%= order._id %>', 'out_for_delivery')"
+                                                                    class="btn btn-success btn-sm">
+                                                                    <i class="fas fa-play"></i> Start Delivery
+                                                                </button>
+                                                                <% } else if (order.status==='out_for_delivery' ) { %>
+                                                                    <div
+                                                                        style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                                                        <button
+                                                                            onclick="uploadProof('<%= order._id %>')"
+                                                                            class="btn btn-primary btn-sm">
+                                                                            <i class="fas fa-camera"></i> Upload Proof
+                                                                        </button>
+                                                                        <button onclick="verifyOTP('<%= order._id %>')"
+                                                                            class="btn btn-success btn-sm">
+                                                                            <i class="fas fa-key"></i> Verify OTP
+                                                                        </button>
+                                                                    </div>
+                                                                    <% } %>
+                                                                        <% if (order.shippingAddress?.phone) { %>
+                                                                            <a href="tel:<%= order.shippingAddress.phone %>"
+                                                                                class="btn btn-outline btn-sm">
+                                                                                <i class="fas fa-phone"></i> Call
+                                                                            </a>
+                                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                    <% }) %>
+                                                        <% } else { %>
+                                                            <p
+                                                                style="color: var(--text-muted); text-align: center; padding: 40px;">
+                                                                <i class="fas fa-check-circle"
+                                                                    style="font-size: 48px; margin-bottom: 10px; color: var(--success);"></i><br>
+                                                                <strong>No assigned orders!</strong><br>
+                                                                You're all caught up. New orders will be assigned soon.
+                                                            </p>
+                                                            <% } %>
+                                        </div>
+
+                                        <!-- Recently Completed -->
+                                        <div class="section">
+                                            <div class="section-header">
+                                                <h2 class="section-title"><i class="fas fa-history"></i> Recently
+                                                    Completed</h2>
+                                                <a href="/agent/orders?status=delivered"
+                                                    class="btn btn-outline btn-sm">View All</a>
+                                            </div>
+
+                                            <% if (completedOrders && completedOrders.length> 0) { %>
+                                                <% completedOrders.slice(0, 3).forEach(order=> { %>
+                                                    <div class="delivery-card" style="opacity: 0.8;">
+                                                        <div class="delivery-header">
+                                                            <div class="delivery-id">
+                                                                Order: <%= order.tracking?.orderId || 'N/A' %>
+                                                            </div>
+                                                            <span class="status-badge delivered"><i
+                                                                    class="fas fa-check"></i> Delivered</span>
+                                                        </div>
+                                                        <div style="font-size: 13px; color: var(--text-muted);">
+                                                            <i class="fas fa-calendar-check"></i>
+                                                            Delivered on: <%= order.tracking?.deliveredAt ? new
+                                                                Date(order.tracking.deliveredAt).toLocaleString('en-IN')
+                                                                : 'N/A' %>
+                                                        </div>
+                                                    </div>
+                                                    <% }) %>
+                                                        <% } else { %>
+                                                            <p
+                                                                style="color: var(--text-muted); text-align: center; padding: 20px;">
+                                                                No completed orders yet
+                                                            </p>
+                                                            <% } %>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sidebar -->
+                                    <div>
+                                        <!-- Quick Actions -->
+                                        <div class="sidebar-section">
+                                            <h3 class="sidebar-title"><i class="fas fa-bolt"></i> Quick Actions</h3>
+                                            <div class="quick-actions">
+                                                <a href="/agent/profile" class="quick-action-btn">
+                                                    <i class="fas fa-user-circle"></i>
+                                                    <span>My Profile</span>
+                                                </a>
+                                                <a href="/agent/deliveries" class="quick-action-btn">
+                                                    <i class="fas fa-list"></i>
+                                                    <span>All Deliveries</span>
+                                                </a>
+                                                <a href="/agent/deliveries?status=delivered" class="quick-action-btn">
+                                                    <i class="fas fa-history"></i>
+                                                    <span>History</span>
+                                                </a>
+                                                <a href="/agent/profile" class="quick-action-btn">
+                                                    <i class="fas fa-file-upload"></i>
+                                                    <span>Documents</span>
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <!-- Earnings Summary -->
+                                        <div class="sidebar-section">
+                                            <h3 class="sidebar-title"><i class="fas fa-wallet"></i> Earnings Summary
+                                            </h3>
+                                            <div class="earnings-row">
+                                                <span class="earnings-label">Today</span>
+                                                <span class="earnings-value">₹<%= todayStats.earnings %></span>
+                                            </div>
+                                            <div class="earnings-row">
+                                                <span class="earnings-label">This Week</span>
+                                                <span class="earnings-value">₹<%= weekStats.earnings %></span>
+                                            </div>
+                                            <div class="earnings-row">
+                                                <span class="earnings-label">This Month</span>
+                                                <span class="earnings-value">₹<%= monthStats.earnings %></span>
+                                            </div>
+                                            <div class="earnings-row"
+                                                style="border-top: 2px solid var(--border); padding-top: 10px; margin-top: 10px;">
+                                                <span class="earnings-label"><strong>Total</strong></span>
+                                                <span class="earnings-value"><strong>₹<%= agent.stats?.totalEarnings ||
+                                                            0 %></strong></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Recent Ratings -->
+                                        <div class="sidebar-section">
+                                            <h3 class="sidebar-title"><i class="fas fa-star"></i> Recent Ratings</h3>
+                                            <% if (recentRatings && recentRatings.length> 0) { %>
+                                                <% recentRatings.forEach(rating=> { %>
+                                                    <div class="rating-item">
+                                                        <div class="rating-stars">
+                                                            <% for (let i=0; i < 5; i++) { %>
+                                                                <i
+                                                                    class="fas fa-star<%= i < rating.rating ? '' : '-o' %>"></i>
+                                                                <% } %>
+                                                        </div>
+                                                        <% if (rating.comment) { %>
+                                                            <div class="rating-comment">"<%= rating.comment %>"</div>
+                                                            <% } %>
+                                                                <div class="rating-date">
+                                                                    <i class="fas fa-clock"></i>
+                                                                    <%= new
+                                                                        Date(rating.submittedAt).toLocaleDateString('en-IN')
+                                                                        %>
+                                                                </div>
+                                                    </div>
+                                                    <% }) %>
+                                                        <% } else { %>
+                                                            <p
+                                                                style="color: var(--text-muted); text-align: center; padding: 20px;">
+                                                                <i class="fas fa-star"
+                                                                    style="font-size: 32px; margin-bottom: 10px; opacity: 0.3;"></i><br>
+                                                                No ratings yet
+                                                            </p>
+                                                            <% } %>
+                                        </div>
+
+                                        <!-- Performance Chart -->
+                                        <div class="sidebar-section">
+                                            <h3 class="sidebar-title"><i class="fas fa-chart-line"></i> Weekly
+                                                Performance</h3>
+                                            <div class="chart-container">
+                                                <canvas id="performanceChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+    </div>
+
+    <script>
+        // Toggle Availability
+        async function toggleAvailability() {
+            try {
+                const response = await fetch('/agent/toggle-availability', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    const toggle = document.getElementById('availabilityToggle');
+                    const label = document.getElementById('availabilityLabel');
+
+                    if (result.isAvailable) {
+                        toggle.classList.add('active');
+                        label.textContent = 'Online';
+                    } else {
+                        toggle.classList.remove('active');
+                        label.textContent = 'Offline';
+                    }
+
+                    // Show success message
+                    const notification = document.createElement('div');
+                    notification.className = 'notification-card success';
+                    notification.innerHTML = `
+                        <i class="fas fa-check-circle"></i>
+                        <span class="message">You are now ${result.isAvailable ? 'online' : 'offline'}</span>
+                        <button class="dismiss" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+                    `;
+                    document.querySelector('.notifications-section')?.prepend(notification) ||
+                        document.querySelector('.dashboard').insertBefore(notification, document.querySelector('.stats-grid'));
+                }
+            } catch (error) {
+                console.error('Error toggling availability:', error);
+            }
+        }
+
+        // Auto-update location (if browser supports geolocation)
+        function updateLocation() {
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    try {
+                        await fetch('/agent/update-location', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude
+                            })
+                        });
+                    } catch (error) {
+                        console.error('Error updating location:', error);
+                    }
+                });
+            }
+        }
+
+        // Update location every 5 minutes when page is open
+        updateLocation();
+        setInterval(updateLocation, 5 * 60 * 1000);
+
+        // Performance Chart
+        const ctx = document.getElementById('performanceChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Deliveries',
+                        data: [5, 8, 6, 9, 7, 10, 8],
+                        borderColor: '#1c8125',
+                        backgroundColor: 'rgba(28, 129, 37, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 2 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Auto-dismiss flash messages after 5 seconds
+        setTimeout(() => {
+            document.querySelectorAll('.flash').forEach(flash => {
+                flash.style.transition = 'opacity 0.5s';
+                flash.style.opacity = '0';
+                setTimeout(() => flash.remove(), 500);
+            });
+        }, 5000);
+
+        // Order management functions
+        async function updateOrderStatus(orderId, status) {
+            try {
+                const response = await fetch(`/agent/order/${orderId}/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ status }),
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Order status updated successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating order status.');
+            }
+        }
+
+        async function uploadProof(orderId) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const formData = new FormData();
+                formData.append('proofImage', file);
+
+                try {
+                    const response = await fetch(`/agent/order/${orderId}/proof`, {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'include'
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert('Proof uploaded successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while uploading proof.');
+                }
+            };
+            input.click();
+        }
+
+        async function verifyOTP(orderId) {
+            const otp = prompt('Enter the OTP provided by the customer:');
+            if (!otp) return;
+
+            try {
+                const response = await fetch(`/agent/order/${orderId}/verify-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ otp }),
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // After OTP verification, mark as delivered
+                    await updateOrderStatus(orderId, 'delivered');
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while verifying OTP.');
+            }
+        }
+    </script>
+    <script src="/js/theme.js"></script>
+</body>
+
+</html>

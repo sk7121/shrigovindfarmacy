@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Contact Us – Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!--
+    Font Awesome 6.5.2 — full kit
+    cdnjs.cloudflare.com hosts every icon:
+      fa-solid, fa-regular, fa-brands  — all included in all.min.css
+    No integrity hash so it loads even when hash mismatches occur on CDN edge caches.
+  -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <link rel="stylesheet" href="css/contact.css">
+  <!-- Theme Script -->
+  <script src="/js/theme.js"></script>
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+
+  <!-- ══════════════════════════════════
+     TOPBAR
+══════════════════════════════════ -->
+  <div class="topbar" id="topbarWrap">
+    <div class="topbar-ticker" id="topbarTicker">
+      <span class="tick-slide tick-active">
+        <i class="fa-solid fa-leaf"></i>
+        100% Natural Ayurvedic Products
+      </span>
+      <span class="tick-slide">
+        <i class="fa-solid fa-truck-fast"></i>
+        Free Delivery on Orders &#8377;499+
+      </span>
+      <span class="tick-slide">
+        <i class="fa-solid fa-phone"></i>
+        Call: +91 98765 43210
+      </span>
+    </div>
+    <button class="topbar-close" id="topbarClose" aria-label="Close announcement">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════
+     HEADER
+══════════════════════════════════ -->
+  <header class="main-header" id="mainHeader">
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-flex">
+
+          <!-- Logo -->
+          <a href="/home" class="logo">
+            <i class="fa-solid fa-mortar-pestle logo-ico"></i>
+            <div class="logo-text">
+              <span class="logo-main">Shri Govind Pharmacy</span>
+              <span class="brand-sub">Ayurvedic &amp; Herbal Wellness</span>
+            </div>
+          </a>
+
+          <!-- Nav actions -->
+          <div class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+              <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+            <a href="/home" class="btn btn-outline">
+              <i class="fa-solid fa-house"></i>
+              <span class="btn-label">Home</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ══════════════════════════════════
+     BREADCRUMB
+══════════════════════════════════ -->
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/home"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right bc-sep"></i>
+        <span>Contact Us</span>
+      </nav>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+     HERO BANNER
+══════════════════════════════════ -->
+  <section class="contact-hero">
+    <div class="hero-bg-dots"></div>
+    <div class="hero-wave-bottom"></div>
+    <div class="container hero-inner">
+
+      <span class="hero-badge">
+        <i class="fa-solid fa-headset"></i>
+        We're Here to Help
+      </span>
+
+      <h1>Get In <em>Touch</em> With Us</h1>
+
+      <p>Have a question about Ayurvedic medicines, need expert guidance, or want to place a bulk order? Our team responds within 2 hours.</p>
+
+      <div class="hero-chips">
+        <span class="chip"><i class="fa-solid fa-circle-check"></i> 24/7 Support</span>
+        <span class="chip"><i class="fa-solid fa-bolt"></i> &lt;2h Response</span>
+        <span class="chip"><i class="fa-solid fa-star"></i> 25+ Years Trust</span>
+        <span class="chip"><i class="fa-brands fa-whatsapp"></i> WhatsApp Help</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+     QUICK CONTACT CARDS
+══════════════════════════════════ -->
+  <section class="quick-cards-sec">
+    <div class="container">
+      <div class="quick-cards-grid">
+
+        <a href="tel:+919876543210" class="qc-card reveal">
+          <div class="qc-icon"><i class="fa-solid fa-phone-volume"></i></div>
+          <h3>Call Us</h3>
+          <p>Mon &ndash; Sat, 9 AM &ndash; 7 PM</p>
+          <strong>+91 98765 43210</strong>
+        </a>
+
+        <a href="mailto:info@shrigovindpharmacy.com" class="qc-card reveal">
+          <div class="qc-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+          <h3>Email Us</h3>
+          <p>Reply within 2 hours</p>
+          <strong>info@shrigovindpharmacy.com</strong>
+        </a>
+
+        <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" class="qc-card qc-wa reveal">
+          <div class="qc-icon"><i class="fa-brands fa-whatsapp"></i></div>
+          <h3>WhatsApp</h3>
+          <p>Quick chat support</p>
+          <strong>Chat Now</strong>
+        </a>
+
+        <a href="https://www.google.com/maps/search/?api=1&query=27.7327064,75.7755459" target="_blank" rel="noopener noreferrer" class="qc-card reveal">
+          <div class="qc-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <h3>Visit Store</h3>
+          <p>Mon &ndash; Sun, 8 AM &ndash; 9 PM</p>
+          <strong>Sikar, Rajasthan</strong>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+     FORM + MAP
+══════════════════════════════════ -->
+  <section class="form-map-sec">
+    <div class="container">
+      <div class="form-map-grid">
+
+        <!-- ── Contact Form ── -->
+        <div class="form-col reveal">
+          <span class="section-pill"><i class="fa-solid fa-paper-plane"></i> Send Message</span>
+          <h2 class="section-heading">Drop Us a <em>Message</em></h2>
+          <p class="section-sub">We'll get back to you within 2 hours on business days.</p>
+
+          <form id="contactForm" novalidate>
+
+            <div class="field-row">
+              <div class="field-group">
+                <label for="fName">Full Name <span class="req">*</span></label>
+                <div class="field-wrap">
+                  <i class="fa-regular fa-user ficon"></i>
+                  <input type="text" id="fName" placeholder="Ramesh Sharma" autocomplete="name" autocorrect="off">
+                </div>
+                <span class="field-error" id="err-fName">
+                  <i class="fa-solid fa-circle-exclamation"></i> Name is required.
+                </span>
+              </div>
+
+              <div class="field-group">
+                <label for="fPhone">Mobile <span class="req">*</span></label>
+                <div class="field-wrap">
+                  <i class="fa-solid fa-phone ficon"></i>
+                  <input type="tel" id="fPhone" placeholder="9876543210" maxlength="10" inputmode="numeric" autocomplete="tel">
+                </div>
+                <span class="field-error" id="err-fPhone">
+                  <i class="fa-solid fa-circle-exclamation"></i> Enter valid 10-digit number.
+                </span>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="fEmail">Email Address <span class="req">*</span></label>
+              <div class="field-wrap">
+                <i class="fa-regular fa-envelope ficon"></i>
+                <input type="email" id="fEmail" placeholder="you@example.com" autocomplete="email">
+              </div>
+              <span class="field-error" id="err-fEmail">
+                <i class="fa-solid fa-circle-exclamation"></i> Enter a valid email address.
+              </span>
+            </div>
+
+            <div class="field-group">
+              <label for="fSubject">Subject <span class="req">*</span></label>
+              <div class="field-wrap select-wrap">
+                <i class="fa-solid fa-tag ficon"></i>
+                <select id="fSubject">
+                  <option value="" disabled selected>Choose a topic&hellip;</option>
+                  <option value="Product Enquiry">Product Enquiry</option>
+                  <option value="Order / Delivery">Order / Delivery</option>
+                  <option value="Doctor Consultation">Doctor Consultation</option>
+                  <option value="Bulk / Wholesale Order">Bulk / Wholesale Order</option>
+                  <option value="Return or Refund">Return or Refund</option>
+                  <option value="Feedback / Suggestion">Feedback / Suggestion</option>
+                  <option value="Other">Other</option>
+                </select>
+                <i class="fa-solid fa-chevron-down select-arrow"></i>
+              </div>
+              <span class="field-error" id="err-fSubject">
+                <i class="fa-solid fa-circle-exclamation"></i> Please choose a subject.
+              </span>
+            </div>
+
+            <div class="field-group">
+              <label for="fMsg">
+                Message <span class="req">*</span>
+                <span class="char-ctr" id="charCtr">0 / 500</span>
+              </label>
+              <div class="field-wrap">
+                <i class="fa-regular fa-comment-dots ficon ficon-top"></i>
+                <textarea id="fMsg" rows="5" placeholder="Tell us how we can help&hellip;" maxlength="500"></textarea>
+              </div>
+              <span class="field-error" id="err-fMsg">
+                <i class="fa-solid fa-circle-exclamation"></i> Please write your message.
+              </span>
+            </div>
+
+            <!-- Privacy + reCAPTCHA row -->
+            <div class="captcha-row">
+              <label class="check-label">
+                <input type="checkbox" id="fAgree">
+                <span class="check-box"></span>
+                <span>I agree to the <a href="#" class="link-green">Privacy Policy</a></span>
+              </label>
+              <div class="captcha-badge">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>reCAPTCHA</span>
+              </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+              <span class="sbtn-text">
+                <i class="fa-solid fa-paper-plane"></i> Send Message
+              </span>
+              <span class="sbtn-loader"><span class="spin-ring"></span></span>
+            </button>
+
+            <p class="secure-note">
+              <i class="fa-solid fa-lock"></i>
+              Your info is safe &amp; never shared with anyone.
+            </p>
+
+          </form>
+        </div>
+
+        <!-- ── Map + Store Info ── -->
+        <div class="map-col reveal">
+          <span class="section-pill"><i class="fa-solid fa-map-location-dot"></i> Our Location</span>
+          <h2 class="section-heading">Visit Our <em>Store</em></h2>
+          <p class="section-sub">Come visit us in Sikar &mdash; our Ayurvedic experts are always ready to help.</p>
+
+          <div class="map-wrap">
+            <iframe src="https://maps.google.com/maps?q=27.7327064,75.7755459&z=17&output=embed&hl=en" width="100%" height="300" frameborder="0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Shri Govind Pharmacy Location">
+            </iframe>
+            <a class="map-btn" href="https://www.google.com/maps/search/?api=1&query=27.7327064,75.7755459" target="_blank" rel="noopener noreferrer">
+              <i class="fa-solid fa-diamond-turn-right"></i> Get Directions
+            </a>
+          </div>
+
+          <!-- Store details -->
+          <div class="store-grid">
+            <div class="store-item">
+              <div class="store-ico"><i class="fa-solid fa-location-dot"></i></div>
+              <div>
+                <strong>Address</strong>
+                <p>Near Main Bus Stand, Sikar, Rajasthan &ndash; 332001</p>
+              </div>
+            </div>
+            <div class="store-item">
+              <div class="store-ico"><i class="fa-solid fa-clock"></i></div>
+              <div>
+                <strong>Store Hours</strong>
+                <p>Mon&ndash;Sat: 8 AM &ndash; 9 PM<br>Sunday: 9 AM &ndash; 6 PM</p>
+              </div>
+            </div>
+            <div class="store-item">
+              <div class="store-ico"><i class="fa-solid fa-landmark"></i></div>
+              <div>
+                <strong>Landmarks</strong>
+                <p>Opp. District Hospital,<br>Near SBI Main Branch</p>
+              </div>
+            </div>
+            <div class="store-item">
+              <div class="store-ico"><i class="fa-solid fa-square-parking"></i></div>
+              <div>
+                <strong>Parking</strong>
+                <p>Free street parking<br>available outside store</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Social links -->
+          <div class="social-row">
+            <span>Follow us on:</span>
+            <div class="social-icons">
+              <a href="#" aria-label="Facebook" class="soc-btn soc-fb">
+                <i class="fa-brands fa-facebook-f"></i>
+              </a>
+              <a href="#" aria-label="Instagram" class="soc-btn soc-ig">
+                <i class="fa-brands fa-instagram"></i>
+              </a>
+              <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" class="soc-btn soc-wa">
+                <i class="fa-brands fa-whatsapp"></i>
+              </a>
+              <a href="#" aria-label="YouTube" class="soc-btn soc-yt">
+                <i class="fa-brands fa-youtube"></i>
+              </a>
+              <a href="#" aria-label="X / Twitter" class="soc-btn soc-x">
+                <i class="fa-brands fa-x-twitter"></i>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+     WHY CHOOSE US
+══════════════════════════════════ -->
+  <section class="why-sec">
+    <div class="container">
+      <div class="why-head">
+        <span class="section-pill"><i class="fa-solid fa-award"></i> Why Us</span>
+        <h2 class="section-heading">Trusted by <em>12,000+</em> Families</h2>
+      </div>
+      <div class="why-grid">
+        <div class="why-card reveal">
+          <div class="why-ico"><i class="fa-solid fa-certificate"></i></div>
+          <h3>AYUSH Certified</h3>
+          <p>Every product is from GMP-certified manufacturers and fully AYUSH compliant.</p>
+        </div>
+        <div class="why-card reveal">
+          <div class="why-ico"><i class="fa-solid fa-truck-fast"></i></div>
+          <h3>Pan-India Delivery</h3>
+          <p>Delivery across all Indian states in 2&ndash;5 business days. Free on orders &#8377;499+.</p>
+        </div>
+        <div class="why-card reveal">
+          <div class="why-ico"><i class="fa-solid fa-user-doctor"></i></div>
+          <h3>Free Consultation</h3>
+          <p>Personalized Ayurvedic guidance from certified doctors &mdash; at zero cost.</p>
+        </div>
+        <div class="why-card reveal">
+          <div class="why-ico"><i class="fa-solid fa-rotate-left"></i></div>
+          <h3>Easy Returns</h3>
+          <p>7-day hassle-free returns on all unopened products. Full refund guaranteed.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+     FAQ
+══════════════════════════════════ -->
+  <section class="faq-sec">
+    <div class="container">
+      <div class="faq-layout">
+
+        <div class="faq-sidebar">
+          <span class="section-pill"><i class="fa-solid fa-circle-question"></i> FAQ</span>
+          <h2 class="section-heading">Common <em>Questions</em></h2>
+          <p>Can't find your answer? Chat with us on WhatsApp &mdash; we reply fast.</p>
+          <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" class="wa-btn">
+            <i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp
+          </a>
+        </div>
+
+        <div class="faq-list">
+
+          <div class="faq-item">
+            <button class="faq-q" aria-expanded="false">
+              Do you deliver outside Rajasthan?
+              <i class="fa-solid fa-chevron-down faq-arrow"></i>
+            </button>
+            <div class="faq-ans">
+              <p>Yes! We deliver pan-India through trusted courier services. Free shipping on orders &#8377;499+. Delivery takes 2&ndash;5 business days based on your location.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" aria-expanded="false">
+              Are all products certified and authentic?
+              <i class="fa-solid fa-chevron-down faq-arrow"></i>
+            </button>
+            <div class="faq-ans">
+              <p>Absolutely. All products are sourced directly from AYUSH-certified manufacturers. We stock only genuine GMP-certified Ayurvedic medicines tested for quality.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" aria-expanded="false">
+              How do I book a free doctor consultation?
+              <i class="fa-solid fa-chevron-down faq-arrow"></i>
+            </button>
+            <div class="faq-ans">
+              <p>Visit our store or message us on WhatsApp to schedule a consultation. Online video consultations are also available for customers across India.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" aria-expanded="false">
+              What is your return and refund policy?
+              <i class="fa-solid fa-chevron-down faq-arrow"></i>
+            </button>
+            <div class="faq-ans">
+              <p>We offer a 7-day easy return window for all unopened products. For damaged or wrong items, we arrange immediate replacement or full refund in 3&ndash;5 business days.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" aria-expanded="false">
+              Do you offer bulk or wholesale pricing?
+              <i class="fa-solid fa-chevron-down faq-arrow"></i>
+            </button>
+            <div class="faq-ans">
+              <p>Yes! We have special pricing for clinics, hospitals and bulk buyers. Email orders@shrigovindpharmacy.com or call +91&nbsp;98765&nbsp;43210 to get a quote.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+     NEWSLETTER
+══════════════════════════════════ -->
+  <section class="nl-sec">
+    <div class="container">
+      <div class="nl-inner">
+        <div class="nl-left">
+          <h2>Get Weekly <em>Health Tips</em> &amp; Offers</h2>
+          <p>Subscribe for Ayurvedic wellness tips, new arrivals &amp; exclusive member discounts.</p>
+        </div>
+        <div class="nl-right">
+          <div class="nl-form">
+            <div class="nl-input-wrap">
+              <i class="fa-regular fa-envelope nl-ico"></i>
+              <input type="email" id="nlEmail" placeholder="Enter your email address&hellip;" autocomplete="email">
+            </div>
+            <button class="nl-btn" id="nlBtn" type="button">
+              <span class="nbtn-txt">Subscribe <i class="fa-solid fa-arrow-right"></i></span>
+              <span class="nbtn-spin"><span class="spin-ring spin-dark"></span></span>
+            </button>
+          </div>
+          <p class="nl-note">
+            <i class="fa-solid fa-shield-halved"></i> No spam. Unsubscribe anytime.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+     FOOTER
+══════════════════════════════════ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+
+        <div class="footer-brand">
+          <a href="/home" class="logo footer-logo">
+            <i class="fa-solid fa-mortar-pestle ft-logo-ico"></i>
+            <div class="logo-text">
+              <span class="logo-main ft-logo-main">Shri Govind Pharmacy</span>
+              <span class="brand-sub ft-brand-sub">Ayurvedic &amp; Herbal Wellness</span>
+            </div>
+          </a>
+          <p>Your trusted source for authentic Ayurvedic medicines and herbal wellness products since 1998.</p>
+          <div class="ft-socials">
+            <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+              <i class="fa-brands fa-whatsapp"></i>
+            </a>
+            <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="/home"><i class="fa-solid fa-chevron-right"></i> Home</a></li>
+            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Products</a></li>
+            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> About Us</a></li>
+            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Consult Doctor</a></li>
+            <li><a href="/contact" class="ft-active"><i class="fa-solid fa-chevron-right"></i> Contact</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Categories</h4>
+          <ul>
+            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Immunity Boosters</a></li>
+            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Digestive Health</a></li>
+            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Skin &amp; Hair</a></li>
+            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Joint &amp; Bone</a></li>
+            <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Stress &amp; Sleep</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Contact Info</h4>
+          <ul class="ft-contact">
+            <li>
+              <i class="fa-solid fa-location-dot"></i>
+              <span>Near Bus Stand, Sikar, Rajasthan &ndash; 332001</span>
+            </li>
+            <li>
+              <i class="fa-solid fa-phone"></i>
+              <a href="tel:+919876543210">+91 98765 43210</a>
+            </li>
+            <li>
+              <i class="fa-regular fa-envelope"></i>
+              <a href="mailto:info@shrigovindpharmacy.com">info@shrigovindpharmacy.com</a>
+            </li>
+            <li>
+              <i class="fa-solid fa-clock"></i>
+              <span>Mon&ndash;Sat: 8 AM &ndash; 9 PM</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2025 Shri Govind Pharmacy. All Rights Reserved.</p>
+        <div class="fb-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Sitemap</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Zone -->
+  <div class="toast-zone" id="toastZone" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Back to Top -->
+  <button class="btt" id="bttBtn" aria-label="Back to top">
+    <i class="fa-solid fa-chevron-up"></i>
+  </button>
+
+  <script src="js/contact.js"></script>
+</body>
+
+</html>

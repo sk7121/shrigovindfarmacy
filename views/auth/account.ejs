@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shri Govind Pharmacy — Account</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+    rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Auth Page Stylesheet -->
+  <link rel="stylesheet" href="/css/account.css">
+
+  <!-- Theme Script (run before page renders) -->
+  <script src="/js/theme.js"></script>
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════
+       TOPBAR
+  ══════════════════════════════════ -->
+  <div class="topbar">
+    <i class="fa-solid fa-leaf"></i>
+    100% Natural Ayurvedic Products &nbsp;|&nbsp;
+    Free Delivery on Orders ₹499+ &nbsp;|&nbsp;
+    Call: +91 98765 43210
+  </div>
+
+  <!-- ══════════════════════════════════
+       HEADER / NAVBAR
+  ══════════════════════════════════ -->
+  <header class="main-header">
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-flex">
+
+          <!-- Logo -->
+          <a href="#" class="logo">
+            <i class="fa-solid fa-mortar-pestle"></i>
+            <div class="logo-text">
+              <span class="logo-main">Shri Govind Pharmacy</span>
+              <span class="brand-sub">Ayurvedic &amp; Herbal Wellness</span>
+            </div>
+          </a>
+
+          <!-- Nav Actions -->
+          <div class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+              <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+            <a href="/home" class="btn btn-outline home-btn">
+              <i class="fa-solid fa-house"></i> <span>Home</span>
+            </a>
+            <button class="hamburger" id="hamburger" aria-label="Open Menu" aria-expanded="false">
+              <span></span><span></span><span></span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="/home"><i class="fa-solid fa-house"></i> Home</a>
+      <a href="/login"><i class="fa-solid fa-sign-in-alt"></i> Sign In</a>
+      <a href="/signIn"><i class="fa-solid fa-user-plus"></i> Create Account</a>
+      <a href="/contact"><i class="fa-solid fa-envelope"></i> Contact</a>
+      <a href="/aboutUs"><i class="fa-solid fa-info-circle"></i> About Us</a>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════
+       BREADCRUMB
+  ══════════════════════════════════ -->
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <div class="breadcrumb">
+        <!-- <a href="#"><i class="fa-solid fa-house"></i> Home</a> -->
+        <a href="/home">
+          <i class="fa-solid fa-house"></i> Home
+        </a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span id="bc-current">My Account</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       MAIN AUTH LAYOUT
+  ══════════════════════════════════ -->
+  <main class="auth-page">
+
+    <!-- ── LEFT: Visual / Branding Panel ── -->
+    <aside class="auth-visual">
+
+      <div>
+        <div class="visual-badge">
+          <i class="fa-solid fa-certificate"></i>
+          Trusted Since 1998 · 25+ Years
+        </div>
+
+        <h2 class="visual-headline">
+          Nature's <em>Wisdom</em>,<br>Delivered to You
+        </h2>
+
+        <p class="visual-sub">
+          Join thousands of families who trust Shri Govind Pharmacy for
+          authentic, certified Ayurvedic medicines and herbal wellness products.
+        </p>
+
+        <div class="visual-features">
+          <div class="visual-feat">
+            <div class="feat-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <span>100% Authentic &amp; Lab-Tested Products</span>
+          </div>
+          <div class="visual-feat">
+            <div class="feat-icon"><i class="fa-solid fa-truck-fast"></i></div>
+            <span>Fast Delivery across India — 2–4 Days</span>
+          </div>
+          <div class="visual-feat">
+            <div class="feat-icon"><i class="fa-solid fa-user-doctor"></i></div>
+            <span>Free Ayurvedic Doctor Consultation</span>
+          </div>
+          <div class="visual-feat">
+            <div class="feat-icon"><i class="fa-solid fa-rotate-left"></i></div>
+            <span>Easy 7-Day Return &amp; Refund Policy</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="visual-stats">
+        <div class="stat-item">
+          <div class="stat-num">12K+</div>
+          <div class="stat-label">Happy Customers</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">500+</div>
+          <div class="stat-label">Herbal Products</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">25+</div>
+          <div class="stat-label">Years Trusted</div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ── RIGHT: Form Panel ── -->
+    <section class="auth-form-side">
+
+      <% if (success && success.length) { %>
+        <div class="flash success">
+          <%= success %>
+        </div>
+        <% } %>
+          <% if (error && error.length) { %>
+            <div class="flash error">
+              <%= error %>
+            </div>
+            <% } %>
+              <% if (info && info.length) { %>
+                <div class="flash info">
+                  <%= info %>
+                </div>
+                <% } %>
+
+              <!-- ════════════════════════
+           USER DASHBOARD (When Logged In)
+      ════════════════════════ -->
+              <% if (typeof user !=='undefined' && user) { %>
+                <div class="dashboard-panel">
+
+                  <div class="dashboard-header">
+                    <div class="user-info">
+                      <div class="user-avatar">
+                        <i class="fa-solid fa-user-circle"></i>
+                      </div>
+                      <div class="user-details">
+                        <h2>Welcome, <%= user.name %>!</h2>
+                        <p class="user-email"><i class="fa-solid fa-envelope"></i>
+                          <%= user.email %>
+                        </p>
+                        <% if (user.phone) { %>
+                          <p class="user-phone"><i class="fa-solid fa-phone"></i>
+                            <%= user.phone %>
+                          </p>
+                          <% } %>
+                      </div>
+                    </div>
+                    <form action="/logout" method="POST" style="margin:0;">
+                      <button type="submit" class="btn-logout">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                      </button>
+                    </form>
+                  </div>
+
+                  <!-- User Profile Section -->
+                  <div class="dashboard-section">
+                    <div class="section-header">
+                      <h3><i class="fa-solid fa-user"></i> Profile Information</h3>
+                    </div>
+                    <div class="profile-grid">
+                      <div class="profile-item">
+                        <label>Full Name</label>
+                        <div class="profile-value">
+                          <%= user.name || 'Not provided' %>
+                        </div>
+                      </div>
+                      <div class="profile-item">
+                        <label>Email Address</label>
+                        <div class="profile-value">
+                          <%= user.email || 'Not provided' %>
+                        </div>
+                      </div>
+                      <% if (user.phone) { %>
+                        <div class="profile-item">
+                          <label>Phone Number</label>
+                          <div class="profile-value">
+                            <%= user.phone %>
+                          </div>
+                        </div>
+                        <% } %>
+                          <% if (user.address) { %>
+                            <div class="profile-item">
+                              <label>Address</label>
+                              <div class="profile-value">
+                                <%= user.address %>
+                              </div>
+                            </div>
+                            <% } %>
+                              <div class="profile-item">
+                                <label>Member Since</label>
+                                <div class="profile-value">
+                                  <%= new Date(user.createdAt).toLocaleDateString('en-IN', { day: 'numeric' ,
+                                    month: 'long' , year: 'numeric' }) %>
+                                </div>
+                              </div>
+                    </div>
+                  </div>
+
+                  <!-- Appointments Section -->
+                  <div class="dashboard-section">
+                    <div class="section-header">
+                      <h3><i class="fa-solid fa-calendar-check"></i> My Appointments</h3>
+                      <a href="/doctor" class="btn-book">
+                        <i class="fa-solid fa-plus"></i> Book New
+                      </a>
+                    </div>
+
+                    <% if (typeof appointments !=='undefined' && appointments && appointments.length> 0) { %>
+                      <div class="appointments-list">
+                        <% appointments.forEach(apt=> { %>
+                          <a href="/appointment/<%= apt._id.toString() %>" class="appointment-card-link">
+                            <div class="appointment-card status-<%= apt.status.toLowerCase() %>">
+                              <div class="apt-header">
+                                <div class="apt-doctor">
+                                  <i class="fa-solid fa-user-doctor"></i>
+                                  <strong>
+                                    <%= apt.doctor?.name || 'Doctor' %>
+                                  </strong>
+                                </div>
+                                <span class="apt-status">
+                                  <%= apt.status %>
+                                </span>
+                              </div>
+                              <div class="apt-details">
+                                <div class="apt-item">
+                                  <i class="fa-regular fa-calendar"></i>
+                                  <span>
+                                    <%= new Date(apt.appointmentDate).toLocaleDateString('en-IN', { day: 'numeric' ,
+                                      month: 'short' , year: 'numeric' }) %>
+                                  </span>
+                                </div>
+                                <div class="apt-item">
+                                  <i class="fa-regular fa-clock"></i>
+                                  <span>
+                                    <%= apt.appointmentTime %>
+                                  </span>
+                                </div>
+                                <div class="apt-item">
+                                  <i class="fa-solid fa-video"></i>
+                                  <span>
+                                    <%= apt.appointmentType %>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </a>
+                          <% }) %>
+                      </div>
+                      <% } else { %>
+                        <div class="empty-state">
+                          <i class="fa-regular fa-calendar-xmark"></i>
+                          <p>No appointments booked yet</p>
+                          <a href="/doctor" class="btn-primary">
+                            <i class="fa-solid fa-calendar-check"></i> Book Your First Appointment
+                          </a>
+                        </div>
+                        <% } %>
+                  </div>
+
+                  <!-- Recent Orders Section -->
+                  <div class="dashboard-section">
+                    <div class="section-header">
+                      <h3><i class="fa-solid fa-bag-shopping"></i> Recent Orders</h3>
+                      <a href="/user/orders" class="btn-view-all">View All</a>
+                    </div>
+
+                    <% if (typeof orders !=='undefined' && orders && orders.length> 0) { %>
+                      <div class="orders-list">
+                        <% orders.forEach(order=> { %>
+                          <div class="order-card">
+                            <div class="order-header">
+                              <span class="order-id">Order #<%= order._id.toString().slice(-6) %></span>
+                              <span class="order-status status-<%= order.status.toLowerCase() %>">
+                                <%= order.status %>
+                              </span>
+                            </div>
+                            <div class="order-details">
+                              <span>
+                                <%= order.items?.length || 0 %> items
+                              </span>
+                              <span class="order-amount">₹<%= order.totalAmount %></span>
+                            </div>
+                            <div class="order-date">
+                              <i class="fa-regular fa-clock"></i>
+                              <%= new Date(order.createdAt).toLocaleDateString('en-IN') %>
+                            </div>
+                          </div>
+                          <% }) %>
+                      </div>
+                      <% } else { %>
+                        <div class="empty-state">
+                          <i class="fa-solid fa-bag-shopping"></i>
+                          <p>No orders yet</p>
+                          <a href="/home" class="btn-primary">
+                            <i class="fa-solid fa-store"></i> Start Shopping
+                          </a>
+                        </div>
+                        <% } %>
+                  </div>
+
+                </div>
+                <% } else { %>
+
+                  <!-- TABS -->
+                  <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Sign In</button>
+                    <button class="auth-tab" data-tab="signup">Create Account</button>
+                  </div>
+
+                  <!-- ════════════════════════
+           LOGIN PANEL
+      ════════════════════════ -->
+                  <div class="form-panel active" id="panel-login">
+
+                    <div class="panel-head">
+                      <div class="panel-title">Welcome Back 🙏</div>
+                      <div class="panel-sub">Sign in to your Shri Govind Pharmacy account to continue.</div>
+                    </div>
+
+                    <form id="form-login" action="/login" method="post">
+
+                      <!-- Redirect URL (hidden field) -->
+                      <input type="hidden" id="redirect-url" name="redirect" value="">
+
+                      <!-- Email / Mobile -->
+                      <div class="field">
+                        <label class="field-label" for="l-email">Email / Mobile Number</label>
+                        <div class="field-wrap">
+                          <input class="field-input" id="l-email" name="email" type="email"
+                            placeholder="you@example.com or 9876543210" autocomplete="email">
+                          <i class="fa-solid fa-envelope field-icon"></i>
+                        </div>
+                        <div class="field-err" id="e-l-email">
+                          <i class="fa-solid fa-circle-exclamation"></i>
+                          Enter a valid email or mobile number.
+                        </div>
+                      </div>
+
+                      <!-- Password -->
+                      <div class="field">
+                        <label class="field-label" for="l-password">Password</label>
+                        <div class="field-wrap">
+                          <input class="field-input has-eye" name="password" id="l-password" type="password"
+                            placeholder="Your password" autocomplete="current-password">
+                          <i class="fa-solid fa-lock field-icon"></i>
+                          <button type="button" class="toggle-pw" data-t="l-password">
+                            <i class="fa-regular fa-eye"></i>
+                          </button>
+                        </div>
+                        <div class="field-err" id="e-l-password">
+                          <i class="fa-solid fa-circle-exclamation"></i>
+                          Password is required.
+                        </div>
+                      </div>
+
+                      <!-- Remember Me / Forgot -->
+                      <div class="form-opts">
+                        <label class="check-wrap">
+                          <input type="checkbox" id="remember">
+                          <div class="check-box"></div>
+                          <span class="check-label">Remember me</span>
+                        </label>
+                        <a href="/forgot-password.html" class="form-link" id="go-forgot">Forgot Password?</a>
+                      </div>
+
+                      <!-- OTP Login Link -->
+                      <div style="text-align: center; margin: 15px 0;">
+                        <a href="/otp-login"
+                          style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.95rem;">
+                          <i class="fa-solid fa-shield-halved"></i> Login with OTP (Passwordless)
+                        </a>
+                      </div>
+
+                      <!-- Admin Login Link -->
+                      <div style="text-align: center; margin: 15px 0;">
+                        <a href="/admin/login"
+                          style="color: var(--warning); text-decoration: none; font-weight: 600; font-size: 0.95rem;">
+                          <i class="fa-solid fa-user-shield"></i> Admin Login
+                        </a>
+                      </div>
+
+                      <!-- Agent Login Link -->
+                      <div style="text-align: center; margin: 15px 0;">
+                        <a href="/agent/login"
+                          style="color: var(--warning); text-decoration: none; font-weight: 600; font-size: 0.95rem;">
+                          _<i><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-640v-200h280v200H120Zm80-80h120v-40H200v40Zm-5 485q-35-35-35-85H80v-120q0-66 47-113t113-47h160v200h140l140-174v-106H560v-80h120q33 0 56.5 23.5T760-680v134L580-320H400q0 50-35 85t-85 35q-50 0-85-35Zm113.5-56.5Q320-303 320-320h-80q0 17 11.5 28.5T280-280q17 0 28.5-11.5ZM675-235q-35-35-35-85t35-85q35-35 85-35t85 35q35 35 35 85t-35 85q-35 35-85 35t-85-35Zm113.5-56.5Q800-303 800-320t-11.5-28.5Q777-360 760-360t-28.5 11.5Q720-337 720-320t11.5 28.5Q743-280 760-280t28.5-11.5ZM160-400h160v-120h-80q-33 0-56.5 23.5T160-440v40Zm160-320v-40 40Zm0 320Z"/></svg></i>_ Agent Login
+                        </a>
+                      </div>
+
+                      <!-- Submit -->
+                      <button type="submit" class="btn-submit">
+                        <span class="btn-txt">
+                          <i class="fa-solid fa-right-to-bracket"></i>&nbsp; Sign In
+                        </span>
+                        <span class="btn-spin">
+                          <div class="spin-ring"></div>
+                        </span>
+                      </button>
+
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="divider">
+                      <div class="div-line"></div>
+                      <div class="div-txt">or continue with</div>
+                      <div class="div-line"></div>
+                    </div>
+
+                    <!-- Social Buttons -->
+                    <div class="social-row">
+                      <a href="/auth/google" class="btn-social" style="text-decoration: none;">
+                        <i class="fa-brands fa-google" style="color:#db4437;"></i> Google
+                      </a>
+                      <button class="btn-social" onclick="socialClick()">
+                        <i class="fa-brands fa-facebook" style="color:#1877f2;"></i> Facebook
+                      </button>
+                      <button class="btn-social" onclick="socialClick()">
+                        <i class="fa-brands fa-apple"></i> Apple
+                      </button>
+                    </div>
+
+                    <p class="terms-note">
+                      By signing in, you agree to our
+                      <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+                    </p>
+
+                  </div><!-- /panel-login -->
+
+                  <!-- ════════════════════════
+           SIGNUP PANEL
+      ════════════════════════ -->
+                  <div class="form-panel" id="panel-signup">
+
+                    <div class="panel-head">
+                      <div class="panel-title">Create Your Account</div>
+                      <div class="panel-sub">Join us for exclusive deals, order tracking &amp; Ayurvedic tips.</div>
+                    </div>
+
+                    <form id="form-signup" action="/signIn" method="post">
+
+                      <!-- Name Row -->
+                      <div class="field-row">
+                        <div class="field">
+                          <label class="field-label" for="s-fname">First Name</label>
+                          <div class="field-wrap">
+                            <input class="field-input" id="s-fname" name="fname" type="text" placeholder="Ramesh"
+                              autocomplete="given-name">
+                            <i class="fa-solid fa-user field-icon"></i>
+                          </div>
+                          <div class="field-err" id="e-s-fname">
+                            <i class="fa-solid fa-circle-exclamation"></i> Required.
+                          </div>
+                        </div>
+                        <div class="field">
+                          <label class="field-label" for="s-lname">Last Name</label>
+                          <div class="field-wrap">
+                            <input class="field-input" id="s-lname" name="lname" type="text" placeholder="Sharma"
+                              autocomplete="family-name">
+                            <i class="fa-solid fa-user field-icon"></i>
+                          </div>
+                          <div class="field-err" id="e-s-lname">
+                            <i class="fa-solid fa-circle-exclamation"></i> Required.
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Email -->
+                      <div class="field">
+                        <label class="field-label" for="s-email">Email Address</label>
+                        <div class="field-wrap">
+                          <input class="field-input" id="s-email" name="email" type="email"
+                            placeholder="you@example.com" autocomplete="email">
+                          <i class="fa-solid fa-envelope field-icon"></i>
+                        </div>
+                        <div class="field-err" id="e-s-email">
+                          <i class="fa-solid fa-circle-exclamation"></i> Enter a valid email.
+                        </div>
+                      </div>
+
+                      <!-- Mobile -->
+                      <div class="field">
+                        <label class="field-label" for="s-phone">Mobile Number</label>
+                        <div class="field-wrap">
+                          <input class="field-input" id="s-phone" name="phone" type="tel" placeholder="9876543210"
+                            autocomplete="tel" maxlength="10">
+                          <i class="fa-solid fa-phone field-icon"></i>
+                        </div>
+                        <div class="field-err" id="e-s-phone">
+                          <i class="fa-solid fa-circle-exclamation"></i> Enter a valid 10-digit mobile number.
+                        </div>
+                      </div>
+
+                      <!-- City & State Row -->
+                      <div class="field-row">
+                        <div class="field">
+                          <label class="field-label" for="s-city">City</label>
+                          <div class="field-wrap">
+                            <input class="field-input" name="city" id="s-city" type="text" placeholder="Jaipur"
+                              autocomplete="address-level2">
+                            <i class="fa-solid fa-location-dot field-icon"></i>
+                          </div>
+                        </div>
+                        <div class="field">
+                          <label class="field-label" for="s-state">State</label>
+                          <div class="field-wrap">
+                            <input class="field-input" id="s-state" name="state" type="text" placeholder="Rajasthan"
+                              autocomplete="address-level1">
+                            <i class="fa-solid fa-map field-icon"></i>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Password -->
+                      <div class="field">
+                        <label class="field-label" for="s-password">Password</label>
+                        <div class="field-wrap">
+                          <input class="field-input has-eye" name="password" id="s-password" type="password"
+                            placeholder="Create a strong password" autocomplete="new-password">
+                          <i class="fa-solid fa-lock field-icon"></i>
+                          <button type="button" class="toggle-pw" data-t="s-password">
+                            <i class="fa-regular fa-eye"></i>
+                          </button>
+                        </div>
+                        <!-- Strength Meter -->
+                        <div class="pw-strength">
+                          <div class="strength-segs">
+                            <div class="seg" id="sg1"></div>
+                            <div class="seg" id="sg2"></div>
+                            <div class="seg" id="sg3"></div>
+                            <div class="seg" id="sg4"></div>
+                          </div>
+                          <div class="strength-txt" id="s-strength-lbl">Enter a password</div>
+                        </div>
+                        <div class="field-err" id="e-s-password">
+                          <i class="fa-solid fa-circle-exclamation"></i> Minimum 8 characters required.
+                        </div>
+                      </div>
+
+                      <!-- Confirm Password -->
+                      <div class="field">
+                        <label class="field-label" for="s-cpassword">Confirm Password</label>
+                        <div class="field-wrap">
+                          <input class="field-input has-eye" name="confirm_password" id="s-cpassword" type="password"
+                            placeholder="Repeat your password" autocomplete="new-password">
+                          <i class="fa-solid fa-key field-icon"></i>
+                          <button type="button" class="toggle-pw" data-t="s-cpassword">
+                            <i class="fa-regular fa-eye"></i>
+                          </button>
+                        </div>
+                        <div class="field-err" id="e-s-cpassword">
+                          <i class="fa-solid fa-circle-exclamation"></i> Passwords do not match.
+                        </div>
+                      </div>
+
+                      <!-- Terms Checkbox -->
+                      <div class="form-opts" style="margin-bottom:18px;">
+                        <label class="check-wrap">
+                          <input type="checkbox" id="agree">
+                          <div class="check-box"></div>
+                          <span class="check-label">
+                            I agree to the
+                            <a class="form-link" href="#">Terms</a> &amp;
+                            <a class="form-link" href="#">Privacy Policy</a>
+                          </span>
+                        </label>
+                      </div>
+
+                      <!-- Submit -->
+                      <button type="submit" class="btn-submit">
+                        <span class="btn-txt">
+                          <i class="fa-solid fa-user-plus"></i>&nbsp; Create Account
+                        </span>
+                        <span class="btn-spin">
+                          <div class="spin-ring"></div>
+                        </span>
+                      </button>
+
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="divider">
+                      <div class="div-line"></div>
+                      <div class="div-txt">or register with</div>
+                      <div class="div-line"></div>
+                    </div>
+
+                    <!-- Social Buttons -->
+                    <div class="social-row">
+                      <a href="/auth/google" class="btn-social" style="text-decoration: none;">
+                        <i class="fa-brands fa-google" style="color:#db4437;"></i> Google
+                      </a>
+                      <button class="btn-social" onclick="socialClick()">
+                        <i class="fa-brands fa-facebook" style="color:#1877f2;"></i> Facebook
+                      </button>
+                    </div>
+
+                    <p class="terms-note">
+                      Your data is protected. We follow DPDP Act 2023 guidelines.
+                      <a href="#">Privacy Policy</a>
+                    </p>
+
+                  </div><!-- /panel-signup -->
+
+                  <!-- ════════════════════════
+           FORGOT PASSWORD PANEL
+      ════════════════════════ -->
+                  <div class="form-panel" id="panel-forgot">
+
+                    <div class="panel-head">
+                      <div class="panel-title">Reset Password 🔐</div>
+                      <div class="panel-sub">We'll send an OTP to your registered email or mobile number.</div>
+                    </div>
+
+                    <!-- Step 1: Enter Email -->
+                    <div id="forgot-step1">
+                      <div class="field">
+                        <label class="field-label" for="f-contact">Email or Mobile Number</label>
+                        <div class="field-wrap">
+                          <input class="field-input" id="f-contact" type="text" name="email"
+                            placeholder="you@example.com or 9876543210">
+                          <i class="fa-solid fa-paper-plane field-icon"></i>
+                        </div>
+                        <div class="field-err" id="e-f-contact">
+                          <i class="fa-solid fa-circle-exclamation"></i>
+                          Please enter a valid email or mobile.
+                        </div>
+                      </div>
+
+                      <!-- Submit -->
+                      <button type="button" class="btn-submit" id="btn-send-otp" style="margin-bottom:12px;">
+                        <span class="btn-txt">
+                          <i class="fa-solid fa-shield-halved"></i>&nbsp; Send Reset OTP
+                        </span>
+                        <span class="btn-spin">
+                          <div class="spin-ring"></div>
+                        </span>
+                      </button>
+
+                      <!-- Back to Login -->
+                      <button type="button" class="btn-back" id="back-login">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Sign In
+                      </button>
+                    </div>
+
+                    <!-- Step 2: Enter OTP and New Password -->
+                    <div id="forgot-step2" style="display: none;">
+                      <div class="field">
+                        <label class="field-label" for="f-otp">Enter 6-Digit OTP</label>
+                        <div class="field-wrap">
+                          <input class="field-input" id="f-otp" type="text" maxlength="6"
+                            placeholder="Enter OTP sent to your email">
+                          <i class="fa-solid fa-key field-icon"></i>
+                        </div>
+                        <div class="field-err" id="e-f-otp">
+                          <i class="fa-solid fa-circle-exclamation"></i>
+                          Please enter the 6-digit OTP.
+                        </div>
+                      </div>
+
+                      <!-- New Password -->
+                      <div class="field">
+                        <label class="field-label" for="f-password">New Password</label>
+                        <div class="field-wrap">
+                          <input class="field-input has-eye" id="f-password" type="password"
+                            placeholder="Enter new password">
+                          <i class="fa-solid fa-lock field-icon"></i>
+                          <button type="button" class="toggle-pw" data-t="f-password">
+                            <i class="fa-regular fa-eye"></i>
+                          </button>
+                        </div>
+                        <!-- Strength Meter -->
+                        <div class="pw-strength">
+                          <div class="strength-segs">
+                            <div class="seg" id="fg1"></div>
+                            <div class="seg" id="fg2"></div>
+                            <div class="seg" id="fg3"></div>
+                            <div class="seg" id="fg4"></div>
+                          </div>
+                          <div class="strength-txt" id="f-strength-lbl">Enter a password</div>
+                        </div>
+                        <div class="field-err" id="e-f-password">
+                          <i class="fa-solid fa-circle-exclamation"></i>
+                          Minimum 8 characters required.
+                        </div>
+                      </div>
+
+                      <!-- Confirm Password -->
+                      <div class="field">
+                        <label class="field-label" for="f-cpassword">Confirm Password</label>
+                        <div class="field-wrap">
+                          <input class="field-input has-eye" id="f-cpassword" type="password"
+                            placeholder="Confirm new password">
+                          <i class="fa-solid fa-key field-icon"></i>
+                          <button type="button" class="toggle-pw" data-t="f-cpassword">
+                            <i class="fa-regular fa-eye"></i>
+                          </button>
+                        </div>
+                        <div class="field-err" id="e-f-cpassword">
+                          <i class="fa-solid fa-circle-exclamation"></i>
+                          Passwords do not match.
+                        </div>
+                      </div>
+
+                      <!-- Resend OTP -->
+                      <div style="text-align: center; margin: 15px 0;">
+                        <button type="button" id="btn-resend-otp"
+                          style="background: none; border: none; color: var(--primary); cursor: pointer; font-weight: 600; font-size: 0.95rem;">
+                          <i class="fa-solid fa-redo"></i> Resend OTP
+                        </button>
+                      </div>
+
+                      <!-- Submit Reset -->
+                      <button type="button" class="btn-submit" id="btn-reset-password" style="margin-bottom:12px;">
+                        <span class="btn-txt">
+                          <i class="fa-solid fa-save"></i>&nbsp; Reset Password
+                        </span>
+                        <span class="btn-spin">
+                          <div class="spin-ring"></div>
+                        </span>
+                      </button>
+
+                      <!-- Back to Login -->
+                      <button type="button" class="btn-back" onclick="showForgotStep1()">
+                        <i class="fa-solid fa-arrow-left"></i> Back
+                      </button>
+                    </div>
+
+                    <p class="terms-note" style="margin-top:16px;">
+                      Didn't receive anything? Check your spam folder or
+                      <a href="#">contact support</a>.
+                    </p>
+
+                  </div><!-- /panel-forgot -->
+
+                  <% } %>
+                    <!-- End logged in check -->
+
+    </section><!-- /auth-form-side -->
+
+  </main><!-- /auth-page -->
+
+  <!-- ══════════════════════════════════
+       FOOTER STRIP
+  ══════════════════════════════════ -->
+  <footer class="auth-footer-strip">
+    © 2025 Shri Govind Pharmacy. All Rights Reserved.
+    &nbsp;|&nbsp; <a href="#">Privacy Policy</a>
+    &nbsp;|&nbsp; <a href="#">Terms</a>
+    &nbsp;|&nbsp; <a href="#">Contact Us</a>
+  </footer>
+
+  <!-- Toast Container -->
+  <div class="toast-zone" id="toastZone"></div>
+
+  <!-- Display Flash Messages -->
+  <% if (typeof success !=='undefined' && success) { %>
+    <script>
+      window.addEventListener('DOMContentLoaded', function () {
+        toast('<%- success %>', 'success');
+      });
+    </script>
+    <% } %>
+
+      <% if (typeof error !=='undefined' && error) { %>
+        <script>
+          window.addEventListener('DOMContentLoaded', function () {
+            toast('<%- error %>', 'error');
+          });
+        </script>
+        <% } %>
+
+          <!-- Auth Page Script -->
+          <script src="/js/account.js"></script>
+</body>
+
+</html>

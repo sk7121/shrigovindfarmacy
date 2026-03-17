@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Agent Login — Shri Govind Pharmacy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1c8125; --primary-dark: #145a1a; --secondary: #e67e22;
+            --bg: #f8f9fa; --surface: #ffffff; --text: #1a1a1a;
+            --text-muted: #6c757d; --border: #e9ecef;
+            --success: #28a745; --danger: #dc3545; --warning: #ffc107;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #121212; --surface: #1e1e1e; --text: #e0e0e0;
+            --text-muted: #a0a0a0; --border: #2d2d2d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+        }
+        
+        .flash {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .flash.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flash.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text);
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            background: var(--surface);
+            color: var(--text);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .form-footer p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .benefits {
+            margin-top: 25px;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        
+        .benefits h3 {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .benefits ul {
+            list-style: none;
+        }
+        
+        .benefits li {
+            padding: 8px 0;
+            font-size: 13px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .benefits li i {
+            color: var(--success);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-motorcycle"></i>
+            </div>
+            <h1>Agent Login</h1>
+            <p>Welcome back! Continue your deliveries</p>
+            <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode" style="position: absolute; top: 20px; right: 20px; background: transparent; border: 2px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; color: var(--text);">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+        </div>
+
+        <% if (locals.success && locals.success.length > 0) { %>
+            <div class="flash success"><%= success %></div>
+        <% } %>
+        <% if (locals.error && locals.error.length > 0) { %>
+            <div class="flash error"><%= error %></div>
+        <% } %>
+
+        <form action="/agent/login" method="POST">
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email or Phone</label>
+                <input type="text" name="email" placeholder="Enter email or phone number" required>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" name="password" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+
+        <div class="form-footer">
+            <p>Don't have an account?</p>
+            <a href="/agent/register"><i class="fas fa-user-plus"></i> Register as Delivery Partner</a>
+        </div>
+
+        <div class="benefits">
+            <h3><i class="fas fa-star"></i> Why Become a Partner?</h3>
+            <ul>
+                <li><i class="fas fa-check-circle"></i> Flexible working hours</li>
+                <li><i class="fas fa-check-circle"></i> Earn based on deliveries</li>
+                <li><i class="fas fa-check-circle"></i> Weekly payments</li>
+                <li><i class="fas fa-check-circle"></i> Be your own boss</li>
+                <li><i class="fas fa-check-circle"></i> Supportive team environment</li>
+            </ul>
+        </div>
+
+        <div class="form-footer" style="border: none; padding-top: 0;">
+            <p style="font-size: 12px;">
+                <a href="/home" style="color: var(--text-muted);"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="/js/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Cart — Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Cart Stylesheet -->
+  <link rel="stylesheet" href="/css/cart.css">
+
+  <script src="/js/theme.js"></script>
+
+  <style>
+    /* Toast Notifications */
+    .toast-zone {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .toast {
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 300px;
+      transform: translateX(100%);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-left: 4px solid #28a745;
+    }
+
+    .toast.error {
+      border-left: 4px solid #dc3545;
+    }
+
+    .toast.info {
+      border-left: 4px solid #17a2b8;
+    }
+
+    .toast i {
+      font-size: 1.25rem;
+    }
+
+    .toast.success i {
+      color: #28a745;
+    }
+
+    .toast.error i {
+      color: #dc3545;
+    }
+
+    .toast.info i {
+      color: #17a2b8;
+    }
+
+    @media (max-width: 768px) {
+      .toast-zone {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+      }
+
+      .toast {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+
+  <!-- ══ TOPBAR ══ -->
+  <div class="topbar">
+    <i class="fa-solid fa-leaf"></i>
+    100% Natural Ayurvedic Products &nbsp;|&nbsp;
+    Free Delivery on Orders ₹499+ &nbsp;|&nbsp;
+    Call: +91 98765 43210
+  </div>
+
+  <!-- ══ HEADER ══ -->
+  <header class="main-header">
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-flex">
+          <a href="/home" class="logo">
+            <i class="fa-solid fa-mortar-pestle"></i>
+            <div class="logo-text">
+              <span class="logo-main">Shri Govind Pharmacy</span>
+              <span class="brand-sub">Ayurvedic &amp; Herbal Wellness</span>
+            </div>
+          </a>
+          <div class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+              <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+            <a href="/home" class="btn btn-outline">
+              <i class="fa-solid fa-house"></i> <span class="btn-label">Home</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ══ BREADCRUMB ══ -->
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/home"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span>My Cart</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE HERO ══ -->
+  <div class="cart-hero">
+    <div class="container">
+      <div class="cart-hero-inner">
+        <div class="cart-hero-text">
+          <h1><i class="fa-solid fa-cart-shopping"></i> My Cart</h1>
+          <p>Review your selected Ayurvedic products before checkout.</p>
+        </div>
+        <div class="cart-count-badge" id="hero-count">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span id="hero-count-num"><%= typeof totalItems !== 'undefined' ? totalItems : 0 %></span> Items
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MAIN CONTENT ══ -->
+  <main class="cart-page">
+    <div class="container">
+
+      <!-- Flash Messages -->
+      <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success" style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <i class="fa-solid fa-check-circle"></i> <%= success %>
+      </div>
+      <% } %>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-error" style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <i class="fa-solid fa-exclamation-circle"></i> <%= error %>
+      </div>
+      <% } %>
+
+      <!-- ── PROGRESS STEPS ── -->
+      <div class="progress-bar-wrap">
+        <div class="progress-steps">
+          <div class="step active">
+            <div class="step-circle"><i class="fa-solid fa-cart-shopping"></i></div>
+            <div class="step-label">Cart</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step">
+            <div class="step-circle"><i class="fa-solid fa-location-dot"></i></div>
+            <div class="step-label">Address</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step">
+            <div class="step-circle"><i class="fa-solid fa-credit-card"></i></div>
+            <div class="step-label">Payment</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step">
+            <div class="step-circle"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="step-label">Confirmed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── COUPON STRIP ── -->
+      <div class="coupon-strip" id="coupon-strip">
+        <div class="coupon-left">
+          <i class="fa-solid fa-tag"></i>
+          <span>Have a coupon code?</span>
+        </div>
+        <div class="coupon-right">
+          <input type="text" class="coupon-input" id="coupon-input" placeholder="Enter code (e.g. AYUR20)">
+          <button class="coupon-btn" id="coupon-apply">Apply</button>
+        </div>
+      </div>
+
+      <!-- ── GRID ── -->
+      <div class="cart-grid">
+
+        <!-- LEFT: Cart Items -->
+        <div class="cart-left">
+
+          <!-- Select All Bar -->
+          <div class="select-bar">
+            <label class="check-wrap">
+              <input type="checkbox" id="select-all">
+              <div class="check-box"></div>
+              <span class="check-label">Select All (<span id="total-items"><%= typeof totalItems !== 'undefined' ? totalItems : 0 %></span> items)</span>
+            </label>
+            <button class="btn-remove-selected" id="remove-selected">
+              <i class="fa-solid fa-trash-can"></i> Remove Selected
+            </button>
+          </div>
+
+          <!-- Cart Items List -->
+          <div class="cart-items-list" id="cart-items-list">
+            <% if (cart && cart.items && cart.items.length > 0) { %>
+            <% cart.items.forEach((item, index) => {
+                // Calculate discount percentage: ((Old Price - New Price) × 100) / Old Price
+                const discountPercent = item.product.oldPrice && item.product.oldPrice > 0 
+                    ? Math.round(((item.product.oldPrice - item.product.price) * 100) / item.product.oldPrice)
+                    : 0;
+              %>
+            <div class="cart-item" data-id="<%= item.product._id %>" data-price="<%= item.product.price %>">
+              <label class="item-check">
+                <input type="checkbox" class="item-cb" checked>
+                <div class="check-box"></div>
+              </label>
+              <div class="item-img">
+                <img src="<%= item.product.image || 'https://via.placeholder.com/80' %>" alt="<%= item.product.name %>" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div class="item-details">
+                <div class="item-brand"><%= item.product.category || 'Product' %></div>
+                <div class="item-name"><%= item.product.name %></div>
+                <div class="item-meta">
+                  <span class="meta-tag"><i class="fa-solid fa-seedling"></i> <%= item.product.category || 'Herbal' %></span>
+                  <% if (item.product.averageRating >= 4.5) { %>
+                  <span class="meta-tag out-tag"><i class="fa-solid fa-bolt"></i> Best Seller</span>
+                  <% } %>
+                </div>
+                <div class="item-price-row mobile-price">
+                  <span class="item-price">₹<%= item.product.price %></span>
+                  <% if (item.product.oldPrice && item.product.oldPrice > item.product.price) { %>
+                  <span class="item-mrp">₹<%= item.product.oldPrice %></span>
+                  <span class="item-discount"><%= discountPercent %>% off</span>
+                  <% } %>
+                </div>
+              </div>
+              <div class="item-right">
+                <div class="item-price-col">
+                  <div class="item-price">₹<%= item.product.price %></div>
+                  <% if (item.product.oldPrice && item.product.oldPrice > item.product.price) { %>
+                  <div class="item-mrp">₹<%= item.product.oldPrice %></div>
+                  <div class="item-discount"><%= discountPercent %>% off</div>
+                  <% } %>
+                </div>
+                <div class="qty-control">
+                  <button class="qty-btn minus" data-id="<%= item.product._id %>"><i class="fa-solid fa-minus"></i></button>
+                  <span class="qty-val" id="qty-<%= item.product._id %>"><%= item.quantity %></span>
+                  <button class="qty-btn plus" data-id="<%= item.product._id %>"><i class="fa-solid fa-plus"></i></button>
+                </div>
+                <div class="item-actions">
+                  <button class="btn-wishlist" title="Move to Wishlist" onclick="moveToWishlist('<%= item.product._id %>')">
+                    <i class="fa-regular fa-heart"></i> Save
+                  </button>
+                  <button class="btn-delete" data-id="<%= item.product._id %>" title="Remove" onclick="removeItem('<%= item.product._id %>')">
+                    <i class="fa-solid fa-trash-can"></i> Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+            <% }) %>
+            <% } else { %>
+            <!-- Empty Cart State -->
+            <div style="text-align: center; padding: 4rem 2rem;">
+              <div style="font-size: 5rem; color: var(--text-muted); opacity: 0.3; margin-bottom: 1rem;">
+                <i class="fa-solid fa-cart-shopping"></i>
+              </div>
+              <h3>Your Cart is Empty</h3>
+              <p style="color: var(--text-muted); margin: 1rem 0 2rem;">Looks like you haven't added any Ayurvedic products yet.</p>
+              <a href="/home#product" class="btn-primary-big" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: var(--primary); color: white; text-decoration: none; border-radius: 10px; font-weight: 600;">
+                <i class="fa-solid fa-store"></i> Browse Products
+              </a>
+            </div>
+            <% } %>
+          </div><!-- /cart-items-list -->
+
+          <!-- Empty State (hidden by default) -->
+          <div class="cart-empty" id="cart-empty" style="display:none;">
+            <div class="empty-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+            <h3>Your Cart is Empty</h3>
+            <p>Looks like you haven't added any Ayurvedic products yet.</p>
+            <a href="/home" class="btn-primary-big">
+              <i class="fa-solid fa-store"></i> Browse Products
+            </a>
+          </div>
+
+          <!-- Delivery Info Banner -->
+          <div class="delivery-banner" id="delivery-banner">
+            <i class="fa-solid fa-truck-fast"></i>
+            <div class="delivery-text">
+              <strong>Free Delivery Unlocked!</strong>
+              <span>Your order qualifies for free shipping across India.</span>
+            </div>
+            <div class="delivery-badge">FREE</div>
+          </div>
+
+          <!-- Recently Viewed / You May Also Like -->
+          <div class="also-like">
+            <div class="also-like-head">
+              <i class="fa-solid fa-sparkles"></i> You May Also Like
+            </div>
+            <div class="also-like-grid">
+              <div class="suggest-card">
+                <div class="suggest-img"><i class="fa-solid fa-leaf"></i></div>
+                <div class="suggest-name">Brahmi Tablets</div>
+                <div class="suggest-price">₹220</div>
+                <button class="suggest-add" onclick="toast('Added to Cart! 🛒','success')"><i class="fa-solid fa-plus"></i> Add</button>
+              </div>
+              <div class="suggest-card">
+                <div class="suggest-img"><i class="fa-solid fa-mortar-pestle"></i></div>
+                <div class="suggest-name">Shilajit Resin 20g</div>
+                <div class="suggest-price">₹899</div>
+                <button class="suggest-add" onclick="toast('Added to Cart! 🛒','success')"><i class="fa-solid fa-plus"></i> Add</button>
+              </div>
+              <div class="suggest-card">
+                <div class="suggest-img"><i class="fa-solid fa-spa"></i></div>
+                <div class="suggest-name">Kumkumadi Oil</div>
+                <div class="suggest-price">₹540</div>
+                <button class="suggest-add" onclick="toast('Added to Cart! 🛒','success')"><i class="fa-solid fa-plus"></i> Add</button>
+              </div>
+              <div class="suggest-card">
+                <div class="suggest-img"><i class="fa-solid fa-flask"></i></div>
+                <div class="suggest-name">Chyawanprash 500g</div>
+                <div class="suggest-price">₹320</div>
+                <button class="suggest-add" onclick="toast('Added to Cart! 🛒','success')"><i class="fa-solid fa-plus"></i> Add</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /cart-left -->
+
+        <!-- RIGHT: Order Summary -->
+        <div class="cart-right" id="order-summary">
+
+          <!-- Savings Banner -->
+          <div class="savings-banner">
+            <i class="fa-solid fa-piggy-bank"></i>
+            <span>You're saving <strong id="total-savings">₹<%= typeof productDiscount !== 'undefined' ? Math.round(productDiscount) : 0 %></strong> on this order!</span>
+          </div>
+
+          <!-- Summary Card -->
+          <div class="summary-card">
+            <div class="summary-head">
+              <i class="fa-solid fa-receipt"></i> Order Summary
+            </div>
+            <div class="summary-body">
+              <div class="summary-row">
+                <span>Price (<span id="s-items"><%= typeof totalItems !== 'undefined' ? totalItems : 0 %></span> items)</span>
+                <span id="s-original">₹<%= typeof mrpTotal !== 'undefined' ? Math.round(mrpTotal) : 0 %></span>
+              </div>
+              <div class="summary-row discount-row">
+                <span>Discount</span>
+                <span id="s-discount" class="green">−₹<%= typeof productDiscount !== 'undefined' ? Math.round(productDiscount) : 0 %></span>
+              </div>
+              <div class="summary-row" id="coupon-row" style="display:none;">
+                <span>Coupon Discount <span class="coupon-tag" id="applied-coupon-tag"></span></span>
+                <span id="s-coupon" class="green">−₹0</span>
+              </div>
+              <div class="summary-row">
+                <span>Delivery Charges</span>
+                <span id="s-delivery" class="green">FREE</span>
+              </div>
+              <div class="summary-row">
+                <span>GST (5%)</span>
+                <span id="s-gst">₹<%= typeof gst !== 'undefined' ? Math.round(gst) : 0 %></span>
+              </div>
+              <div class="summary-divider"></div>
+              <div class="summary-row total-row">
+                <span>Total Payable</span>
+                <span id="s-total">₹<%= typeof total !== 'undefined' ? Math.round(total) : 0 %></span>
+              </div>
+            </div>
+
+            <!-- Checkout Button -->
+            <a href="/checkout" class="btn-checkout" id="btn-checkout">
+              <span class="btn-txt"><i class="fa-solid fa-lock"></i>&nbsp; Proceed to Checkout</span>
+              <span class="btn-spin">
+                <div class="spin-ring"></div>
+              </span>
+            </a>
+
+            <p class="secure-note">
+              <i class="fa-solid fa-shield-halved"></i>
+              100% Secure Checkout · SSL Encrypted
+            </p>
+          </div>
+
+          <!-- Payment Methods -->
+          <div class="payment-methods">
+            <div class="pm-label">We Accept</div>
+            <div class="pm-icons">
+              <div class="pm-chip"><i class="fa-brands fa-cc-visa"></i> Visa</div>
+              <div class="pm-chip"><i class="fa-solid fa-mobile-screen-button"></i> UPI</div>
+              <div class="pm-chip"><i class="fa-brands fa-cc-mastercard"></i> Mastercard</div>
+              <div class="pm-chip"><i class="fa-solid fa-money-bill-wave"></i> COD</div>
+            </div>
+          </div>
+
+          <!-- Trust Badges -->
+          <div class="trust-grid">
+            <div class="trust-item">
+              <i class="fa-solid fa-rotate-left"></i>
+              <span>7-Day Returns</span>
+            </div>
+            <div class="trust-item">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>100% Authentic</span>
+            </div>
+            <div class="trust-item">
+              <i class="fa-solid fa-truck-fast"></i>
+              <span>Fast Delivery</span>
+            </div>
+            <div class="trust-item">
+              <i class="fa-solid fa-headset"></i>
+              <span>24/7 Support</span>
+            </div>
+          </div>
+
+          <!-- WhatsApp Help -->
+          <a href="https://wa.me/919876543210?text=I%20need%20help%20with%20my%20cart%20order." target="_blank" class="wa-help">
+            <i class="fa-brands fa-whatsapp"></i>
+            <div>
+              <div class="wa-help-title">Need Help?</div>
+              <div class="wa-help-sub">Chat with us on WhatsApp</div>
+            </div>
+            <i class="fa-solid fa-chevron-right wa-chevron"></i>
+          </a>
+
+        </div><!-- /cart-right -->
+      </div><!-- /cart-grid -->
+    </div><!-- /container -->
+  </main>
+
+  <!-- ══ MOBILE STICKY FOOTER ══ -->
+  <div class="mobile-sticky" id="mobile-sticky">
+    <div class="mobile-total">
+      <div class="mobile-total-label">Total Payable</div>
+      <div class="mobile-total-val" id="mobile-total-val">₹<%= typeof total !== 'undefined' ? Math.round(total) : 0 %></div>
+    </div>
+    <a href="/checkout" class="btn-checkout-mobile" id="btn-checkout-mobile">
+      <i class="fa-solid fa-lock"></i> Checkout
+    </a>
+  </div>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="auth-footer-strip">
+    © 2025 Shri Govind Pharmacy. All Rights Reserved.
+    &nbsp;|&nbsp; <a href="#">Privacy Policy</a>
+    &nbsp;|&nbsp; <a href="#">Terms</a>
+    &nbsp;|&nbsp; <a href="#">Contact Us</a>
+  </footer>
+
+  <!-- WhatsApp Floating -->
+  <a href="https://wa.me/919876543210" target="_blank" class="wa-float" title="Chat on WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i>
+    <span class="wa-float-tooltip">Need Help?</span>
+  </a>
+
+  <!-- Toast Zone -->
+  <div class="toast-zone" id="toastZone"></div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      console.log('=== CART SCRIPT STARTING ===');
+
+      // Wait for DOM to be ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCart);
+      } else {
+        initCart();
+      }
+
+      function initCart() {
+        console.log('Cart initialized');
+
+        // Quantity controls
+        const minusButtons = document.querySelectorAll('.qty-btn.minus');
+        const plusButtons = document.querySelectorAll('.qty-btn.plus');
+
+        console.log('Minus buttons found:', minusButtons.length);
+        console.log('Plus buttons found:', plusButtons.length);
+
+        // Minus buttons
+        minusButtons.forEach(function(button) {
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var productId = this.getAttribute('data-id');
+            var qtySpan = document.getElementById('qty-' + productId);
+            var currentQty = qtySpan ? parseInt(qtySpan.textContent) : 1;
+
+            console.log('Minus clicked:', productId, 'qty:', currentQty);
+
+            if (currentQty > 1) {
+              updateQuantity(productId, currentQty - 1);
+            }
+          });
+        });
+
+        // Plus buttons
+        plusButtons.forEach(function(button) {
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var productId = this.getAttribute('data-id');
+            var qtySpan = document.getElementById('qty-' + productId);
+            var currentQty = qtySpan ? parseInt(qtySpan.textContent) : 0;
+
+            console.log('Plus clicked:', productId, 'qty:', currentQty);
+
+            updateQuantity(productId, currentQty + 1);
+          });
+        });
+
+        // Update quantity function
+        function updateQuantity(productId, newQuantity) {
+          console.log('Updating qty:', productId, 'to', newQuantity);
+
+          fetch('/user/edit-quantity/' + productId, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                quantity: newQuantity
+              })
+            })
+            .then(function(res) {
+              console.log('Response status:', res.status);
+              return res.json();
+            })
+            .then(function(result) {
+              console.log('Result:', result);
+
+              if (result.success) {
+                // Update qty display
+                var qtySpan = document.getElementById('qty-' + productId);
+                if (qtySpan) {
+                  qtySpan.textContent = result.itemQuantity;
+                }
+
+                // Update summary
+                updateOrderSummary(result);
+
+                // Update badges dynamically
+                updateBadges(result.cartCount, result.cartItemCount, result.wishlistCount);
+
+                // Update total items count labels
+                var totalItemsLabel = document.getElementById('total-items');
+                if (totalItemsLabel) totalItemsLabel.textContent = result.cartCount;
+
+                showToast('Cart updated!', 'success');
+              } else {
+                showToast(result.message || 'Error', 'error');
+              }
+            })
+            .catch(function(err) {
+              console.error('Error:', err);
+              showToast('Error updating quantity', 'error');
+            });
+        }
+
+        // Update order summary
+        function updateOrderSummary(data) {
+          console.log('Updating summary with:', data);
+
+          // Update items count
+          var el = document.getElementById('s-items');
+          if (el) {
+            el.textContent = data.cartCount;
+            console.log('Updated s-items to:', data.cartCount);
+          }
+
+          // Update MRP total (Price)
+          el = document.getElementById('s-original');
+          if (el) {
+            el.textContent = '₹' + Math.round(data.mrpTotal);
+            console.log('Updated s-original to:', data.mrpTotal);
+          }
+
+          // Update discount
+          el = document.getElementById('s-discount');
+          if (el) {
+            el.textContent = '−₹' + Math.round(data.productDiscount);
+            console.log('Updated s-discount to:', data.productDiscount);
+          }
+
+          // Update GST
+          el = document.getElementById('s-gst');
+          if (el) {
+            el.textContent = '₹' + Math.round(data.gst);
+            console.log('Updated s-gst to:', data.gst);
+          }
+
+          // Update total
+          el = document.getElementById('s-total');
+          if (el) {
+            el.textContent = '₹' + Math.round(data.total);
+            console.log('Updated s-total to:', data.total);
+          }
+
+          // Update mobile total
+          el = document.getElementById('mobile-total-val');
+          if (el) {
+            el.textContent = '₹' + Math.round(data.total);
+          }
+
+          console.log('Summary update complete');
+        }
+
+        // Update badges function
+        function updateBadges(cartCount, cartItemCount, wishlistCount) {
+          console.log('updateBadges called:', {
+            cartCount,
+            cartItemCount,
+            wishlistCount
+          });
+
+          // Update header badge (hero-count-num shows total quantity)
+          var heroCountNum = document.getElementById('hero-count-num');
+          console.log('hero-count-num element:', heroCountNum);
+          if (heroCountNum) {
+            heroCountNum.textContent = cartCount || 0;
+            console.log('Updated hero-count-num to:', cartCount);
+          }
+
+          // Update hero-count badge visibility
+          var heroCount = document.getElementById('hero-count');
+          if (heroCount) {
+            if (cartCount > 0) {
+              heroCount.style.display = 'flex';
+            } else {
+              heroCount.style.display = 'none';
+            }
+          }
+
+          // Update wishlist badge in header if exists
+          var wishCountEl = document.getElementById('wish-count');
+          if (wishCountEl) {
+            wishCountEl.textContent = wishlistCount || 0;
+            console.log('Updated wish-count to:', wishlistCount);
+          }
+
+          // Update cart-count badge if exists (for consistency)
+          var cartCountEl = document.getElementById('cart-count');
+          if (cartCountEl) {
+            cartCountEl.textContent = cartCount || 0;
+            console.log('Updated cart-count to:', cartCount);
+          }
+        }
+
+        // Remove item
+        window.removeItem = function(productId) {
+          if (!confirm('Remove this item?')) return;
+
+          fetch('/cart/remove/' + productId, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(function(res) {
+              if (res.ok) {
+                return res.json();
+              }
+              throw new Error('Remove failed');
+            })
+            .then(function(data) {
+              var itemEl = document.querySelector('[data-id="' + productId + '"]');
+              if (itemEl) {
+                itemEl.style.opacity = '0';
+                itemEl.style.transform = 'scale(0.95)';
+                setTimeout(function() {
+                  itemEl.remove();
+                }, 300);
+              }
+              // Update badges dynamically
+              updateBadges(data.cartCount, data.cartItemCount, data.wishlistCount);
+              // Update cart summary
+              updateSummary(data);
+              showToast('Item removed', 'success');
+            })
+            .catch(function(err) {
+              console.error(err);
+              showToast('Error removing item', 'error');
+            });
+        };
+
+        // Move to wishlist
+        window.moveToWishlist = function(productId) {
+          fetch('/wishlist/add/' + productId, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(function(res) {
+              return res.json();
+            })
+            .then(function(result) {
+              if (result.success) {
+                // Update badges
+                updateBadges(result.cartCount || 0, result.cartItemCount || 0, result.wishlistCount);
+                // Remove item from cart
+                removeItem(productId);
+                showToast('Moved to wishlist! ❤️', 'success');
+              } else {
+                showToast('Error', 'error');
+              }
+            })
+            .catch(function(err) {
+              console.error(err);
+              showToast('Error', 'error');
+            });
+        };
+
+        // Toast
+        function showToast(message, type) {
+          var toastZone = document.getElementById('toastZone');
+          var toast = document.createElement('div');
+          toast.className = 'toast ' + (type || 'success');
+
+          var iconClass = 'check-circle';
+          if (type === 'error') iconClass = 'times-circle';
+          else if (type === 'info') iconClass = 'info-circle';
+
+          toast.innerHTML = '<i class="fas fa-' + iconClass + '"></i><span>' + message + '</span>';
+          toastZone.appendChild(toast);
+
+          setTimeout(function() {
+            toast.classList.add('show');
+          }, 10);
+          setTimeout(function() {
+            toast.classList.remove('show');
+            setTimeout(function() {
+              toast.remove();
+            }, 300);
+          }, 3000);
+        }
+
+        console.log('=== CART SCRIPT READY ===');
+      }
+    })();
+  </script>
+</body>
+
+</html>

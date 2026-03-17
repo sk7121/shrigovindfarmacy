@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Product — Shri Govind Pharmacy Admin</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --secondary: #e67e22;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 2rem;
+    }
+
+    /* Header */
+    .admin-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .admin-header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .admin-logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .admin-logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-logo-main {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    .admin-logo-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .admin-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: var(--bg);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+
+    .theme-toggle:hover {
+      background: var(--border);
+    }
+
+    .btn-link {
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-link:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* Main Content */
+    .edit-main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .page-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .breadcrumb a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .breadcrumb a:hover {
+      color: var(--primary);
+    }
+
+    .breadcrumb i {
+      font-size: 0.75rem;
+    }
+
+    .page-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+
+    /* Form Card */
+    .form-card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .form-head {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .form-head h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .form-body {
+      padding: 1.5rem;
+    }
+
+    /* Form Fields */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .form-label .required {
+      color: var(--danger);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(28, 129, 37, 0.1);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    textarea.form-input {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    select.form-input {
+      cursor: pointer;
+    }
+
+    .input-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    /* Image Preview */
+    .image-preview {
+      margin-top: 0.75rem;
+      border-radius: 10px;
+      overflow: hidden;
+      max-width: 200px;
+      border: 1px solid var(--border);
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Form Actions */
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      margin-top: 1rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--surface);
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      z-index: 1000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--danger);
+    }
+
+    .toast-icon {
+      font-size: 1.25rem;
+    }
+
+    .toast.success .toast-icon {
+      color: var(--success);
+    }
+
+    .toast.error .toast-icon {
+      color: var(--danger);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .admin-header-inner {
+        padding: 0 1rem;
+      }
+
+      .edit-main {
+        padding: 0 1rem;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column-reverse;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <a href="/admin/home" class="admin-logo">
+        <div class="admin-logo-icon">
+          <i class="fas fa-mortar-pestle"></i>
+        </div>
+        <div class="admin-logo-text">
+          <span class="admin-logo-main">Shri Govind</span>
+          <span class="admin-logo-sub">Admin Panel</span>
+        </div>
+      </a>
+
+      <div class="admin-header-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+          <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+        <a href="/admin/home" class="btn-link">
+          <i class="fas fa-arrow-left"></i>
+          <span class="desktop-only">Back</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="edit-main">
+
+    <div class="page-header">
+      <div class="breadcrumb">
+        <a href="/admin/home"><i class="fas fa-home"></i> Home</a>
+        <i class="fas fa-chevron-right"></i>
+        <a href="/admin/home">Products</a>
+        <i class="fas fa-chevron-right"></i>
+        <span>Edit Product</span>
+      </div>
+      <h1><i class="fas fa-edit"></i> Edit Product</h1>
+    </div>
+
+    <form class="form-card" action="/admin/products/edit/<%= product._id %>" method="POST">
+      <div class="form-head">
+        <h2>Product Information</h2>
+      </div>
+
+      <div class="form-body">
+        <div class="form-grid">
+
+          <!-- Product Name -->
+          <div class="form-group full-width">
+            <label class="form-label" for="name">Product Name <span class="required">*</span></label>
+            <input type="text" id="name" name="name" class="form-input" value="<%= product.name || '' %>" required placeholder="Enter product name">
+            <div class="input-hint">Use a clear, descriptive name for the product</div>
+          </div>
+
+          <!-- Image URL -->
+          <div class="form-group full-width">
+            <label class="form-label" for="image">Image URL <span class="required">*</span></label>
+            <input type="url" id="image" name="image" class="form-input" value="<%= product.image || '' %>" required placeholder="https://example.com/image.jpg">
+            <div class="image-preview" id="image-preview" style="display: <%= product.image ? 'block' : 'none' %>;">
+              <img id="preview-img" src="<%= product.image || '' %>" alt="Product preview">
+            </div>
+            <div class="input-hint">Paste a direct link to the product image</div>
+          </div>
+
+          <!-- Price -->
+          <div class="form-group">
+            <label class="form-label" for="price">Price (₹) <span class="required">*</span></label>
+            <input type="number" id="price" name="price" class="form-input" value="<%= product.price || '' %>" required min="0" step="0.01" placeholder="0.00">
+          </div>
+
+          <!-- Old Price -->
+          <div class="form-group">
+            <label class="form-label" for="oldPrice">Old Price (₹)</label>
+            <input type="number" id="oldPrice" name="oldPrice" class="form-input" value="<%= product.oldPrice || '' %>" min="0" step="0.01" placeholder="0.00">
+            <div class="input-hint">Leave empty if no discount</div>
+          </div>
+
+          <!-- Stock -->
+          <div class="form-group">
+            <label class="form-label" for="stock">Stock Quantity <span class="required">*</span></label>
+            <input type="number" id="stock" name="stock" class="form-input" value="<%= product.stock || 0 %>" required min="0" placeholder="0">
+            <div class="input-hint">Current available quantity</div>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label class="form-label" for="category">Category <span class="required">*</span></label>
+            <select id="category" name="category" class="form-input" required>
+              <option value="">Select Category</option>
+              <option value="ayurvedic" <%= product.category === 'ayurvedic' ? 'selected' : '' %>>Ayurvedic</option>
+              <option value="sashtri" <%= product.category === 'sashtri' ? 'selected' : '' %>>Sashtri Ayurvedic</option>
+              <option value="herbal-cosmetics" <%= product.category === 'herbal-cosmetics' ? 'selected' : '' %>>Herbal Cosmetics</option>
+              <option value="fmcg" <%= product.category === 'fmcg' ? 'selected' : '' %>>FMCG</option>
+            </select>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group full-width">
+            <label class="form-label" for="description">Description</label>
+            <textarea id="description" name="description" class="form-input" placeholder="Enter product description, benefits, usage instructions..."><%= product.description || '' %></textarea>
+            <div class="input-hint">Provide detailed information about the product</div>
+          </div>
+
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <a href="/admin/home" class="btn btn-secondary">
+            <i class="fas fa-times"></i> Cancel
+          </a>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </div>
+      </div>
+    </form>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <span class="toast-icon"><i class="fas fa-check-circle"></i></span>
+    <span class="toast-message">Product updated successfully!</span>
+  </div>
+
+  <script>
+    // Image Preview
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+
+    imageInput.addEventListener('input', (e) => {
+      const url = e.target.value;
+      if (url) {
+        previewImg.src = url;
+        imagePreview.style.display = 'block';
+      } else {
+        imagePreview.style.display = 'none';
+      }
+    });
+
+    // Show toast on form submission success (via URL param)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('updated') === 'true') {
+      showToast('Product updated successfully!', 'success');
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastIcon = toast.querySelector('.toast-icon i');
+      const toastMessage = toast.querySelector('.toast-message');
+
+      toast.className = 'toast ' + type;
+      toastIcon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+      toastMessage.textContent = message;
+
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+
+
+</body>
+
+</html>

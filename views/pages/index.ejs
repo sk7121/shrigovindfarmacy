@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1c8125">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Shri Govind Pharmacy | Ayurvedic &amp; Herbal Wellness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* Toast Notifications */
+    .toast-zone {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .toast {
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 300px;
+      transform: translateX(100%);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-left: 4px solid #28a745;
+    }
+
+    .toast.error {
+      border-left: 4px solid #dc3545;
+    }
+
+    .toast.info {
+      border-left: 4px solid #17a2b8;
+    }
+
+    .toast i {
+      font-size: 1.25rem;
+    }
+
+    .toast.success i {
+      color: #28a745;
+    }
+
+    .toast.error i {
+      color: #dc3545;
+    }
+
+    .toast.info i {
+      color: #17a2b8;
+    }
+
+    .toast-action {
+      margin-left: auto;
+      padding: 0.5rem 1rem;
+      background: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .toast-action:hover {
+      background: #218838;
+    }
+
+    @media (max-width: 768px) {
+      .toast-zone {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+      }
+
+      .toast {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+
+    /* Product Filter Section - Responsive */
+    .search-filter-section {
+      background: var(--surface);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .product-filter-form {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      gap: 15px;
+      align-items: end;
+    }
+
+    .filter-field {
+      width: 100%;
+    }
+
+    .filter-field label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+
+    .filter-field input,
+    .filter-field select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* Tablet - 3 columns */
+    @media (max-width: 1024px) {
+      .product-filter-form {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+      }
+
+      .filter-field:nth-child(4) {
+        grid-column: span 1;
+      }
+
+      .filter-actions {
+        grid-column: span 2;
+        justify-content: flex-end;
+      }
+    }
+
+    /* Mobile - 2 columns */
+    @media (max-width: 768px) {
+      .search-filter-section {
+        padding: 15px;
+      }
+
+      .product-filter-form {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .filter-field:first-child {
+        grid-column: span 2;
+      }
+
+      .filter-field:nth-child(2),
+      .filter-field:nth-child(3) {
+        grid-column: span 1;
+      }
+
+      .filter-field:nth-child(4) {
+        grid-column: span 1;
+      }
+
+      .filter-actions {
+        grid-column: span 2;
+        justify-content: stretch;
+      }
+
+      .filter-actions .btn {
+        flex: 1;
+        justify-content: center;
+      }
+    }
+
+    /* Very small screens - 1 column */
+    @media (max-width: 480px) {
+      .search-filter-section {
+        padding: 12px;
+      }
+
+      .product-filter-form {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .filter-field,
+      .filter-field:first-child,
+      .filter-field:nth-child(2),
+      .filter-field:nth-child(3),
+      .filter-field:nth-child(4),
+      .filter-actions {
+        grid-column: span 1;
+      }
+
+      .filter-actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .filter-actions .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success">
+      <%= success[0] %>
+    </div>
+    <% } %>
+      <% if (error && error.length) { %>
+        <div class="flash error">
+          <%= error[0] %>
+        </div>
+        <% } %>
+
+
+          <!-- ANNOUNCEMENT BAR -->
+          <div class="announce-bar" id="announce-bar">
+            <div class="announce-inner">
+              <span class="announce-slide active">🌿 Free Delivery on Orders ₹499+ | Use Code <strong>AYUR20</strong>
+                for 20%
+                Off</span>
+              <span class="announce-slide">📞 Helpline: +91 9413010731 | Mon–Sat 9AM–6PM</span>
+              <span class="announce-slide">✅ 100% Authentic · 25+ Years Trusted</span>
+            </div>
+            <button class="announce-close" id="announce-close" aria-label="Close"><i class="fas fa-times"></i></button>
+          </div>
+
+          <!-- HEADER -->
+          <header class="main-header" id="main-header">
+
+            <div class="topbar">
+              <div class="container topbar-flex">
+                <div class="topbar-left">
+                  <a href="tel:+919413010731"><i class="fas fa-phone"></i> +91 9413010731</a>
+                  <a href="mailto:shrigovindpharmacy212@gmail.com"><i class="fas fa-envelope"></i>
+                    shrigovindpharmacy212@gmail.com</a>
+                </div>
+                <div class="topbar-right">
+                  <a href="#"><i class="fas fa-truck"></i> Track Order</a>
+                  <a href="#"><i class="fas fa-map-marker-alt"></i> Store Locator</a>
+                  <div class="topbar-social">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/919413010731" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <nav class="navbar">
+              <div class="container nav-flex">
+
+                <a href="/home" class="logo">
+                  <img src="https://res.cloudinary.com/drufdfmfr/image/upload/v1772726044/favicon_uuzvml.svg"
+                    alt="Shri Govind Pharmacy" class="logo-favicon">
+                  <div class="logo-text">
+                    <span class="logo-main">Shri Govind</span>
+                    <span class="logo-sub">Pharmacy</span>
+                  </div>
+                </a>
+
+                <ul class="nav-links" id="nav-links">
+                  <li><a href="/home" class="active">Home</a></li>
+                  <li class="has-dropdown">
+                    <a href="#categories">Categories <i class="fas fa-chevron-down"></i></a>
+                    <ul class="mega-dropdown">
+                      <li><a href="/categories?category=ayurvedic"><i class="fas fa-capsules"></i> Ayurvedic</a></li>
+                      <li><a href="/categories?category=sashtri-ayurvedic"><i class="fas fa-leaf"></i> Sashtri
+                          Ayurvedic</a>
+                      </li>
+                      <li><a href="/categories?category=herbal-cosmetics"><i class="fas fa-heart"></i> Herbal
+                          Cosmetics</a></li>
+                      <li><a href="/categories?category=fmcg"><i class="fas fa-soap"></i> FMCG</a></li>
+                    </ul>
+                  </li>
+                  <li><a href="#product">Products</a></li>
+                  <li><a href="#about">About</a></li>
+                  <li><a href="/contact">Contact</a></li>
+                  <% if (typeof user !=='undefined' && user) { %>
+                    <li class="has-dropdown user-menu">
+                      <a href="/account" class="user-link">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="user-name">
+                          <%= user.name.split(' ')[0] %></span>
+              <i class="fas fa-chevron-down"></i>
+            </a>
+            <ul class="user-dropdown">
+              <li><a href="/account"><i class="fas fa-user"></i> My Account</a></li>
+              <li><a href="/user/orders"><i class="fas fa-box"></i> My Orders</a></li>
+
+              <li><a href="/loyalty-rewards"><i class="fas fa-gift"></i> Loyalty Rewards</a></li>
+              <li><a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a></li>
+              <li><a href="/doctor"><i class="fas fa-user-md"></i> Consult Doctor</a></li>
+              <li class="divider"></li>
+              <li><a href="/logout" onclick="event.preventDefault(); fetch(' /logout', {method: 'POST' ,
+                            credentials: 'same-origin' }).then(()=> window.location.href = '/login'); return false;"><i
+                              class="fas fa-sign-out-alt"></i> Logout</a>
+                    </li>
+                </ul>
+                </li>
+                <% } else { %>
+                  <li><a href="/login" class="login-link"><i class="fas fa-user"></i> Login</a></li>
+                  <% } %>
+                    </ul>
+
+                    <div class="nav-actions">
+                      <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                      </button>
+                      <button class="icon-btn" id="search-trigger" aria-label="Search">
+                        <i class="fas fa-search"></i>
+                      </button>
+                      <a href="/cart" class="cart-icon" id="cart-btn" aria-label="Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="badge" id="cart-count">
+                          <%= typeof cartCount !=='undefined' ? cartCount : 0 %>
+                        </span>
+                      </a>
+                      <a href="/wishlist" class="icon-btn wishlist-btn" aria-label="Wishlist">
+                        <i class="fas fa-heart"></i>
+                        <span class="badge wish-badge" id="wish-count">
+                          <%= typeof wishCount !=='undefined' ? wishCount : 0 %>
+                        </span>
+                      </a>
+                      <a href="/doctor" class="btn btn-primary consult-btn desktop-only">
+                        <i class="fas fa-user-md"></i> Consult Doctor
+                      </a>
+                      <button class="hamburger" id="hamburger" aria-label="Open Menu" aria-expanded="false">
+                        <span></span><span></span><span></span>
+                      </button>
+                    </div>
+
+              </div>
+            </nav>
+
+            <!-- SEARCH OVERLAY -->
+            <div class="search-overlay" id="search-overlay" role="dialog" aria-modal="true" aria-label="Search">
+              <div class="search-overlay-inner">
+                <div class="search-bar-big">
+                  <div class="sbb-categories">
+                    <select id="search-cat" aria-label="Search category">
+                      <option value="">All Categories</option>
+                      <option>Ayurvedic</option>
+                      <option>Sashtri Ayurvedic</option>
+                      <option>Herbal Cosmetics</option>
+                      <option>FMCG</option>
+                    </select>
+                  </div>
+                  <input type="search" id="searchInput" placeholder="Search medicines, supplements, herbal products…"
+                    autocomplete="off" autocorrect="off" spellcheck="false" inputmode="search">
+                  <button id="searchBtn"><i class="fas fa-search"></i> Search</button>
+                </div>
+                <div class="search-suggestions">
+                  <span class="sug-label">Popular:</span>
+                  <button class="sug-chip" onclick="quickSearch('Ashwagandha')">Ashwagandha</button>
+                  <button class="sug-chip" onclick="quickSearch('Triphala')">Triphala</button>
+                  <button class="sug-chip" onclick="quickSearch('Vitamin C')">Vitamin C</button>
+                  <button class="sug-chip" onclick="quickSearch('Immunity')">Immunity</button>
+                  <button class="sug-chip" onclick="quickSearch('Omega 3')">Omega 3</button>
+                </div>
+                <button class="search-close" id="search-close" aria-label="Close search"><i
+                    class="fas fa-times"></i></button>
+              </div>
+            </div>
+
+            <!-- MOBILE MENU -->
+            <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+              <div class="mobile-menu-inner">
+                <div class="mobile-menu-head">
+                  <span>Menu</span>
+                  <button id="mobile-close" aria-label="Close menu"><i class="fas fa-times"></i></button>
+                </div>
+                <ul>
+                  <li><a href="/home"><i class="fas fa-home"></i> Home</a></li>
+                  <li class="mob-has-sub">
+                    <a href="#categories" class="mob-sub-trigger"><i class="fas fa-th-large"></i> Categories <i
+                        class="fas fa-chevron-down mob-arrow"></i></a>
+                    <ul class="mob-submenu">
+                      <li><a href="/categories?category=ayurvedic">Ayurvedic</a></li>
+                      <li><a href="/categories?category=sashtri-ayurvedic">Sashtri Ayurvedic</a></li>
+                      <li><a href="/categories?category=herbal-cosmetics">Herbal Cosmetics</a></li>
+                      <li><a href="/categories?category=fmcg">FMCG</a></li>
+                    </ul>
+                  </li>
+                  <li><a href="#product"><i class="fas fa-box"></i> Products</a></li>
+                  <li><a href="#about"><i class="fas fa-info-circle"></i> About</a></li>
+                  <li><a href="/contact"><i class="fas fa-phone"></i> Contact</a></li>
+                  <% if (typeof user !=='undefined' && user) { %>
+                    <li class="mob-user-info">
+                      <div class="mob-user-display">
+                        <i class="fas fa-user-circle"></i>
+                        <span>
+                          <%= user.name %>
+                        </span>
+                      </div>
+                      <ul class="mob-user-menu">
+                        <li><a href="/account"><i class="fas fa-user"></i> My Account</a></li>
+                        <li><a href="/user/orders"><i class="fas fa-box"></i> My Orders</a></li>
+                        <li><a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a></li>
+                        <li><a href="/doctor"><i class="fas fa-user-md"></i> Consult Doctor</a></li>
+                        <li class="divider"></li>
+                        <li><a href="/logout"
+                            onclick="event.preventDefault(); fetch('/logout', {method: 'POST', credentials: 'same-origin'}).then(() => window.location.href = '/login'); return false;"><i
+                              class="fas fa-sign-out-alt"></i> Logout</a></li>
+                      </ul>
+                    </li>
+                    <% } else { %>
+                      <li><a href="/login"><i class="fas fa-user"></i> Login</a></li>
+                      <% } %>
+                        <li>
+                          <a href="/doctor" class="btn btn-primary mob-consult">
+                            <i class="fas fa-user-md"></i> Consult Doctor
+                          </a>
+                        </li>
+                </ul>
+                <div class="mob-contact-strip">
+                  <a href="tel:+919413010731"><i class="fas fa-phone"></i> +91 9413010731</a>
+                  <a href="https://wa.me/919413010731" target="_blank" rel="noopener noreferrer"><i
+                      class="fab fa-whatsapp"></i>
+                    WhatsApp Us</a>
+                </div>
+              </div>
+            </div>
+            <div class="mobile-overlay" id="mobile-overlay"></div>
+
+          </header>
+
+          <main>
+
+            <!-- HERO SLIDER -->
+            <section class="hero-slider" id="hero">
+              <div class="slider-container" id="slider-container">
+
+                <div class="slide active"
+                  style="--slide-bg:linear-gradient(120deg,#0f3d18 0%,#1c6b27 60%,#27ae60 100%)">
+                  <div class="slide-bg-pattern"></div>
+                  <img
+                    src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070&auto=format&fit=crop"
+                    alt="Advanced Ayurvedic Care" class="slide-img" loading="eager" fetchpriority="high">
+                  <div class="slide-overlay"></div>
+                  <div class="slide-content container">
+
+                    <h1>Advanced<br><em>Ayurvedic</em> Care</h1>
+                    <p>Authentic medicines &amp; herbal products delivered at your doorstep within 24 hours. Trusted by
+                      12,000+
+                      families.</p>
+                    <div class="slide-btns">
+                      <a href="#product" class="btn btn-primary btn-lg">Shop Now <i class="fas fa-arrow-right"></i></a>
+                      <a href="/doctor" class="btn btn-ghost btn-lg"><i class="fas fa-user-md"></i> Consult Free</a>
+                    </div>
+                    <div class="slide-stats">
+                      <div class="ss-item"><strong>12K+</strong><span>Happy Customers</span></div>
+                      <div class="ss-div"></div>
+                      <div class="ss-item"><strong>500+</strong><span>Products</span></div>
+                      <div class="ss-div"></div>
+                      <div class="ss-item"><strong>25+</strong><span>Years Trusted</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="slide" style="--slide-bg:linear-gradient(120deg,#1a237e 0%,#283593 60%,#3949ab 100%)">
+                  <div class="slide-bg-pattern"></div>
+                  <img
+                    src="https://images.unsplash.com/photo-1585435557343-3b092031a831?q=80&w=2070&auto=format&fit=crop"
+                    alt="Expert Doctor Consultations" class="slide-img" loading="lazy">
+                  <div class="slide-overlay"></div>
+                  <div class="slide-content container">
+                    <div class="slide-badge"><i class="fas fa-user-md"></i> Free First Consultation</div>
+                    <h1>Expert Doctor<br><em>Consultations</em></h1>
+                    <p>Talk to our verified Ayurvedic specialists online. Get personalized prescriptions and wellness
+                      guidance.
+                    </p>
+                    <div class="slide-btns">
+                      <a href="/doctor" class="btn btn-primary btn-lg">Book Appointment <i
+                          class="fas fa-arrow-right"></i></a>
+                      <a href="#about" class="btn btn-ghost btn-lg"><i class="fas fa-info-circle"></i> Learn More</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="slide" style="--slide-bg:linear-gradient(120deg,#4a1942 0%,#6a1f68 60%,#8e24aa 100%)">
+                  <div class="slide-bg-pattern"></div>
+                  <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?q=80&w=2070&auto=format&fit=crop"
+                    alt="Wellness and Nutrition Hub" class="slide-img" loading="lazy">
+                  <div class="slide-overlay"></div>
+                  <div class="slide-content container">
+                    <div class="slide-badge"><i class="fas fa-leaf"></i> 100% Natural &amp; Herbal</div>
+                    <h1>Wellness &amp;<br><em>Nutrition</em> Hub</h1>
+                    <p>Premium Ayurvedic supplements, herbal care, and immunity boosters for your family's daily
+                      wellness.</p>
+                    <div class="slide-btns">
+                      <a href="#categories" class="btn btn-primary btn-lg">Explore Wellness <i
+                          class="fas fa-arrow-right"></i></a>
+                      <a href="#product" class="btn btn-ghost btn-lg"><i class="fas fa-box"></i> View All</a>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <button class="slider-arrow" id="prev" aria-label="Previous slide"><i
+                  class="fas fa-chevron-left"></i></button>
+              <button class="slider-arrow" id="next" aria-label="Next slide"><i
+                  class="fas fa-chevron-right"></i></button>
+
+              <div class="slider-dots" id="slider-dots">
+                <button class="dot active" data-slide="0" aria-label="Slide 1"></button>
+                <button class="dot" data-slide="1" aria-label="Slide 2"></button>
+                <button class="dot" data-slide="2" aria-label="Slide 3"></button>
+              </div>
+            </section>
+
+            <!-- TRUST BAR -->
+            <div class="trust-bar">
+              <div class="container trust-flex">
+                <div class="trust-item">
+                  <i class="fas fa-shield-halved"></i>
+                  <div><strong>100% Authentic</strong><span>Lab-tested products</span></div>
+                </div>
+                <div class="trust-div"></div>
+                <div class="trust-item">
+                  <i class="fas fa-truck-fast"></i>
+                  <div><strong>Fast Delivery</strong><span>2–4 days pan India</span></div>
+                </div>
+                <div class="trust-div"></div>
+                <div class="trust-item">
+                  <i class="fas fa-rotate-left"></i>
+                  <div><strong>Easy Returns</strong><span>7-day hassle-free</span></div>
+                </div>
+                <div class="trust-div"></div>
+                <div class="trust-item">
+                  <i class="fas fa-headset"></i>
+                  <div><strong>Expert Support</strong><span>Mon–Sat 9AM–6PM</span></div>
+                </div>
+                <div class="trust-div"></div>
+                <div class="trust-item">
+                  <i class="fas fa-tag"></i>
+                  <div><strong>Best Price</strong><span>Guaranteed savings</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CATEGORIES -->
+            <section id="categories" class="categories-section">
+              <div class="container">
+                <div class="sec-head">
+                  <div class="sec-tag"><i class="fas fa-th-large"></i> Shop by Category</div>
+                  <h2 class="section-title">Find What You Need</h2>
+                  <p class="sec-sub">Browse our carefully curated categories of authentic Ayurvedic products</p>
+                </div>
+                <div class="category-grid">
+                  <a href="/categories?category=ayurvedic" class="category-card">
+                    <div class="cat-icon-wrap"><i class="fas fa-capsules"></i></div>
+                    <div class="cat-info">
+                      <h3>Ayurvedic</h3>
+                      <p>Classical &amp; modern formulations</p>
+                      <span class="cat-count">120+ Products</span>
+                    </div>
+                    <i class="fas fa-arrow-right cat-arrow"></i>
+                  </a>
+                  <a href="/categories?category=sashtri-ayurvedic" class="category-card">
+                    <div class="cat-icon-wrap"><i class="fas fa-leaf"></i></div>
+                    <div class="cat-info">
+                      <h3>Sashtri Ayurvedic</h3>
+                      <p>Traditional herbal science</p>
+                      <span class="cat-count">80+ Products</span>
+                    </div>
+                    <i class="fas fa-arrow-right cat-arrow"></i>
+                  </a>
+                  <a href="/categories?category=herbal-cosmetics" class="category-card">
+                    <div class="cat-icon-wrap"><i class="fas fa-heart"></i></div>
+                    <div class="cat-info">
+                      <h3>Herbal Cosmetics</h3>
+                      <p>Natural beauty &amp; skincare</p>
+                      <span class="cat-count">95+ Products</span>
+                    </div>
+                    <i class="fas fa-arrow-right cat-arrow"></i>
+                  </a>
+                  <a href="/categories?category=fmcg" class="category-card">
+                    <div class="cat-icon-wrap"><i class="fas fa-soap"></i></div>
+                    <div class="cat-info">
+                      <h3>FMCG</h3>
+                      <p>Daily wellness essentials</p>
+                      <span class="cat-count">200+ Products</span>
+                    </div>
+                    <i class="fas fa-arrow-right cat-arrow"></i>
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            <!-- OFFER BANNER STRIP -->
+            <div class="offer-strip">
+              <div class="container offer-grid">
+                <div class="offer-card oc-green">
+                  <div class="oc-text">
+                    <span class="oc-tag">Limited Offer</span>
+                    <h3>Flat 20% Off</h3>
+                    <p>On all Ayurvedic products</p>
+                    <a href="#product" class="oc-btn">Shop Now <i class="fas fa-arrow-right"></i></a>
+                  </div>
+                  <div class="oc-icon"><i class="fas fa-leaf"></i></div>
+                </div>
+                <div class="offer-card oc-orange">
+                  <div class="oc-text">
+                    <span class="oc-tag">New Arrival</span>
+                    <h3>Herbal Skincare</h3>
+                    <p>Fresh collection just landed</p>
+                    <a href="#product" class="oc-btn">Explore <i class="fas fa-arrow-right"></i></a>
+                  </div>
+                  <div class="oc-icon"><i class="fas fa-spa"></i></div>
+                </div>
+                <div class="offer-card oc-blue">
+                  <div class="oc-text">
+                    <span class="oc-tag">Free Consult</span>
+                    <h3>Talk to a Doctor</h3>
+                    <p>First consultation free</p>
+                    <a href="/doctor" class="oc-btn">Book Now <i class="fas fa-arrow-right"></i></a>
+                  </div>
+                  <div class="oc-icon"><i class="fas fa-user-md"></i></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PRODUCTS -->
+
+            <section id="product" class="product-section">
+              <div class="container">
+                <div class="sec-head">
+                  <div class="sec-tag"><i class="fas fa-fire"></i> Best Sellers</div>
+                  <h2 class="section-title">Our Top Products</h2>
+                  <p class="sec-sub">Handpicked, lab-tested, and loved by thousands of customers across India</p>
+                </div>
+
+                <div class="filter-tabs">
+                  <button class="ftab active" data-filter="all">All Products</button>
+                  <button class="ftab" data-filter="ayurvedic">Ayurvedic</button>
+                  <button class="ftab" data-filter="herbal-cosmetics">Cosmetics</button>
+                  <button class="ftab" data-filter="fmcg">FMCG</button>
+                </div>
+
+                <!-- Search and Filter Section -->
+                <div class="search-filter-section">
+                  <form id="product-filter-form" class="product-filter-form">
+
+                    <!-- Search Box -->
+                    <div class="filter-field">
+                      <label>
+                        <i class="fas fa-search"></i> Search Products
+                      </label>
+                      <input type="text" name="search" placeholder="Search by name, description..."
+                        value="<%= typeof filters !== 'undefined' && filters.search ? filters.search : '' %>">
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="filter-field">
+                      <label>
+                        <i class="fas fa-filter"></i> Category
+                      </label>
+                      <select name="category">
+                        <option value="all">All Categories</option>
+                        <% if (typeof categories !=='undefined' && categories.length> 0) { %>
+                          <% categories.forEach(cat=> { %>
+                            <option value="<%= cat %>" <%=typeof filters !=='undefined' && filters.category===cat
+                              ? 'selected' : '' %>><%= cat %>
+                            </option>
+                            <% }) %>
+                              <% } %>
+                      </select>
+                    </div>
+
+                    <!-- Price Range -->
+                    <div class="filter-field">
+                      <label>
+                        <i class="fas fa-rupee-sign"></i> Max Price
+                      </label>
+                      <input type="number" name="maxPrice" placeholder="₹ Max"
+                        value="<%= typeof filters !== 'undefined' && filters.maxPrice ? filters.maxPrice : '' %>">
+                    </div>
+
+                    <!-- Sort By -->
+                    <div class="filter-field">
+                      <label>
+                        <i class="fas fa-sort"></i> Sort By
+                      </label>
+                      <select name="sortBy">
+                        <option value="default" <%=typeof filters !=='undefined' && filters.sortBy==='default'
+                          ? 'selected' : '' %>>Default</option>
+                        <option value="price-low" <%=typeof filters !=='undefined' && filters.sortBy==='price-low'
+                          ? 'selected' : '' %>>Price: Low to High</option>
+                        <option value="price-high" <%=typeof filters !=='undefined' && filters.sortBy==='price-high'
+                          ? 'selected' : '' %>>Price: High to Low</option>
+                        <option value="name-asc" <%=typeof filters !=='undefined' && filters.sortBy==='name-asc'
+                          ? 'selected' : '' %>>Name: A to Z</option>
+                        <option value="name-desc" <%=typeof filters !=='undefined' && filters.sortBy==='name-desc'
+                          ? 'selected' : '' %>>Name: Z to A</option>
+                        <option value="newest" <%=typeof filters !=='undefined' && filters.sortBy==='newest'
+                          ? 'selected' : '' %>>Newest First</option>
+                        <option value="rating" <%=typeof filters !=='undefined' && filters.sortBy==='rating'
+                          ? 'selected' : '' %>>Highest Rated</option>
+                      </select>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="filter-actions">
+                      <button type="button" id="filter-submit-btn" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                      </button>
+                      <a href="/home" class="btn btn-outline" title="Clear filters">
+                        <i class="fas fa-times"></i>
+                      </a>
+                    </div>
+                  </form>
+
+                  <!-- Active Filters Display -->
+                  <% if (typeof filters !=='undefined' && (filters.search || filters.category !=='all' ||
+                    filters.maxPrice)) { %>
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border);">
+                      <strong style="color: var(--text-muted); font-size: 13px;">Active Filters:</strong>
+                      <% if (filters.search) { %>
+                        <span class="filter-tag"
+                          style="display: inline-block; background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin: 5px 5px 0 10px;">
+                          Search: <%= filters.search %> <i class="fas fa-times"></i>
+                        </span>
+                        <% } %>
+                          <% if (filters.category !=='all' ) { %>
+                            <span class="filter-tag"
+                              style="display: inline-block; background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin: 5px 5px 0 10px;">
+                              Category: <%= filters.category %> <i class="fas fa-times"></i>
+                            </span>
+                            <% } %>
+                              <% if (filters.maxPrice) { %>
+                                <span class="filter-tag"
+                                  style="display: inline-block; background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin: 5px 5px 0 10px;">
+                                  Max Price: ₹<%= filters.maxPrice %> <i class="fas fa-times"></i>
+                                </span>
+                                <% } %>
+                    </div>
+                    <% } %>
+                </div>
+
+                <% if (products && products.length> 0) { %>
+                  <div class="product-grid" id="product-grid">
+                    <% products.forEach(product=> { %>
+                      <article class="product-card" data-product-id="<%= product._id %>"
+                        data-category="<%= product.category %>">
+                        <div class="product-image">
+                          <img src="<%= product.image || 'https://via.placeholder.com/500' %>" alt="<%= product.name %>"
+                            loading="lazy" width="500" height="500">
+                          <% if (product.stock> 10) { %>
+                            <span class="product-badge instock">In Stock</span>
+                            <% } else if (product.stock> 0) { %>
+                              <span class="product-badge" style="background: #f39c12;">Low Stock</span>
+                              <% } else { %>
+                                <span class="product-badge" style="background: #e74c3c;">Out of Stock</span>
+                                <% } %>
+                                  <% if (product.averageRating>= 4.5) { %>
+                                    <span class="product-badge-2">Best Seller</span>
+                                    <% } %>
+                                      <div class="product-overlay">
+                                        <button class="overlay-btn wish-it" aria-label="Add to wishlist">
+                                          <i class="fas fa-heart"></i>
+                                        </button>
+                                        <button class="overlay-btn quick-view" data-id="<%= product._id %>"
+                                          aria-label="Quick view" onclick="quickView('<%= product._id %>')">
+                                          <i class="fas fa-eye"></i>
+                                        </button>
+                                      </div>
+                        </div>
+                        <div class="product-details">
+                          <div class="pd-brand">
+                            <%= product.category || 'Product' %>
+                          </div>
+                          <h4 class="product-title">
+                            <%= product.name %>
+                          </h4>
+                          <div class="pd-rating">
+                            <% const rating=product.averageRating || 0; %>
+                              <% for(let i=1; i<=5; i++) { %>
+                                <% if (i <=Math.floor(rating)) { %>
+                                  <i class="fas fa-star"></i>
+                                  <% } else if (i===Math.ceil(rating) && rating % 1 !==0) { %>
+                                    <i class="fas fa-star-half-alt"></i>
+                                    <% } else { %>
+                                      <i class="far fa-star"></i>
+                                      <% } %>
+                                        <% } %>
+                                          <span>(<%= product.numReviews || 0 %>)</span>
+                          </div>
+                          <div class="product-price">
+                            <span class="current-price">₹<%= product.price %></span>
+                            <% if (product.oldPrice) { %>
+                              <span class="old-price">₹<%= product.oldPrice %></span>
+                              <span class="discount-pct">
+                                <%= Math.round((1 - product.price / product.oldPrice) * 100) %>% off
+                              </span>
+                              <% } %>
+                          </div>
+                          <button class="add-to-cart-btn" data-product-id="<%= product._id %>"
+                            data-name="<%= product.name %>" data-price="<%= product.price %>" <%=product.stock===0
+                            ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : '' %>>
+                            <i class="fas fa-cart-plus"></i>
+                            <%= product.stock===0 ? 'Out of Stock' : 'Add to Cart' %>
+                          </button>
+                        </div>
+                      </article>
+                      <% }) %>
+
+                        <article class="product-card" data-product-id="103" data-category="ayurvedic">
+                          <div class="product-image">
+                            <img
+                              src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=500&auto=format&fit=crop"
+                              alt="Daily Multivitamin Tablets" loading="lazy" width="500" height="500">
+                            <span class="product-badge instock">In Stock</span>
+                            <div class="product-overlay">
+                              <button class="overlay-btn wish-it" aria-label="Add to wishlist"><i
+                                  class="fas fa-heart"></i></button>
+                              <button class="overlay-btn quick-view" data-id="103" aria-label="Quick view"><i
+                                  class="fas fa-eye"></i></button>
+                            </div>
+                          </div>
+                          <div class="product-details">
+                            <div class="pd-brand">Himalaya</div>
+                            <h4 class="product-title">Daily Multivitamin Tablets 60pcs</h4>
+                            <div class="pd-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="far fa-star"></i><span>(89)</span>
+                            </div>
+                            <div class="product-price">
+                              <span class="current-price">₹350</span>
+                              <span class="old-price">₹499</span>
+                              <span class="discount-pct">30% off</span>
+                            </div>
+                            <button class="add-to-cart-btn" data-product-id="103"
+                              data-name="Daily Multivitamin Tablets 60pcs" data-price="350">
+                              <i class="fas fa-cart-plus"></i> Add to Cart
+                            </button>
+                          </div>
+                        </article>
+                  </div>
+                  <% } else { %>
+                    <div style="text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
+                      <i class="fas fa-box-open" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                      <h3>No Products Available</h3>
+                      <p>Check back soon for new products!</p>
+                    </div>
+                    <% } %>
+              </div>
+
+              <div class="view-all-wrap">
+                <a href="#" class="btn btn-outline-green btn-lg">View All Products <i
+                    class="fas fa-arrow-right"></i></a>
+              </div>
+              </div>
+            </section>
+
+            <!-- QUICK VIEW MODAL -->
+            <div id="productModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+              <div class="modal-content">
+                <button class="modal-close" id="modal-close" aria-label="Close"><i class="fas fa-times"></i></button>
+                <div class="modal-grid">
+                  <div class="modal-img-side">
+                    <img id="modalImg" src="" alt="">
+                  </div>
+                  <div class="modal-info-side">
+                    <div class="modal-brand" id="modalBrand"></div>
+                    <h2 id="modalTitle"></h2>
+                    <div class="modal-rating" id="modalRating"></div>
+                    <div class="modal-price-wrap">
+                      <span class="modal-price" id="modalPrice"></span>
+                      <span class="modal-mrp" id="modalMrp"></span>
+                      <span class="modal-disc" id="modalDisc"></span>
+                    </div>
+                    <p class="modal-desc" id="modalDesc">Premium quality product from a trusted brand. Certified and
+                      lab-tested
+                      for your safety.</p>
+                    <div class="modal-status" id="modalStock"></div>
+                    <button class="btn btn-primary modal-add-btn" id="modalAddBtn">
+                      <i class="fas fa-cart-plus"></i> Add to Cart
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-backdrop" id="modal-backdrop"></div>
+
+            <!-- ABOUT SECTION -->
+            <section id="about" class="about-section">
+              <div class="container">
+                <div class="about-grid">
+                  <div class="about-image-side">
+                    <div class="about-img-wrap">
+                      <img src="pharmacy.png" alt="Shri Govind Pharmacy" loading="lazy"
+                        onerror="this.src='https://images.unsplash.com/photo-1576671081837-49000212a370?q=80&w=700&auto=format&fit=crop'">
+                      <div class="about-exp-badge">
+                        <strong>25+</strong>
+                        <span>Years of<br>Trusted Service</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="about-content">
+                    <div class="sec-tag"><i class="fas fa-info-circle"></i> Who We Are</div>
+                    <h2 class="section-title" style="text-align:left;">About Shri Govind Pharmacy</h2>
+                    <p>Shri Govind Pharmacy is a trusted healthcare destination providing authentic medicines, wellness
+                      products, and expert Ayurvedic consultation services. We are committed to delivering quality
+                      healthcare
+                      solutions with transparency, care, and deep-rooted Ayurvedic wisdom.</p>
+                    <p style="margin-top:12px;">With over two decades of experience, we ensure temperature-controlled
+                      storage,
+                      verified suppliers, and certified Ayurvedic pharmacists for your complete safety and satisfaction.
+                    </p>
+                    <ul class="about-highlights">
+                      <li><i class="fas fa-check-circle"></i> 100% Genuine &amp; Lab-Tested Medicines</li>
+                      <li><i class="fas fa-check-circle"></i> Fast &amp; Safe Pan-India Delivery</li>
+                      <li><i class="fas fa-check-circle"></i> Expert Ayurvedic Healthcare Guidance</li>
+                      <li><i class="fas fa-check-circle"></i> AYUSH Certified &amp; GMP Compliant</li>
+                    </ul>
+                    <div class="about-stats-row">
+                      <div class="ab-stat"><strong>12K+</strong><span>Customers</span></div>
+                      <div class="ab-stat"><strong>500+</strong><span>Products</span></div>
+                      <div class="ab-stat"><strong>25+</strong><span>Years</span></div>
+                      <div class="ab-stat"><strong>4.9★</strong><span>Rating</span></div>
+                    </div>
+                    <a href="/doctor" class="btn btn-primary btn-lg" style="margin-top:28px;">
+                      <i class="fas fa-user-md"></i> Meet Our Doctors
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- DOCTOR CTA -->
+            <section class="doctor-cta">
+              <div class="container doctor-grid">
+                <div class="doctor-image-stack">
+                  <img src="https://images.unsplash.com/photo-1559839734-2b71f1536783?q=80&w=1000&auto=format&fit=crop"
+                    alt="Ayurvedic Doctor" loading="lazy">
+                  <div class="doc-cta-badge">
+                    <div class="dcb-dot"></div>
+                    <span>Available Now</span>
+                  </div>
+                </div>
+                <div class="doctor-text">
+                  <div class="sec-tag light"><i class="fas fa-user-md"></i> Expert Consultation</div>
+                  <h2>Need Professional<br>Ayurvedic Advice?</h2>
+                  <p>Consult with our verified Ayurvedic doctors from the comfort of your home. Get digital
+                    prescriptions and
+                    expert health guidance within minutes.</p>
+                  <ul class="benefit-list">
+                    <li><i class="fas fa-check-circle"></i> BAMS &amp; MD Certified Specialists</li>
+                    <li><i class="fas fa-check-circle"></i> 100% Private &amp; Secure</li>
+                    <li><i class="fas fa-check-circle"></i> Free Follow-up Consultations</li>
+                    <li><i class="fas fa-check-circle"></i> WhatsApp &amp; Video Consultation</li>
+                  </ul>
+                  <div class="doc-cta-btns">
+                    <a href="/doctor" class="btn btn-primary btn-lg">Consult a Doctor Now</a>
+                    <a href="https://wa.me/919413010731" target="_blank" rel="noopener noreferrer"
+                      class="btn btn-wa-outline btn-lg"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- TESTIMONIALS -->
+            <section class="testimonials-section">
+              <div class="container">
+                <div class="sec-head">
+                  <div class="sec-tag"><i class="fas fa-star"></i> Testimonials</div>
+                  <h2 class="section-title">What Our Customers Say</h2>
+                  <p class="sec-sub">Real experiences from real families across India</p>
+                </div>
+                <div class="testi-grid">
+                  <div class="testi-card">
+                    <div class="testi-stars">★★★★★</div>
+                    <p>"Shri Govind Pharmacy has been our family's go-to for all Ayurvedic medicines for over 10 years.
+                      The
+                      quality is unmatched and the delivery is always on time."</p>
+                    <div class="testi-author">
+                      <div class="testi-avatar"><i class="fas fa-user"></i></div>
+                      <div><strong>Sunita Sharma</strong><span>Jaipur, Rajasthan</span></div>
+                    </div>
+                  </div>
+                  <div class="testi-card">
+                    <div class="testi-stars">★★★★★</div>
+                    <p>"The free doctor consultation was incredibly helpful. Dr. Rajesh gave me a detailed Ayurvedic
+                      plan and
+                      I've seen amazing results in just 3 weeks!"</p>
+                    <div class="testi-author">
+                      <div class="testi-avatar"><i class="fas fa-user"></i></div>
+                      <div><strong>Arun Gupta</strong><span>Delhi, India</span></div>
+                    </div>
+                  </div>
+                  <div class="testi-card">
+                    <div class="testi-stars">★★★★★</div>
+                    <p>"Amazing range of authentic herbal products. I love that all products are AYUSH certified. Will
+                      definitely recommend to everyone."</p>
+                    <div class="testi-author">
+                      <div class="testi-avatar"><i class="fas fa-user"></i></div>
+                      <div><strong>Priya Mehta</strong><span>Mumbai, Maharashtra</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- NEWSLETTER -->
+            <section class="newsletter">
+              <div class="container newsletter-content">
+                <div class="nl-icon"><i class="fas fa-envelope-open-text"></i></div>
+                <h2>Join Our Wellness Community</h2>
+                <p>Subscribe to get health tips, exclusive offers, and updates on new Ayurvedic products — straight to
+                  your
+                  inbox.</p>
+                <form id="newsletter-form" class="subscribe-form" novalidate>
+                  <input type="email" name="subscriber_email" placeholder="Enter your email address" required
+                    autocomplete="email" inputmode="email">
+                  <button type="submit" class="btn btn-white">Subscribe <i class="fas fa-arrow-right"></i></button>
+                </form>
+                <p class="nl-note"><i class="fas fa-lock"></i> No spam, ever. Unsubscribe anytime.</p>
+              </div>
+            </section>
+
+          </main>
+
+          <!-- FOOTER -->
+          <footer class="main-footer">
+            <div class="footer-top">
+              <div class="container footer-grid">
+
+                <div class="footer-brand">
+                  <a href="/home" class="logo footer-logo">
+                    <img src="https://res.cloudinary.com/drufdfmfr/image/upload/v1772726044/favicon_uuzvml.svg"
+                      alt="Shri Govind Pharmacy" class="logo-favicon">
+                    <div class="logo-text">
+                      <span class="logo-main">Shri Govind</span>
+                      <span class="logo-sub">Pharmacy</span>
+                    </div>
+                  </a>
+                  <p>Your trusted Ayurvedic healthcare partner. Delivering 100% authentic medicines and herbal wellness
+                    products
+                    since 1998.</p>
+                  <div class="social-links">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/919413010731" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                  </div>
+                  <div class="footer-cert">
+                    <span><i class="fas fa-certificate"></i> AYUSH Certified</span>
+                    <span><i class="fas fa-shield-halved"></i> GMP Compliant</span>
+                  </div>
+                </div>
+
+                <div class="footer-links">
+                  <h4>Quick Links</h4>
+                  <ul>
+                    <li><a href="#about"><i class="fas fa-chevron-right"></i> About Us</a></li>
+                    <li><a href="#product"><i class="fas fa-chevron-right"></i> Our Products</a></li>
+                    <li><a href="/doctor"><i class="fas fa-chevron-right"></i> Consult Doctor</a></li>
+                    <li><a href="/contact"><i class="fas fa-chevron-right"></i> Contact Us</a></li>
+                    <li><a href="/agent/register"><i class="fas fa-chevron-right"></i> Become Delivery Partner</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Privacy Policy</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Terms of Service</a></li>
+                  </ul>
+                </div>
+
+                <div class="footer-links">
+                  <h4>Customer Support</h4>
+                  <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Track Order</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Return Policy</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Refund Policy</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Shipping Policy</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> FAQs</a></li>
+                    <li><a href="/login"><i class="fas fa-chevron-right"></i> My Account</a></li>
+                  </ul>
+                </div>
+
+                <div class="footer-contact">
+                  <h4>Get in Touch</h4>
+                  <div class="fc-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Ward No.6, Govind Marg, Neemkathana, Dist. Sikar, Rajasthan 332713, India</span>
+                  </div>
+                  <div class="fc-item">
+                    <i class="fas fa-phone"></i>
+                    <a href="tel:+919413010741">+91 9413010741</a>
+                  </div>
+                  <div class="fc-item">
+                    <i class="fab fa-whatsapp"></i>
+                    <a href="https://wa.me/919413010731">+91 9413010731</a>
+                  </div>
+                  <div class="fc-item">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:shrigovindpharmacy212@gmail.com">shrigovindpharmacy212@gmail.com</a>
+                  </div>
+                  <div class="fc-hours">
+                    <i class="fas fa-clock"></i>
+                    <span>Mon – Sat: 9:00 AM – 6:00 PM</span>
+                  </div>
+                  <div class="footer-payment">
+                    <span class="pm-label">We Accept:</span>
+                    <div class="pm-row">
+                      <span class="pm-chip"><i class="fab fa-cc-visa"></i></span>
+                      <span class="pm-chip"><i class="fab fa-cc-mastercard"></i></span>
+                      <span class="pm-chip"><i class="fas fa-mobile-screen-button"></i> UPI</span>
+                      <span class="pm-chip"><i class="fas fa-money-bill-wave"></i> COD</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div class="footer-bottom">
+              <div class="container footer-bottom-flex">
+                <p>© 2025 Shri Govind Pharmacy. All Rights Reserved. Designed with <i class="fas fa-heart"
+                    style="color:#e53e3e;"></i> in India.</p>
+                <div class="footer-bottom-links">
+                  <a href="/privacy-policy">Privacy Policy</a>
+                  <a href="/terms-conditions">Terms of Service</a>
+                  <a href="/refund-policy">Refund Policy</a>
+                  <a href="/aboutUs">About Us</a>
+                  <a href="/contact">Contact</a>
+                </div>
+              </div>
+            </div>
+          </footer>
+
+          <!-- WhatsApp Float -->
+          <a href="https://wa.me/919413010731" target="_blank" rel="noopener noreferrer" class="wa-float"
+            aria-label="WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+            <span class="wa-tooltip">Chat with Us</span>
+          </a>
+
+          <!-- Back to Top -->
+          <button class="back-to-top" id="back-to-top" aria-label="Back to top">
+            <i class="fas fa-chevron-up"></i>
+          </button>
+
+          <!-- Toast Zone -->
+          <div class="toast-zone" id="toastZone" role="status" aria-live="polite"></div>
+
+
+
+          <script>
+            // Mobile user menu toggle
+            const mobUserInfo = document.querySelector('.mob-user-info');
+            if (mobUserInfo) {
+              const mobUserDisplay = mobUserInfo.querySelector('.mob-user-display');
+              const mobUserMenu = mobUserInfo.querySelector('.mob-user-menu');
+
+              if (mobUserDisplay && mobUserMenu) {
+                mobUserDisplay.addEventListener('click', function () {
+                  mobUserMenu.classList.toggle('active');
+                });
+              }
+            }
+
+            // Add to Cart Functionality
+            document.addEventListener('DOMContentLoaded', function () {
+              const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+              addToCartButtons.forEach(button => {
+                button.addEventListener('click', async function (e) {
+                  e.preventDefault();
+
+                  const productId = this.getAttribute('data-product-id');
+                  const productName = this.getAttribute('data-name');
+                  const productPrice = this.getAttribute('data-price');
+
+                  if (!productId) return;
+
+                  // Check if user is logged in (if button is disabled for non-logged users)
+                  if (this.disabled) {
+                    showToast('Please login to add items to cart', 'error');
+                    return;
+                  }
+
+                  try {
+                    const response = await fetch('/user/add-to-cart/' + productId, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({
+                        quantity: 1
+                      })
+                    });
+
+                    if (response.ok) {
+                      const result = await response.json();
+                      showToast('Added to cart successfully! 🛒', 'success', 'Go to Cart', '/user/cart');
+                      // Update badges dynamically
+                      updateBadges(result.cartCount, result.cartItemCount, result.wishlistCount);
+                    } else {
+                      // Try to parse as JSON first
+                      try {
+                        const result = await response.json();
+                        if (result.redirect) {
+                          // Server returned a redirect (e.g., email verification needed)
+                          if (result.redirect.includes('/verify-otp')) {
+                            showToast('Please verify your email to continue', 'info');
+                            setTimeout(() => {
+                              window.location.href = result.redirect;
+                            }, 1000);
+                          } else {
+                            showToast(result.message || 'Authentication required', 'error');
+                            setTimeout(() => {
+                              window.location.href = result.redirect;
+                            }, 1000);
+                          }
+                          return;
+                        } else {
+                          showToast(result.message || 'Error adding to cart', 'error');
+                        }
+                      } catch (jsonError) {
+                        // Not JSON, check for redirects
+                        if (response.redirected || response.url.includes('/login') || response.status === 302 || response.status === 401) {
+                          showToast('First login, then add to cart', 'error');
+                          setTimeout(() => {
+                            window.location.href = '/login';
+                          }, 1000);
+                        } else {
+                          showToast('Error adding to cart', 'error');
+                        }
+                      }
+                    }
+                  } catch (err) {
+                    console.log(err);
+                    showToast('Error adding to cart', 'error');
+                  }
+                });
+              });
+
+              // Update badges function using API data
+              function updateBadges(cartCount, cartItemCount, wishlistCount) {
+                const cartCountEl = document.getElementById('cart-count');
+                const wishCountEl = document.getElementById('wish-count');
+
+                if (cartCountEl) {
+                  cartCountEl.textContent = cartCount || 0;
+                }
+                if (wishCountEl) {
+                  wishCountEl.textContent = wishlistCount || 0;
+                }
+              }
+
+              // Fetch and update counts on page load
+              async function fetchCounts() {
+                try {
+                  const response = await fetch('/api/user/counts');
+                  if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                      updateBadges(result.cartCount, result.cartItemCount, result.wishlistCount);
+                    }
+                  }
+                } catch (err) {
+                  console.log('Error fetching counts:', err);
+                }
+              }
+
+              // Fetch counts on page load
+              fetchCounts();
+
+              // Check wishlist status and update buttons
+              async function checkWishlistStatus() {
+                try {
+                  const wishlistButtons = document.querySelectorAll('.wish-it');
+                  for (const btn of wishlistButtons) {
+                    const productId = btn.closest('.product-card')?.dataset.productId;
+                    if (!productId) continue;
+
+                    const response = await fetch('/wishlist/check/' + productId);
+                    const result = await response.json();
+
+                    if (result.success === false) {
+                      // API returned an error, skip this item
+                      console.log('Wishlist check failed for product', productId, result.message);
+                      continue;
+                    }
+
+                    if (result.inWishlist) {
+                      const icon = btn.querySelector('i');
+                      if (icon) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        btn.style.color = '#e91e63';
+                      }
+                    }
+                  }
+                } catch (err) {
+                  console.log('Error checking wishlist status:', err);
+                }
+              }
+
+              // Add event listeners to wishlist buttons
+              document.querySelectorAll('.wish-it').forEach(btn => {
+                btn.addEventListener('click', async function (e) {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  const productId = this.closest('.product-card')?.dataset.productId;
+                  if (!productId) return;
+
+                  const icon = this.querySelector('i');
+
+                  // First check actual wishlist status from server
+                  try {
+                    const checkResponse = await fetch('/wishlist/check/' + productId);
+                    const checkResult = await checkResponse.json();
+                    const isInWishlist = checkResult.inWishlist;
+
+                    if (isInWishlist) {
+                      // Remove from wishlist
+                      const response = await fetch('/wishlist/remove/' + productId, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json'
+                        }
+                      });
+
+                      const result = await response.json();
+
+                      if (result.success) {
+                        showToast('Removed from wishlist', 'info');
+                        // Update badges dynamically
+                        updateBadges(result.cartCount || 0, result.cartItemCount || 0, result.wishlistCount);
+                        // Update button icon
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
+                        this.style.color = '';
+                      } else if (result.redirect) {
+                        // Server returned a redirect (e.g., email verification needed)
+                        if (result.redirect.includes('/verify-otp')) {
+                          showToast('Please verify your email to use wishlist', 'info');
+                          setTimeout(() => {
+                            window.location.href = result.redirect;
+                          }, 1000);
+                        } else {
+                          showToast(result.message || 'Authentication required', 'error');
+                          setTimeout(() => {
+                            window.location.href = result.redirect;
+                          }, 1000);
+                        }
+                      } else {
+                        showToast(result.message || 'Error removing from wishlist', 'error');
+                      }
+                    } else {
+                      // Add to wishlist
+                      const response = await fetch('/wishlist/add/' + productId, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json'
+                        }
+                      });
+
+                      const result = await response.json();
+
+                      if (result.success) {
+                        showToast('Added to wishlist! ❤️', 'success');
+                        // Update badges dynamically
+                        updateBadges(result.cartCount || 0, result.cartItemCount || 0, result.wishlistCount);
+                        // Update button icon
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        this.style.color = '#e91e63';
+                      } else if (result.redirect) {
+                        // Server returned a redirect (e.g., email verification needed)
+                        if (result.redirect.includes('/verify-otp')) {
+                          showToast('Please verify your email to use wishlist', 'info');
+                          setTimeout(() => {
+                            window.location.href = result.redirect;
+                          }, 1000);
+                        } else {
+                          showToast(result.message || 'Authentication required', 'error');
+                          setTimeout(() => {
+                            window.location.href = result.redirect;
+                          }, 1000);
+                        }
+                      } else {
+                        showToast(result.message || 'Error adding to wishlist', 'error');
+                      }
+                    }
+                  } catch (err) {
+                    console.log('Wishlist error:', err);
+                    // Try to check if it's a redirect response
+                    try {
+                      // If the error is due to JSON parsing of HTML, it might be a redirect
+                      // For now, assume any error means authentication issue
+                      showToast('Please verify your email to use wishlist', 'info');
+                      // Don't redirect immediately, let user decide
+                    } catch (innerErr) {
+                      showToast('Please login to add items to wishlist', 'error');
+                      setTimeout(() => {
+                        window.location.href = '/login';
+                      }, 1500);
+                    }
+                  }
+                });
+              });
+
+              // Check wishlist status on page load
+              checkWishlistStatus();
+
+              // Quick view function
+              window.quickView = function (productId) {
+                // You can implement a modal here
+                console.log('Quick view product:', productId);
+                showToast('Quick view coming soon!', 'info');
+              };
+
+              // Load product reviews
+              window.loadReviews = async function (productId) {
+                try {
+                  const response = await fetch(`/api/products/${productId}/reviews`);
+                  const result = await response.json();
+
+                  if (result.success) {
+                    const reviewsContainer = document.getElementById('reviews-container');
+                    if (!reviewsContainer) return;
+
+                    if (result.reviews.length === 0) {
+                      reviewsContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 20px;">No reviews yet. Be the first to review!</p>';
+                      return;
+                    }
+
+                    let html = '';
+                    result.reviews.forEach(review => {
+                      const date = new Date(review.createdAt).toLocaleDateString('en-IN');
+                      const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+
+                      html += `
+                <div class="review-card" style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div>
+                      <strong style="color: var(--text);">${review.user?.name || 'Anonymous'}</strong>
+                      ${review.verified ? '<span style="background: #4ade80; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 8px;">✓ Verified Purchase</span>' : ''}
+                    </div>
+                    <span style="color: var(--text-muted); font-size: 12px;">${date}</span>
+                  </div>
+                  <div style="color: #ffc107; font-size: 18px; margin-bottom: 8px;">${stars}</div>
+                  <h4 style="color: var(--text); margin: 10px 0;">${review.title}</h4>
+                  <p style="color: var(--text-muted); line-height: 1.6;">${review.comment}</p>
+                  <div style="margin-top: 10px;">
+                    <button onclick="markHelpful('${review._id}')" style="background: none; border: 1px solid var(--border); padding: 5px 15px; border-radius: 5px; cursor: pointer; color: var(--text-muted);">
+                      <i class="fas fa-thumbs-up"></i> Helpful (${review.helpful?.length || 0})
+                    </button>
+                  </div>
+                </div>
+              `;
+                    });
+
+                    reviewsContainer.innerHTML = html;
+                  }
+                } catch (error) {
+                  console.log('Load reviews error:', error);
+                }
+              };
+
+              // Mark review as helpful
+              window.markHelpful = async function (reviewId) {
+                try {
+                  const response = await fetch(`/api/reviews/${reviewId}/helpful`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                  });
+                  const result = await response.json();
+
+                  if (result.success) {
+                    showToast('Review marked as helpful!', 'success');
+                    // Reload reviews to update count
+                    const productId = document.querySelector('[data-product-id]')?.dataset.productId;
+                    if (productId) loadReviews(productId);
+                  } else {
+                    showToast(result.message, 'error');
+                  }
+                } catch (error) {
+                  showToast('Error marking review as helpful', 'error');
+                }
+              };
+
+              // Submit review
+              window.submitReview = async function (productId) {
+                const rating = document.getElementById('review-rating')?.value;
+                const title = document.getElementById('review-title')?.value;
+                const comment = document.getElementById('review-comment')?.value;
+
+                if (!rating || !title || !comment) {
+                  showToast('Please fill all fields', 'error');
+                  return;
+                }
+
+                try {
+                  const response = await fetch(`/api/products/${productId}/review`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating, title, comment })
+                  });
+                  const result = await response.json();
+
+                  if (result.success) {
+                    showToast('Review submitted successfully!', 'success');
+                    document.getElementById('review-modal').style.display = 'none';
+                    loadReviews(productId);
+                  } else {
+                    showToast(result.message, 'error');
+                  }
+                } catch (error) {
+                  showToast('Error submitting review', 'error');
+                }
+              };
+
+              // Open review modal
+              window.openReviewModal = function (productId) {
+                document.getElementById('review-product-id').value = productId;
+                document.getElementById('review-modal').style.display = 'flex';
+              };
+
+              // Close review modal
+              window.closeReviewModal = function () {
+                document.getElementById('review-modal').style.display = 'none';
+              };
+
+              // Toast notification function
+              function showToast(message, type = 'success', actionText = null, actionUrl = null) {
+                const toastZone = document.getElementById('toastZone');
+                const toast = document.createElement('div');
+                toast.className = 'toast ' + type;
+
+                let actionHTML = '';
+                if (actionText && actionUrl) {
+                  actionHTML = `<a href="${actionUrl}" class="toast-action">${actionText}</a>`;
+                }
+
+                toast.innerHTML = `
+          <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i>
+          <span>${message}</span>
+          ${actionHTML}
+        `;
+
+                toastZone.appendChild(toast);
+
+                setTimeout(() => {
+                  toast.classList.add('show');
+                }, 10);
+
+                setTimeout(() => {
+                  toast.classList.remove('show');
+                  setTimeout(() => toast.remove(), 300);
+                }, 3000);
+              }
+            });
+          </script>
+
+          <!-- Review Modal -->
+          <div id="review-modal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+            <div
+              style="background: var(--surface); padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: var(--text); margin: 0;">Write a Review</h3>
+                <button onclick="closeReviewModal()"
+                  style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted);">&times;</button>
+              </div>
+
+              <input type="hidden" id="review-product-id">
+
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text);">Rating</label>
+                <select id="review-rating"
+                  style="width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px;">
+                  <option value="5">★★★★★ - Excellent</option>
+                  <option value="4">★★★★☆ - Very Good</option>
+                  <option value="3">★★★☆☆ - Good</option>
+                  <option value="2">★★☆☆☆ - Fair</option>
+                  <option value="1">★☆☆☆☆ - Poor</option>
+                </select>
+              </div>
+
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text);">Review
+                  Title</label>
+                <input type="text" id="review-title" placeholder="Summarize your experience"
+                  style="width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px;">
+              </div>
+
+              <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--text);">Your
+                  Review</label>
+                <textarea id="review-comment" placeholder="Share your experience with this product" rows="4"
+                  style="width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; resize: vertical;"></textarea>
+              </div>
+
+              <button onclick="submitReview(document.getElementById('review-product-id').value)" class="btn btn-primary"
+                style="width: 100%;">
+                <i class="fas fa-paper-plane"></i> Submit Review
+              </button>
+            </div>
+          </div>
+
+          <script src="/js/theme.js"></script>
+          <script src="/js/script.js"></script>
+</body>
+
+</html>

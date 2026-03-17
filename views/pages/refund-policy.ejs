@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Refund & Return Policy – Shri Govind Pharmacy</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/theme.js"></script>
+
+  <style>
+    .policy-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    .policy-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 2px solid var(--primary-color, #1c8125);
+    }
+    .policy-header h1 {
+      font-size: 2.5rem;
+      color: var(--text-color, #1a1a1a);
+      margin-bottom: 0.5rem;
+    }
+    .policy-header .last-updated {
+      color: var(--muted-color, #666);
+      font-size: 0.95rem;
+    }
+    .policy-section {
+      margin-bottom: 2.5rem;
+    }
+    .policy-section h2 {
+      font-size: 1.5rem;
+      color: var(--primary-color, #1c8125);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .policy-section h2 i {
+      font-size: 1.3rem;
+    }
+    .policy-section h3 {
+      font-size: 1.1rem;
+      color: var(--text-color, #333);
+      margin-top: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .policy-section p, .policy-section li {
+      line-height: 1.8;
+      color: var(--text-color, #333);
+      font-size: 1rem;
+    }
+    .policy-section ul {
+      margin-left: 1.5rem;
+      margin-top: 0.75rem;
+    }
+    .policy-section li {
+      margin-bottom: 0.5rem;
+    }
+    .policy-highlight {
+      background: rgba(28, 129, 37, 0.08);
+      border-left: 4px solid var(--primary-color, #1c8125);
+      padding: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .policy-success {
+      background: rgba(28, 129, 37, 0.08);
+      border-left: 4px solid #28a745;
+      padding: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .policy-warning {
+      background: rgba(255, 152, 0, 0.1);
+      border-left: 4px solid #ff9800;
+      padding: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .policy-danger {
+      background: rgba(220, 53, 69, 0.08);
+      border-left: 4px solid #dc3545;
+      padding: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .policy-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    .policy-table th, .policy-table td {
+      padding: 1rem;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    .policy-table th {
+      background: rgba(28, 129, 37, 0.1);
+      font-weight: 600;
+    }
+    .steps-container {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+    }
+    .step-item {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: flex-start;
+    }
+    .step-item:last-child {
+      margin-bottom: 0;
+    }
+    .step-number {
+      width: 40px;
+      height: 40px;
+      background: var(--primary-color, #1c8125);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-content h4 {
+      margin: 0 0 0.5rem 0;
+      color: var(--text-color, #333);
+      font-size: 1.1rem;
+    }
+    .step-content p {
+      margin: 0;
+      color: var(--muted-color, #666);
+    }
+    .contact-box {
+      background: linear-gradient(135deg, var(--primary-color, #1c8125), #2d9d3a);
+      color: white;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    .contact-box h3 {
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+    }
+    .contact-box a {
+      color: white;
+      text-decoration: underline;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary-color, #1c8125);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 2rem;
+      transition: gap 0.2s;
+    }
+    .back-link:hover {
+      gap: 0.75rem;
+    }
+    [data-theme="dark"] .policy-highlight,
+    [data-theme="dark"] .policy-success {
+      background: rgba(28, 129, 37, 0.15);
+    }
+    [data-theme="dark"] .policy-warning {
+      background: rgba(255, 152, 0, 0.15);
+    }
+    [data-theme="dark"] .policy-danger {
+      background: rgba(220, 53, 69, 0.15);
+    }
+    [data-theme="dark"] .steps-container {
+      background: #2a2a2a;
+    }
+    [data-theme="dark"] .policy-table th {
+      background: rgba(28, 129, 37, 0.2);
+    }
+    [data-theme="dark"] .policy-table td,
+    [data-theme="dark"] .policy-table th {
+      border-color: #444;
+    }
+  </style>
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+  <header class="main-header">
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-flex">
+          <a href="/home" class="logo">
+            <i class="fa-solid fa-mortar-pestle logo-ico"></i>
+            <div class="logo-text">
+              <span class="logo-main">Shri Govind Pharmacy</span>
+              <span class="brand-sub">Ayurvedic &amp; Herbal Wellness</span>
+            </div>
+          </a>
+          <div class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+              <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+            <a href="/home" class="btn btn-outline">
+              <i class="fa-solid fa-house"></i>
+              <span>Home</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/home"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right bc-sep"></i>
+        <span>Refund & Return Policy</span>
+      </nav>
+    </div>
+  </div>
+
+  <main class="policy-container">
+    <a href="/home" class="back-link">
+      <i class="fa-solid fa-arrow-left"></i>
+      Back to Home
+    </a>
+
+    <div class="policy-header">
+      <h1><i class="fa-solid fa-rotate-left"></i> Refund & Return Policy</h1>
+      <p class="last-updated">Last Updated: January 1, 2025</p>
+    </div>
+
+    <div class="policy-success">
+      <strong><i class="fa-solid fa-circle-check"></i> 7-Day Hassle-Free Returns</strong>
+      <p style="margin: 0.5rem 0 0 0;">Not satisfied with your purchase? We offer a 7-day return window on all unopened products with full refund guarantee. Your satisfaction is our priority.</p>
+    </div>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-scale-balanced"></i> 1. Our Commitment to You</h2>
+      <p>At Shri Govind Pharmacy, we stand behind the quality of our Ayurvedic products. However, we understand that sometimes products may not meet your expectations or you may receive a damaged or incorrect item.</p>
+      <p>This policy outlines our return and refund process to ensure a smooth and transparent experience.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-list-check"></i> 2. Return Eligibility</h2>
+      
+      <h3>✅ Items Eligible for Return:</h3>
+      <ul>
+        <li>Unopened products in original condition with seals intact</li>
+        <li>Products received damaged or defective</li>
+        <li>Wrong product or variant delivered</li>
+        <li>Expired or near-expiry products (less than 3 months shelf life)</li>
+        <li>Products with manufacturing defects</li>
+        <li>Missing or incomplete items in combo packs</li>
+      </ul>
+
+      <div class="policy-danger" style="margin-top: 1.5rem;">
+        <strong><i class="fa-solid fa-circle-xmark"></i> Items NOT Eligible for Return:</strong>
+        <ul style="margin-top: 0.75rem;">
+          <li>Opened or used products (unless defective)</li>
+          <li>Prescription medicines (unless defective or wrong dispensed)</li>
+          <li>Products without original packaging and seals</li>
+          <li>Items damaged due to customer misuse</li>
+          <li>Free promotional items or gifts</li>
+          <li>Products purchased more than 7 days ago (unless defective)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-calendar-check"></i> 3. Return Timeframe</h2>
+      <table class="policy-table">
+        <thead>
+          <tr>
+            <th>Return Type</th>
+            <th>Time Limit</th>
+            <th>Condition</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Change of Mind</strong></td>
+            <td>7 days from delivery</td>
+            <td>Unopened, original condition</td>
+          </tr>
+          <tr>
+            <td><strong>Damaged/Defective</strong></td>
+            <td>7 days from delivery</td>
+            <td>With photos of damage</td>
+          </tr>
+          <tr>
+            <td><strong>Wrong Product</strong></td>
+            <td>7 days from delivery</td>
+            <td>Unopened</td>
+          </tr>
+          <tr>
+            <td><strong>Quality Issue</strong></td>
+            <td>15 days from delivery</td>
+            <td>With product batch details</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-clipboard-list"></i> 4. How to Return a Product</h2>
+      
+      <div class="steps-container">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Contact Us</h4>
+            <p>Email us at <strong>returns@shrigovindpharmacy.com</strong> or call <strong>+91 98765 43210</strong> within the return window. Include your order number, product details, and reason for return.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Submit Required Information</h4>
+            <p>For damaged/defective items, send clear photos of the product, packaging, and damage. For change of mind, confirm the product is unopened with seals intact.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Return Authorization</h4>
+            <p>Our team will review your request within 24 hours and provide a Return Authorization (RA) number and return shipping instructions.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Pack the Product</h4>
+            <p>Securely pack the product in its original packaging with all accessories, manuals, and tags. Include a copy of the invoice and RA number.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <h4>Ship the Product</h4>
+            <p>For defective/wrong items: We'll arrange free pickup. For change of mind: You'll need to ship at your cost. Use a tracked courier service.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">6</div>
+          <div class="step-content">
+            <h4>Inspection & Processing</h4>
+            <p>Once received, our team will inspect the product (1-2 business days). If approved, refund will be initiated within 3-5 business days.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-money-bill-transfer"></i> 5. Refund Methods</h2>
+      <p>Refunds are processed to the original payment method:</p>
+      
+      <table class="policy-table">
+        <thead>
+          <tr>
+            <th>Payment Method</th>
+            <th>Refund Method</th>
+            <th>Processing Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Credit/Debit Card</strong></td>
+            <td>Reversed to same card</td>
+            <td>5-7 business days</td>
+          </tr>
+          <tr>
+            <td><strong>UPI / Net Banking</strong></td>
+            <td>Bank transfer to same account</td>
+            <td>3-5 business days</td>
+          </tr>
+          <tr>
+            <td><strong>Digital Wallets</strong></td>
+            <td>Wallet credit</td>
+            <td>2-4 business days</td>
+          </tr>
+          <tr>
+            <td><strong>Cash on Delivery</strong></td>
+            <td>Bank transfer / Store credit</td>
+            <td>5-7 business days</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="policy-highlight" style="margin-top: 1rem;">
+        <strong><i class="fa-solid fa-circle-info"></i> Note:</strong> For COD orders, please provide bank account details (Account Number, IFSC Code, Account Holder Name) for refund processing.
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-truck"></i> 6. Return Shipping Costs</h2>
+    
+      <table class="policy-table">
+        <thead>
+          <tr>
+            <th>Return Reason</th>
+            <th>Who Pays?</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Damaged/Defective Product</strong></td>
+            <td>Shri Govind Pharmacy</td>
+            <td>Free pickup arranged</td>
+          </tr>
+          <tr>
+            <td><strong>Wrong Product Sent</strong></td>
+            <td>Shri Govind Pharmacy</td>
+            <td>Free pickup arranged</td>
+          </tr>
+          <tr>
+            <td><strong>Change of Mind</strong></td>
+            <td>Customer</td>
+            <td>Customer ships at own cost</td>
+          </tr>
+          <tr>
+            <td><strong>Quality Issue</strong></td>
+            <td>Shri Govind Pharmacy</td>
+            <td>Free pickup after verification</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-arrow-right-arrow-left"></i> 7. Exchange Policy</h2>
+      <p>We offer exchanges for the following situations:</p>
+      <ul>
+        <li><strong>Wrong Product:</strong> We'll send the correct product and pick up the wrong one at no cost</li>
+        <li><strong>Damaged Product:</strong> Replacement with same product (subject to availability)</li>
+        <li><strong>Different Size/Variant:</strong> Exchange available; price difference will be adjusted</li>
+      </ul>
+      <p>Exchanges are subject to product availability. If the desired product is unavailable, we'll process a refund instead.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-box-open"></i> 8. Damaged in Transit</h2>
+      <div class="policy-warning">
+        <strong><i class="fa-solid fa-triangle-exclamation"></i> Important:</strong>
+        Always inspect your package before accepting delivery. If you notice damage:
+        <ul style="margin-top: 0.75rem;">
+          <li>Take photos of the damaged package before opening</li>
+          <li>Note the damage on the courier delivery receipt</li>
+          <li>Contact us within 24 hours with photos and order details</li>
+          <li>We'll arrange immediate replacement or full refund</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-percent"></i> 9. Partial Returns</h2>
+      <p>If you return only some items from a multi-item order:</p>
+      <ul>
+        <li>Refund will be calculated based on returned items only</li>
+        <li>Shipping charges paid will not be refunded unless all items are returned</li>
+        <li>Promotional discounts may be adjusted proportionally</li>
+      </ul>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-gift"></i> 10. Returns on Gift Orders</h2>
+      <p>If you received a product as a gift:</p>
+      <ul>
+        <li>Returns can be initiated by the gift giver (original purchaser)</li>
+        <li>Refund will be credited to the original purchaser's account</li>
+        <li>Exchange or store credit can be provided to the gift recipient</li>
+      </ul>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-clock"></i> 11. Late or Missing Refunds</h2>
+      <p>If you haven't received your refund within the specified timeframe:</p>
+      <ol style="margin-left: 1.5rem; margin-top: 0.75rem;">
+        <li>Check your bank account or card statement again</li>
+        <li>Contact your bank/payment provider (processing delays can occur)</li>
+        <li>If still not received, contact us at <strong>returns@shrigovindpharmacy.com</strong></li>
+      </ol>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-headset"></i> 12. Contact Us for Returns</h2>
+      <p>Our returns team is available to assist you:</p>
+      
+      <div class="contact-box">
+        <h3><i class="fa-solid fa-envelope-circle-check"></i> Returns Department</h3>
+        <p><strong>Email:</strong> <a href="mailto:returns@shrigovindpharmacy.com">returns@shrigovindpharmacy.com</a></p>
+        <p><strong>Phone:</strong> <a href="tel:+919876543210">+91 98765 43210</a> (Mon–Sat, 9 AM–7 PM)</p>
+        <p><strong>WhatsApp:</strong> <a href="https://wa.me/919876543210" style="color: white;">+91 98765 43210</a></p>
+        <p><strong>Address:</strong> Returns Department, Shri Govind Pharmacy, Near Main Bus Stand, Sikar, Rajasthan – 332001</p>
+      </div>
+    </section>
+
+    <section class="policy-section">
+      <h2><i class="fa-solid fa-file-shield"></i> 13. Policy Updates</h2>
+      <p>We may update this Refund & Return Policy periodically. Changes will be posted on this page with an updated "Last Updated" date. We encourage you to review this policy regularly.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer" style="margin-top: 4rem;">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2025 Shri Govind Pharmacy. All Rights Reserved.</p>
+        <div class="fb-links">
+          <a href="/privacy-policy">Privacy Policy</a>
+          <a href="/terms-conditions">Terms of Service</a>
+          <a href="/refund-policy">Refund Policy</a>
+          <a href="/sitemap.xml">Sitemap</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/theme.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+    rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --secondary: #e67e22;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .admin-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .admin-header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .admin-logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .admin-logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-logo-main {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    .admin-logo-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .admin-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: var(--bg);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+
+    .theme-toggle:hover {
+      background: var(--border);
+    }
+
+    .btn-logout {
+      padding: 0.5rem 1.25rem;
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: #c82333;
+    }
+
+    /* Main Content */
+    .admin-main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .admin-welcome {
+      margin-bottom: 2rem;
+    }
+
+    .admin-welcome h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .admin-welcome p {
+      color: var(--text-muted);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .stat-icon.green {
+      background: rgba(28, 129, 37, 0.1);
+      color: var(--primary);
+    }
+
+    .stat-icon.blue {
+      background: rgba(52, 152, 219, 0.1);
+      color: #3498db;
+    }
+
+    .stat-icon.orange {
+      background: rgba(230, 126, 34, 0.1);
+      color: var(--secondary);
+    }
+
+    .stat-icon.purple {
+      background: rgba(155, 89, 182, 0.1);
+      color: #9b59b6;
+    }
+
+    .stat-info {
+      flex: 1;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Actions Bar */
+    .actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .btn-primary {
+      padding: 0.75rem 1.5rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .store-btn {
+      background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+    }
+
+    .store-btn:hover {
+      background: linear-gradient(135deg, #e55a2b, #e8851a) !important;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--danger);
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.5rem 1rem;
+      gap: 0.5rem;
+    }
+
+    .search-box input {
+      border: none;
+      background: transparent;
+      outline: none;
+      color: var(--text);
+      font-size: 0.9rem;
+      width: 250px;
+    }
+
+    .search-box i {
+      color: var(--text-muted);
+    }
+
+    /* Products Table */
+    .products-card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .products-head {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .products-head h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .products-body {
+      overflow-x: auto;
+    }
+
+    .products-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .products-table th {
+      background: var(--bg);
+      padding: 1rem 1.25rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .products-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .products-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .products-table tr:hover {
+      background: var(--bg);
+    }
+
+    .product-cell {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .product-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: var(--bg);
+    }
+
+    .product-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-name {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .product-category {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .stock-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .stock-badge.in-stock {
+      background: rgba(40, 167, 69, 0.1);
+      color: var(--success);
+    }
+
+    .stock-badge.low-stock {
+      background: rgba(255, 193, 7, 0.1);
+      color: var(--warning);
+    }
+
+    .stock-badge.out-of-stock {
+      background: rgba(220, 53, 69, 0.1);
+      color: var(--danger);
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .action-btn.edit {
+      background: rgba(52, 152, 219, 0.1);
+      color: #3498db;
+    }
+
+    .action-btn.edit:hover {
+      background: #3498db;
+      color: white;
+    }
+
+    .action-btn.delete {
+      background: rgba(220, 53, 69, 0.1);
+      color: var(--danger);
+    }
+
+    .action-btn.delete:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .admin-header-inner {
+        padding: 0 1rem;
+      }
+
+      .admin-main {
+        padding: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-box {
+        width: 100%;
+      }
+
+      .search-box input {
+        width: 100%;
+      }
+
+      .products-table {
+        font-size: 0.875rem;
+      }
+
+      .products-table th,
+      .products-table td {
+        padding: 0.75rem 0.5rem;
+      }
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success">
+      <%= success[0] %>
+    </div>
+    <% } %>
+      <% if (error && error.length) { %>
+        <div class="flash error">
+          <%= error[0] %>
+        </div>
+        <% } %>
+
+
+          <!-- Header -->
+          <header class="admin-header">
+            <div class="admin-header-inner">
+              <a href="/admin/home" class="admin-logo">
+                <div class="admin-logo-icon">
+                  <i class="fas fa-mortar-pestle"></i>
+                </div>
+                <div class="admin-logo-text">
+                  <span class="admin-logo-main">Shri Govind</span>
+                  <span class="admin-logo-sub">Admin Panel</span>
+                </div>
+              </a>
+
+              <div class="admin-header-actions">
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                  <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+                <form action="/logout" method="POST" style="display: inline;">
+                  <button type="submit" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="desktop-only">Logout</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </header>
+
+          <!-- Main Content -->
+          <main class="admin-main">
+
+            <div class="admin-welcome">
+              <h1>Welcome back, Admin! 👋</h1>
+              <p>Manage your products and track your store performance</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-icon green">
+                  <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="stat-info">
+                  <div class="stat-label">Total Revenue (30 days)</div>
+                  <div class="stat-value" id="total-revenue">₹<%= analytics?.totalRevenue?.toLocaleString('en-IN') || 0
+                      %>
+                  </div>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon blue">
+                  <i class="fas fa-shopping-bag"></i>
+                </div>
+                <div class="stat-info">
+                  <div class="stat-label">Total Orders</div>
+                  <div class="stat-value" id="total-orders">
+                    <%= analytics?.totalOrders || 0 %>
+                  </div>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon purple">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                  <div class="stat-label">New Customers</div>
+                  <div class="stat-value" id="new-customers">
+                    <%= analytics?.newCustomers || 0 %>
+                  </div>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon orange">
+                  <i class="fas fa-box"></i>
+                </div>
+                <div class="stat-info">
+                  <div class="stat-label">Total Products</div>
+                  <div class="stat-value" id="total-products">
+                    <%= products.length %>
+                  </div>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(45, 152, 218, 0.1); color: #2980b9;">
+                  <i class="fas fa-user-doctor"></i>
+                </div>
+                <div class="stat-info">
+                  <div class="stat-label">Total Doctors</div>
+                  <div class="stat-value" id="total-doctors">
+                    <%= totalDoctors || 0 %>
+                  </div>
+                  <div class="stat-label" style="margin-top: 6px; font-size: 0.75rem;">Active: <%= activeDoctors || 0 %>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Delivery Agents Alert Card -->
+            <% if (typeof pendingAgentsCount !=='undefined' && pendingAgentsCount> 0) { %>
+              <div class="stat-card"
+                style="border-left: 4px solid var(--warning); background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);">
+                <div class="stat-icon" style="background: rgba(255, 193, 7, 0.2); color: #f39c12;">
+                  <i class="fas fa-user-clock"></i>
+                </div>
+                <div class="stat-info">
+                  <div class="stat-label">Pending Delivery Agent Requests</div>
+                  <div class="stat-value" style="color: #f39c12; font-size: 1.5rem;">
+                    <%= pendingAgentsCount %>
+                  </div>
+                  <div style="margin-top: 10px;">
+                    <a href="/admin/delivery-agents" class="btn-primary"
+                      style="padding: 8px 16px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                      <i class="fas fa-eye"></i> Review Requests
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <% } else { %>
+                <!-- Delivery Management Quick Access -->
+                <div class="stat-card" style="border-left: 4px solid var(--primary);">
+                  <div class="stat-icon" style="background: rgba(28, 129, 37, 0.2); color: var(--primary);">
+                    <i class="fas fa-shipping-fast"></i>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-label">Delivery Management</div>
+                    <div style="margin-top: 10px;">
+                      <a href="/admin/delivery" class="btn-primary"
+                        style="padding: 8px 16px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-tachometer-alt"></i> Delivery Dashboard
+                      </a>
+                      <a href="/admin/delivery-agents" class="btn-outline"
+                        style="padding: 8px 16px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; margin-left: 8px; border: 2px solid var(--border); background: transparent; color: var(--text);">
+                        <i class="fas fa-users"></i> Manage Agents
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+
+                <!-- Loyalty Program Quick Access -->
+                <div class="stat-card" style="border-left: 4px solid #ffd700;">
+                  <div class="stat-icon" style="background: rgba(255, 215, 0, 0.2); color: #ffd700;">
+                    <i class="fas fa-gift"></i>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-label">Loyalty Program</div>
+                    <div style="margin-top: 10px;">
+                      <a href="/admin/loyalty" class="btn-primary"
+                        style="padding: 8px 16px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: #ffd700; color: #333;">
+                        <i class="fas fa-users"></i> Manage Points
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <% } %>
+
+                  <!-- Additional Stats Row -->
+                  <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="stat-card">
+                      <div class="stat-info">
+                        <div class="stat-label">Completed Orders</div>
+                        <div class="stat-value" style="color: var(--success);">
+                          <%= analytics?.completedOrders || 0 %>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="stat-card">
+                      <div class="stat-info">
+                        <div class="stat-label">Pending Orders</div>
+                        <div class="stat-value" style="color: var(--warning);">
+                          <%= analytics?.pendingOrders || 0 %>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="stat-card">
+                      <div class="stat-info">
+                        <div class="stat-label">Cancelled Orders</div>
+                        <div class="stat-value" style="color: var(--danger);">
+                          <%= analytics?.cancelledOrders || 0 %>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="stat-card">
+                      <div class="stat-info">
+                        <div class="stat-label">Avg Order Value</div>
+                        <div class="stat-value">₹<%= analytics?.averageOrderValue?.toLocaleString('en-IN') || 0 %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Actions Bar -->
+                  <div class="actions-bar">
+                    <a href="/admin/store" class="btn-primary store-btn">
+                      <i class="fas fa-store"></i>
+                      Store Management
+                      <% if (analytics?.pendingOrders> 0) { %>
+                        <span class="notification-badge">
+                          <%= analytics.pendingOrders %>
+                        </span>
+                        <% } %>
+                    </a>
+                    <a href="/admin/doctors" class="btn-primary">
+                      <i class="fas fa-user-doctor"></i>
+                      Manage Doctors
+                    </a>
+                    <a href="/admin/products/new" class="btn-primary">
+                      <i class="fas fa-plus"></i>
+                      Add New Product
+                    </a>
+
+                    <div class="search-box">
+                      <i class="fas fa-search"></i>
+                      <input type="text" id="search-input" placeholder="Search products...">
+                    </div>
+                  </div>
+
+                  <!-- Analytics Sections -->
+                  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+
+                    <!-- Revenue Chart Placeholder -->
+                    <div class="products-card">
+                      <div class="products-head">
+                        <h2><i class="fas fa-chart-line"></i> Revenue Trend</h2>
+                      </div>
+                      <div class="products-body">
+                        <canvas id="revenue-chart" height="80"></canvas>
+                        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                        <script>
+                          const ctx = document.getElementById('revenue-chart').getContext('2d');
+                          const revenueData = <% - JSON.stringify(dailyRevenue || []) %>;
+
+                          new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                              labels: revenueData.slice(-14).map(d => d.date),
+                              datasets: [{
+                                label: 'Revenue (₹)',
+                                data: revenueData.slice(-14).map(d => d.revenue),
+                                borderColor: '#1c8125',
+                                backgroundColor: 'rgba(28, 129, 37, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                              }]
+                            },
+                            options: {
+                              responsive: true,
+                              maintainAspectRatio: true,
+                              plugins: {
+                                legend: {
+                                  display: false
+                                }
+                              },
+                              scales: {
+                                y: {
+                                  beginAtZero: true
+                                }
+                              }
+                            }
+                          });
+                        </script>
+                      </div>
+                    </div>
+
+                    <!-- Top Products -->
+                    <div class="products-card">
+                      <div class="products-head">
+                        <h2><i class="fas fa-trophy"></i> Top Products</h2>
+                      </div>
+                      <div class="products-body">
+                        <% if (typeof topProducts !=='undefined' && topProducts.length> 0) { %>
+                          <% topProducts.slice(0, 5).forEach((product, index)=> { %>
+                            <div
+                              style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: <%= index < 4 ? '1px solid var(--border)' : 'none' %>;">
+                              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div
+                                  style="width: 30px; height: 30px; background: <%= index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'var(--bg)' %>; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem;">
+                                  <%= index + 1 %>
+                                </div>
+                                <div>
+                                  <div style="font-weight: 600; font-size: 0.9rem;">
+                                    <%= product.name %>
+                                  </div>
+                                  <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                    <%= product.sold %> sold
+                                  </div>
+                                </div>
+                              </div>
+                              <div style="font-weight: 700; color: var(--primary);">₹<%=
+                                  Math.round(product.revenue).toLocaleString('en-IN') %>
+                              </div>
+                            </div>
+                            <% }) %>
+                              <% } else { %>
+                                <div style="text-align: center; color: var(--text-muted); padding: 2rem;">No sales data
+                                  yet</div>
+                                <% } %>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Low Stock Alert -->
+                  <% if (typeof lowStockProducts !=='undefined' && lowStockProducts.length> 0) { %>
+                    <div class="products-card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--warning);">
+                      <div class="products-head">
+                        <h2><i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i> Low Stock Alert
+                        </h2>
+                      </div>
+                      <div class="products-body">
+                        <table class="products-table">
+                          <thead>
+                            <tr>
+                              <th>Product</th>
+                              <th>Category</th>
+                              <th>Current Stock</th>
+                              <th>Status</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <% lowStockProducts.forEach(product=> { %>
+                              <tr>
+                                <td>
+                                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <img src="<%= product.image || 'https://via.placeholder.com/40' %>"
+                                      style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
+                                    <span style="font-weight: 600;">
+                                      <%= product.name %>
+                                    </span>
+                                  </div>
+                                </td>
+                                <td>
+                                  <%= product.category %>
+                                </td>
+                                <td><span style="font-weight: 700; color: var(--danger);">
+                                    <%= product.stock %>
+                                  </span></td>
+                                <td><span class="stock-badge low-stock">Low Stock</span></td>
+                                <td><a href="/admin/products/edit/<%= product._id %>" class="action-btn edit"><i
+                                      class="fas fa-edit"></i></a></td>
+                              </tr>
+                              <% }) %>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <% } %>
+
+                      <!-- Recent Orders -->
+                      <% if (typeof recentOrders !=='undefined' && recentOrders.length> 0) { %>
+                        <div class="products-card" style="margin-bottom: 1.5rem;">
+                          <div class="products-head">
+                            <h2><i class="fas fa-clock"></i> Recent Orders</h2>
+                            <a href="/admin/orders"
+                              style="color: var(--primary); text-decoration: none; font-weight: 600;">View All</a>
+                          </div>
+                          <div class="products-body">
+                            <table class="products-table">
+                              <thead>
+                                <tr>
+                                  <th>Order ID</th>
+                                  <th>Customer</th>
+                                  <th>Amount</th>
+                                  <th>Status</th>
+                                  <th>Date</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <% recentOrders.forEach(order=> { %>
+                                  <tr>
+                                    <td><span style="font-family: monospace; color: var(--primary); font-weight: 600;">
+                                        <%= order.tracking.orderId %>
+                                      </span></td>
+                                    <td>
+                                      <%= order.user?.name || 'N/A' %>
+                                    </td>
+                                    <td><strong>₹<%= Math.round(order.pricing.total).toLocaleString('en-IN') %></strong>
+                                    </td>
+                                    <td><span class="stock-badge status-<%= order.status %>">
+                                        <%= order.status.replace('_', ' ' ) %>
+                                      </span></td>
+                                    <td>
+                                      <%= new Date(order.createdAt).toLocaleDateString('en-IN') %>
+                                    </td>
+                                  </tr>
+                                  <% }) %>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                        <% } %>
+
+                          <!-- Products Table -->
+                          <div class="products-card">
+                            <div class="products-head">
+                              <h2>All Products</h2>
+                            </div>
+
+                            <div class="products-body">
+                              <% if (products.length===0) { %>
+                                <div class="empty-state">
+                                  <div class="empty-icon">
+                                    <i class="fas fa-box-open"></i>
+                                  </div>
+                                  <h3>No Products Yet</h3>
+                                  <p>Start by adding your first product to the store</p>
+                                  <a href="/admin/products/new" class="btn-primary">
+                                    <i class="fas fa-plus"></i> Add Product
+                                  </a>
+                                </div>
+                                <% } else { %>
+                                  <table class="products-table">
+                                    <thead>
+                                      <tr>
+                                        <th>Product</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <% products.forEach(product=> { %>
+                                        <tr>
+                                          <td>
+                                            <div class="product-cell">
+                                              <img src="<%= product.image || 'https://via.placeholder.com/50' %>"
+                                                alt="<%= product.name %>" class="product-img">
+                                              <div class="product-info">
+                                                <span class="product-name">
+                                                  <%= product.name %>
+                                                </span>
+                                              </div>
+                                            </div>
+                                          </td>
+                                          <td>
+                                            <span class="product-category">
+                                              <%= product.category || 'N/A' %>
+                                            </span>
+                                          </td>
+                                          <td>
+                                            <strong>₹<%= product.price %></strong>
+                                            <% if (product.oldPrice) { %>
+                                              <span
+                                                style="text-decoration: line-through; color: var(--text-muted); margin-left: 0.5rem;">₹
+                                                <%= product.oldPrice %>
+                                              </span>
+                                              <% } %>
+                                          </td>
+                                          <td>
+                                            <%= product.stock || 0 %>
+                                          </td>
+                                          <td>
+                                            <% if (product.stock> 10) { %>
+                                              <span class="stock-badge in-stock">In Stock</span>
+                                              <% } else if (product.stock> 0) { %>
+                                                <span class="stock-badge low-stock">Low Stock</span>
+                                                <% } else { %>
+                                                  <span class="stock-badge out-of-stock">Out of Stock</span>
+                                                  <% } %>
+                                          </td>
+                                          <td>
+                                            <div class="action-btns">
+                                              <a href="/admin/products/edit/<%= product._id %>" class="action-btn edit"
+                                                title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                              </a>
+                                              <form action="/admin/products/delete/<%= product._id %>?_method=DELETE"
+                                                method="POST" style="display: inline;"
+                                                onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                                <button type="submit" class="action-btn delete" title="Delete">
+                                                  <i class="fas fa-trash"></i>
+                                                </button>
+                                              </form>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                        <% }) %>
+                                    </tbody>
+                                  </table>
+                                  <% } %>
+                            </div>
+                          </div>
+
+          </main>
+
+          <script>
+            // Search Functionality
+            const searchInput = document.getElementById('search-input');
+            const tableRows = document.querySelectorAll('.products-table tbody tr');
+
+            searchInput.addEventListener('input', (e) => {
+              const searchTerm = e.target.value.toLowerCase();
+
+              tableRows.forEach(row => {
+                const productName = row.querySelector('.product-name')?.textContent.toLowerCase() || '';
+                const category = row.querySelector('.product-category')?.textContent.toLowerCase() || '';
+
+                if (productName.includes(searchTerm) || category.includes(searchTerm)) {
+                  row.style.display = '';
+                } else {
+                  row.style.display = 'none';
+                }
+              });
+            });
+          </script>
+
+
+</body>
+
+</html>

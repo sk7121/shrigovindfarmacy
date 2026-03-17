@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Categories | Shri Govind Pharmacy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/categories.css">
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+
+  <!-- ANNOUNCEMENT BAR -->
+  <div class="announce-bar" id="announce-bar">
+    <div class="announce-inner">
+      <span class="announce-slide active">📞 Helpline: +91 9413010731 | Mon–Sat 9AM–6PM</span>
+      <span class="announce-slide">✅ 100% Authentic · 25+ Years Trusted</span>
+    </div>
+    <button class="announce-close" id="announce-close" aria-label="Close"><i class="fas fa-times"></i></button>
+  </div>
+
+  <!-- HEADER -->
+  <header class="main-header" id="main-header">
+    <div class="topbar">
+      <div class="container topbar-flex">
+        <div class="topbar-left">
+          <a href="tel:+919413010731"><i class="fas fa-phone"></i> +91 9413010731</a>
+          <a href="mailto:shrigovindpharmacy212@gmail.com"><i class="fas fa-envelope"></i> shrigovindpharmacy212@gmail.com</a>
+        </div>
+        <div class="topbar-right">
+          <a href="#"><i class="fas fa-truck"></i> Track Order</a>
+          <a href="#"><i class="fas fa-map-marker-alt"></i> Store Locator</a>
+          <div class="topbar-social">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav class="navbar">
+      <div class="container nav-flex">
+        <a href="/home" class="logo">
+          <img src="https://res.cloudinary.com/drufdfmfr/image/upload/v1772726044/favicon_uuzvml.svg" alt="Shri Govind Pharmacy" class="logo-favicon">
+          <div class="logo-text">
+            <span class="logo-main">Shri Govind</span>
+            <span class="logo-sub">Pharmacy</span>
+          </div>
+        </a>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="/home">Home</a></li>
+          <li class="has-dropdown">
+            <a href="/categories" class="active">Categories <i class="fas fa-chevron-down"></i></a>
+            <ul class="mega-dropdown">
+              <li><a href="#ayurvedic"><i class="fas fa-capsules"></i> Ayurvedic</a></li>
+              <li><a href="#sashtri-ayurvedic"><i class="fas fa-leaf"></i> Sashtri Ayurvedic</a></li>
+              <li><a href="#herbal-cosmetics"><i class="fas fa-heart"></i> Herbal Cosmetics</a></li>
+              <li><a href="#fmcg"><i class="fas fa-soap"></i> FMCG</a></li>
+            </ul>
+          </li>
+          <li><a href="/home#product">Products</a></li>
+          <li><a href="/home#about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/login">Account</a></li>
+        </ul>
+        <div class="nav-actions">
+          <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode">
+            <i class="fas fa-moon" id="theme-icon"></i>
+          </button>
+          <button class="icon-btn" id="search-trigger" aria-label="Search">
+            <i class="fas fa-search"></i>
+          </button>
+          <a href="/cart" class="cart-icon" id="cart-btn" aria-label="Cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="badge" id="cart-count">0</span>
+          </a>
+          <a href="#" class="icon-btn wishlist-btn" aria-label="Wishlist">
+            <i class="fas fa-heart"></i>
+            <span class="badge wish-badge" id="wish-count">0</span>
+          </a>
+          <a href="/doctor" class="btn btn-primary consult-btn desktop-only">
+            <i class="fas fa-user-md"></i> Consult Doctor
+          </a>
+          <button class="hamburger" id="hamburger" aria-label="Open Menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- SEARCH OVERLAY -->
+    <div class="search-overlay" id="search-overlay">
+      <div class="search-overlay-inner">
+        <div class="search-bar-big">
+          <div class="sbb-categories">
+            <select id="search-cat">
+              <option value="">All Categories</option>
+              <option>Ayurvedic</option>
+              <option>Sashtri Ayurvedic</option>
+              <option>Herbal Cosmetics</option>
+              <option>FMCG</option>
+            </select>
+          </div>
+          <input type="text" id="searchInput" placeholder="Search for medicines, supplements, herbal products…" autocomplete="off">
+          <button id="searchBtn"><i class="fas fa-search"></i> Search</button>
+        </div>
+        <div class="search-suggestions">
+          <span class="sug-label">Popular:</span>
+          <button class="sug-chip">Ashwagandha</button>
+          <button class="sug-chip">Triphala</button>
+          <button class="sug-chip">Vitamin C</button>
+          <button class="sug-chip">Immunity</button>
+          <button class="sug-chip">Omega 3</button>
+        </div>
+        <button class="search-close" id="search-close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+
+    <!-- MOBILE MENU -->
+    <div class="mobile-menu" id="mobile-menu">
+      <div class="mobile-menu-inner">
+        <div class="mobile-menu-head">
+          <span>Menu</span>
+          <button id="mobile-close"><i class="fas fa-times"></i></button>
+        </div>
+        <ul>
+          <li><a href="/home"><i class="fas fa-home"></i> Home</a></li>
+          <li class="mob-has-sub">
+            <a href="#" class="mob-sub-trigger"><i class="fas fa-th-large"></i> Categories <i class="fas fa-chevron-down mob-arrow"></i></a>
+            <ul class="mob-submenu">
+              <li><a href="#ayurvedic">Ayurvedic</a></li>
+              <li><a href="#sashtri-ayurvedic">Sashtri Ayurvedic</a></li>
+              <li><a href="#herbal-cosmetics">Herbal Cosmetics</a></li>
+              <li><a href="#fmcg">FMCG</a></li>
+            </ul>
+          </li>
+          <li><a href="/home#product"><i class="fas fa-box"></i> Products</a></li>
+          <li><a href="/home#about"><i class="fas fa-info-circle"></i> About</a></li>
+          <li><a href="/contact"><i class="fas fa-phone"></i> Contact</a></li>
+          <li><a href="/login"><i class="fas fa-user"></i> Account</a></li>
+          <li>
+            <a href="/doctor" class="btn btn-primary mob-consult">
+              <i class="fas fa-user-md"></i> Consult Doctor
+            </a>
+          </li>
+        </ul>
+        <div class="mob-contact-strip">
+          <a href="tel:+919413010731"><i class="fas fa-phone"></i> +91 9413010731</a>
+          <a href="https://wa.me/919413010731" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp Us</a>
+        </div>
+      </div>
+    </div>
+    <div class="mobile-overlay" id="mobile-overlay"></div>
+  </header>
+
+  <main>
+
+    <!-- PAGE HERO -->
+    <section class="cat-page-hero">
+      <div class="cat-hero-bg"></div>
+      <div class="cat-hero-particles" id="hero-particles"></div>
+      <div class="container cat-hero-content">
+        <nav class="breadcrumb" aria-label="breadcrumb">
+          <a href="/home"><i class="fas fa-home"></i> Home</a>
+          <span><i class="fas fa-chevron-right"></i></span>
+          <span class="bc-current">All Categories</span>
+        </nav>
+        <div class="cat-hero-text">
+          <div class="sec-tag"><i class="fas fa-th-large"></i> Browse Our Store</div>
+          <h1>All <em>Categories</em></h1>
+          <p>Discover our complete range of authentic Ayurvedic medicines, herbal cosmetics, and wellness essentials — curated from trusted brands.</p>
+        </div>
+        <div class="cat-hero-stats">
+          <div class="chs-item"><strong><%= totalProducts || '0' %>+</strong><span>Products</span></div>
+          <div class="chs-div"></div>
+          <div class="chs-item"><strong><%= categories.length || '0' %></strong><span>Categories</span></div>
+          <div class="chs-div"></div>
+          <div class="chs-item"><strong>12K+</strong><span>Customers</span></div>
+          <div class="chs-div"></div>
+          <div class="chs-item"><strong>25+</strong><span>Years</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STICKY CATEGORY NAV -->
+    <div class="cat-sticky-nav" id="cat-sticky-nav">
+      <div class="container cat-sticky-inner">
+        <div class="csn-links">
+          <% if (categories && categories.length > 0) { %>
+          <% categories.forEach((cat, index) => { %>
+          <a href="#<%= cat.slug %>" class="csn-link <%= index === 0 ? 'active' : '' %>" data-target="<%= cat.slug %>">
+            <i class="<%= cat.icon || 'fas fa-box' %>"></i> <%= cat.name %>
+          </a>
+          <% }) %>
+          <% } else { %>
+          <a href="#ayurvedic" class="csn-link active" data-target="ayurvedic">
+            <i class="fas fa-capsules"></i> Ayurvedic
+          </a>
+          <a href="#sashtri-ayurvedic" class="csn-link" data-target="sashtri-ayurvedic">
+            <i class="fas fa-leaf"></i> Sashtri Ayurvedic
+          </a>
+          <a href="#herbal-cosmetics" class="csn-link" data-target="herbal-cosmetics">
+            <i class="fas fa-heart"></i> Herbal Cosmetics
+          </a>
+          <a href="#fmcg" class="csn-link" data-target="fmcg">
+            <i class="fas fa-soap"></i> FMCG
+          </a>
+          <% } %>
+        </div>
+        <div class="csn-search">
+          <i class="fas fa-search"></i>
+          <input type="text" id="cat-search-input" placeholder="Search products…">
+        </div>
+      </div>
+    </div>
+
+    <!-- DYNAMIC CATEGORY SECTIONS -->
+    <% if (categories && categories.length > 0) { %>
+    <% categories.forEach((cat, catIndex) => { 
+        const products = productsByCategory[cat.slug] || [];
+        const colorClass = cat.color || 'green';
+        const icons = {
+          'ayurvedic': 'fas fa-capsules',
+          'sashtri': 'fas fa-leaf', 
+          'herbal-cosmetics': 'fas fa-heart',
+          'fmcg': 'fas fa-soap'
+        };
+        const subcategories = {
+          'ayurvedic': ['All', 'Immunity', 'Stress Relief', 'Digestion', 'Joint Care', 'Liver Care'],
+          'sashtri': ['All', 'Rasa Shastra', 'Kwath', 'Churna', 'Asava & Arishta', 'Ghrita'],
+          'herbal-cosmetics': ['All', 'Skincare', 'Haircare', 'Bath & Body', 'Face Wash'],
+          'fmcg': ['All', 'Food', 'Beverages', 'Personal Care', 'Home Care']
+        };
+        const btnOutline = {
+          'green': 'btn-outline-green',
+          'saffron': 'btn-outline-saffron',
+          'pink': 'btn-outline-pink',
+          'blue': 'btn-outline-blue'
+        };
+        const descMap = {
+          'ayurvedic': 'Classical & modern Ayurvedic formulations. Trusted remedies backed by centuries of wisdom and modern science.',
+          'sashtri': 'Traditional classical preparations rooted in ancient Ayurvedic scriptures. Pure, potent, and time-tested formulations.',
+          'herbal-cosmetics': 'Natural herbal cosmetics for radiant skin and healthy hair. Chemical-free beauty solutions from nature.',
+          'fmcg': 'Fast-moving consumer goods for daily wellness. Quality personal care and household essentials.'
+        };
+      %>
+    <section class="cat-section" id="<%= cat.slug %>" data-cat="<%= cat.slug %>">
+      <div class="container">
+        <div class="cat-section-head <%= catIndex % 2 === 1 ? 'reverse' : '' %>">
+          <div class="csh-left">
+            <div class="cat-label-wrap <%= colorClass %>">
+              <div class="cat-icon-lg <%= colorClass %>"><i class="<%= cat.icon || icons[cat.slug] || 'fas fa-box' %>"></i></div>
+              <div class="cat-label-text">
+                <div class="sec-tag" style="background:rgba(<%= colorClass === 'green' ? '28,129,37' : colorClass === 'saffron' ? '230,126,34' : colorClass === 'pink' ? '233,30,99' : '33,150,243' %>,0.1);color:<%= colorClass === 'green' ? '#1c8125' : colorClass === 'saffron' ? '#e67e22' : colorClass === 'pink' ? '#e91e63' : '#2196f3' %>;border-color:rgba(<%= colorClass === 'green' ? '28,129,37' : colorClass === 'saffron' ? '230,126,34' : colorClass === 'pink' ? '233,30,99' : '33,150,243' %>,0.2)"><i class="<%= cat.icon || icons[cat.slug] || 'fas fa-box' %>"></i> Category 0<%= catIndex + 1 %></div>
+                <h2 class="section-title" style="text-align:left;"><%= cat.name %></h2>
+                <p class="sec-sub" style="text-align:left;"><%= cat.description || descMap[cat.slug] || 'Quality products for your wellness.' %></p>
+              </div>
+            </div>
+          </div>
+          <div class="csh-right">
+            <div class="cat-meta-chips">
+              <span class="cmc <%= colorClass %>"><i class="fas fa-box"></i> <%= cat.productCount || 0 %>+ Products</span>
+              <span class="cmc <%= colorClass %>"><i class="fas fa-flask"></i> Lab Tested</span>
+            </div>
+            <a href="#" class="btn <%= btnOutline[colorClass] %>">View All <%= cat.name %> <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <!-- Sub-filter tags -->
+        <div class="cat-tags">
+          <% (subcategories[cat.slug] || ['All']).forEach((subcat, subIndex) => { %>
+          <button class="ctag <%= colorClass %><%= subIndex === 0 ? ' active' : '' %>" data-tag="<%= subcat === 'All' ? 'all' : subcat.toLowerCase().replace(/[^a-z0-9]+/g, '-') %>" data-cat="<%= cat.slug %>">
+            <%= subcat %>
+          </button>
+          <% }) %>
+        </div>
+
+        <div class="product-grid cat-product-grid" id="grid-<%= cat.slug %>">
+          <% if (products && products.length > 0) { %>
+          <% products.forEach(product => { 
+              const discount = product.oldPrice ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100) : 0;
+              const inStock = product.stock > 0;
+            %>
+
+          <div class="product-card" data-product-id="<%= product._id %>" data-category="<%= product.category %>" data-tag="<%= (product.description || '').toLowerCase().includes('immunity') ? 'immunity' : (product.description || '').toLowerCase().includes('stress') ? 'stress' : (product.description || '').toLowerCase().includes('digest') ? 'digestion' : 'all' %>">
+            <div class="product-image">
+              <img src="<%= product.image %>" alt="<%= product.name %>" loading="lazy">
+              <span class="product-badge instock"><%= inStock ? 'In Stock' : 'Out of Stock' %></span>
+              <% if (product.numReviews > 50) { %>
+              <span class="product-badge-2">Best Seller</span>
+              <% } %>
+              <div class="product-overlay">
+                <button class="overlay-btn wish-it" title="Wishlist"><i class="fas fa-heart"></i></button>
+                <button class="overlay-btn quick-view" title="Quick View"><i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+            <div class="product-details">
+              <div class="pd-brand">shri govind pharma</div>
+              <h4 class="product-title"><%= product.name %></h4>
+              <div class="pd-rating">
+                <% const rating = product.averageRating || 0; %>
+                <% for(let i=1; i<=5; i++) { %>
+                <% if (i <= Math.floor(rating)) { %>
+                <i class="fas fa-star"></i>
+                <% } else if (i === Math.ceil(rating) && rating % 1 !== 0) { %>
+                <i class="fas fa-star-half-stroke"></i>
+                <% } else { %>
+                <i class="far fa-star"></i>
+                <% } %>
+                <% } %>
+                <span>(<%= product.numReviews || 0 %>)</span>
+              </div>
+              <div class="product-price">
+                <span class="current-price">₹<%= product.price %></span>
+                <% if (product.oldPrice) { %>
+                <span class="old-price">₹<%= product.oldPrice %></span>
+                <span class="discount-pct"><%= discount %>% off</span>
+                <% } %>
+              </div>
+              <button class="add-to-cart-btn" data-product-id="<%= product._id %>" data-name="<%= product.name %>" data-price="<%= product.price %>">
+                <i class="fas fa-cart-plus"></i> Add to Cart
+              </button>
+            </div>
+          </div>
+          <% }) %>
+          <% } else { %>
+          <div class="no-products">
+            <i class="fas fa-box-open"></i>
+            <h3>No products in this category yet</h3>
+            <p>Check back soon for new arrivals!</p>
+          </div>
+          <% } %>
+        </div>
+        <div class="cat-load-more">
+          <button class="btn <%= btnOutline[colorClass] %> load-more-btn" data-cat="<%= cat.slug %>">Load More <i class="fas fa-arrow-down"></i></button>
+        </div>
+      </div>
+    </section>
+
+    <% if (catIndex < categories.length - 1) { %>
+    <!-- DIVIDER -->
+    <div class="cat-section-divider"></div>
+    <% } %>
+
+    <% }) %>
+    <% } %>
+
+    <!-- QUICK VIEW MODAL -->
+    <div id="productModal" class="modal">
+      <div class="modal-content">
+        <button class="modal-close" id="modal-close"><i class="fas fa-times"></i></button>
+        <div class="modal-grid">
+          <div class="modal-img-side">
+            <img id="modalImg" src="" alt="">
+          </div>
+          <div class="modal-info-side">
+            <div class="modal-brand" id="modalBrand"></div>
+            <h2 id="modalTitle"></h2>
+            <div class="modal-rating" id="modalRating"></div>
+            <div class="modal-price-wrap">
+              <span class="modal-price" id="modalPrice"></span>
+              <span class="modal-mrp" id="modalMrp"></span>
+              <span class="modal-disc" id="modalDisc"></span>
+            </div>
+            <p class="modal-desc" id="modalDesc">Premium quality product from a trusted brand. Certified and lab-tested for your safety.</p>
+            <div class="modal-status" id="modalStock"></div>
+            <button class="btn btn-primary modal-add-btn" id="modalAddBtn">
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+
+    <!-- CTA BANNER -->
+    <section class="cat-cta-banner">
+      <div class="container cat-cta-inner">
+        <div class="cat-cta-text">
+          <h2>Need Help Choosing?</h2>
+          <p>Consult our Ayurvedic experts for personalised product recommendations based on your health needs.</p>
+        </div>
+        <div class="cat-cta-actions">
+          <a href="/doctor" class="btn btn-primary btn-lg"><i class="fas fa-user-md"></i> Consult Free</a>
+          <a href="https://wa.me/919413010731" target="_blank" class="btn btn-wa-outline btn-lg"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="main-footer">
+    <div class="footer-top">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <a href="/home" class="logo footer-logo">
+            <img src="https://res.cloudinary.com/drufdfmfr/image/upload/v1772726044/favicon_uuzvml.svg" alt="Shri Govind Pharmacy" class="logo-favicon">
+            <div class="logo-text">
+              <span class="logo-main">Shri Govind</span>
+              <span class="logo-sub">Pharmacy</span>
+            </div>
+          </a>
+          <p>Your trusted Ayurvedic healthcare partner. Delivering 100% authentic medicines and herbal wellness products since 1998.</p>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://wa.me/919413010731" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          </div>
+          <div class="footer-cert">
+            <span><i class="fas fa-certificate"></i> AYUSH Certified</span>
+            <span><i class="fas fa-shield-halved"></i> GMP Compliant</span>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="/home#about"><i class="fas fa-chevron-right"></i> About Us</a></li>
+            <li><a href="/home#product"><i class="fas fa-chevron-right"></i> Our Products</a></li>
+            <li><a href="/doctor"><i class="fas fa-chevron-right"></i> Consult Doctor</a></li>
+            <li><a href="/contact"><i class="fas fa-chevron-right"></i> Contact Us</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Privacy Policy</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Terms of Service</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Customer Support</h4>
+          <ul>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Track Order</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Return Policy</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Refund Policy</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Shipping Policy</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> FAQs</a></li>
+            <li><a href="/login"><i class="fas fa-chevron-right"></i> My Account</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h4>Get in Touch</h4>
+          <div class="fc-item"><i class="fas fa-map-marker-alt"></i><span>Ward No.6, Govind Marg, Neemkathana, Dist. Sikar, Rajasthan 332713, India</span></div>
+          <div class="fc-item"><i class="fas fa-phone"></i><a href="tel:+919413010741">+91 9413010741</a></div>
+          <div class="fc-item"><i class="fab fa-whatsapp"></i><a href="https://wa.me/919413010731">+91 9413010731</a></div>
+          <div class="fc-item"><i class="fas fa-envelope"></i><a href="mailto:shrigovindpharmacy212@gmail.com">shrigovindpharmacy212@gmail.com</a></div>
+          <div class="fc-hours"><i class="fas fa-clock"></i><span>Mon – Sat: 9:00 AM – 6:00 PM</span></div>
+          <div class="footer-payment">
+            <div class="pm-label">We Accept:</div>
+            <div class="pm-row">
+              <span class="pm-chip"><i class="fab fa-cc-visa"></i></span>
+              <span class="pm-chip"><i class="fab fa-cc-mastercard"></i></span>
+              <span class="pm-chip"><i class="fas fa-mobile-screen-button"></i> UPI</span>
+              <span class="pm-chip"><i class="fas fa-money-bill-wave"></i> COD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-flex">
+        <p>© 2025 Shri Govind Pharmacy. All Rights Reserved. Designed with <i class="fas fa-heart" style="color:#e53e3e;"></i> in India.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Sitemap</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- WhatsApp Float -->
+  <a href="https://wa.me/919413010731" target="_blank" class="wa-float" aria-label="WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+    <span class="wa-tooltip">Chat with Us</span>
+  </a>
+
+  <!-- Back to Top -->
+  <button class="back-to-top" id="back-to-top" aria-label="Back to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <!-- Toast Zone -->
+  <div class="toast-zone" id="toastZone"></div>
+
+  <script src="/js/theme.js"></script>
+  <script src="/js/script.js"></script>
+  <script src="/js/categories.js"></script>
+</body>
+
+</html>

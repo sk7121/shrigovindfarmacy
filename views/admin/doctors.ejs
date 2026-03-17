@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Doctors — Admin — Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --secondary: #e67e22;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .admin-header {
+      background: var(--surface);
+      padding: 20px 40px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .admin-header h1 {
+      font-size: 1.5rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 15px;
+    }
+
+    .nav-links a {
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 600;
+      transition: all 0.3s;
+      background: var(--bg);
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      opacity: 0.9;
+    }
+
+    .btn-sm {
+      padding: 8px 16px;
+      font-size: 0.85rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--bg);
+    }
+
+    th,
+    td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      font-size: 0.9rem;
+    }
+
+    tr:hover {
+      background: var(--bg);
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-badge.active {
+      background: rgba(40, 167, 69, 0.1);
+      color: var(--success);
+    }
+
+    .status-badge.inactive {
+      background: rgba(220, 53, 69, 0.1);
+      color: var(--danger);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: var(--text);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+
+    .theme-toggle:hover {
+      background: var(--bg);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+
+</head>
+
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+  <header class="admin-header">
+    <h1><i class="fa-solid fa-user-doctor"></i> Manage Doctors</h1>
+    <div style="display: flex; gap: 15px; align-items: center;">
+      <nav class="nav-links">
+        <a href="/admin/home"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="/admin/doctors" class="active"><i class="fa-solid fa-user-doctor"></i> Doctors</a>
+        <a href="/admin/appointments"><i class="fa-solid fa-calendar-check"></i> Appointments</a>
+        <a href="/home"><i class="fa-solid fa-house"></i> Back to Site</a>
+      </nav>
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <h2 class="page-title">All Doctors</h2>
+      <a href="/admin/doctors/new" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Add New Doctor
+      </a>
+    </div>
+
+    <% if (doctors && doctors.length > 0) { %>
+    <div class="card">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Doctor Name</th>
+              <th>Qualifications</th>
+              <th>Experience</th>
+              <th>Specializations</th>
+              <th>Patients Treated</th>
+              <th>Rating</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% doctors.forEach(doctor => { %>
+            <tr>
+              <td>
+                <strong>Dr. <%= doctor.name %></strong>
+                <% if (doctor.featured) { %>
+                <span style="color: var(--warning); margin-left: 8px;">
+                  <i class="fa-solid fa-star"></i> Featured
+                </span>
+                <% } %>
+              </td>
+              <td>
+                <% if (doctor.qualifications && doctor.qualifications.length > 0) { %>
+                <%= doctor.qualifications.map(q => q.degree).join(', ') %>
+                <% } else { %>
+                -
+                <% } %>
+              </td>
+              <td><%= doctor.experience?.years || 0 %>+ years</td>
+              <td>
+                <% if (doctor.specializations && doctor.specializations.length > 0) { %>
+                <%= doctor.specializations.slice(0, 2).join(', ') %><%= doctor.specializations.length > 2 ? '...' : '' %>
+                <% } else { %>
+                -
+                <% } %>
+              </td>
+              <td><%= (doctor.stats?.patientsTreated || 0).toLocaleString() %></td>
+              <td>
+                <% if (doctor.stats?.averageRating) { %>
+                <span style="color: #f6ad55;">
+                  <i class="fa-solid fa-star"></i> <%= doctor.stats.averageRating.toFixed(1) %>
+                </span>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">
+                  (<%= doctor.stats.totalReviews || 0 %>)
+                </span>
+                <% } else { %>
+                -
+                <% } %>
+              </td>
+              <td>
+                <span class="status-badge <%= doctor.isActive ? 'active' : 'inactive' %>">
+                  <%= doctor.isActive ? 'Active' : 'Inactive' %>
+                </span>
+              </td>
+              <td>
+                <div class="actions">
+                  <a href="/admin/doctors/edit/<%= doctor._id %>" class="btn btn-sm btn-primary">
+                    <i class="fa-solid fa-edit"></i> Edit
+                  </a>
+                  <form action="/admin/doctors/delete/<%= doctor._id %>" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this doctor?');">
+                    <button type="submit" class="btn btn-sm btn-danger">
+                      <i class="fa-solid fa-trash"></i> Delete
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% } else { %>
+    <div class="card empty-state">
+      <i class="fa-solid fa-user-doctor"></i>
+      <h3>No Doctors Added Yet</h3>
+      <p>Start by adding your first doctor to the system</p>
+      <a href="/admin/doctors/new" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Add New Doctor
+      </a>
+    </div>
+    <% } %>
+  </div>
+</body>
+
+</html>

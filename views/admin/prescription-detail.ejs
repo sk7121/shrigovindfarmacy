@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Prescription - Admin - Shri Govind Pharmacy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="/js/theme.js"></script>
+    <style>
+        :root {
+            --primary: #1c8125;
+            --primary-dark: #145a1a;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --bg: #f5f7fa;
+            --surface: #ffffff;
+            --text: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border: #e1e8ed;
+        }
+        [data-theme="dark"] {
+            --bg: #0f1419;
+            --surface: #1e2732;
+            --text: #e0e0e0;
+            --text-muted: #8899a6;
+            --border: #2f3943;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+        }
+        .admin-header {
+            background: var(--surface);
+            padding: 20px 30px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+        @media (max-width: 1024px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .card h3 {
+            margin: 0 0 20px 0;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .info-item {
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        .info-item label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .info-item .value {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .image-item {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .image-item:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+        }
+        .image-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ff9800;
+        }
+        .status-verified {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success);
+        }
+        .status-rejected {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--danger);
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: var(--success);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #218838;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+        .btn-secondary:hover {
+            background: #d0d7de;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--surface);
+            color: var(--text);
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 10000;
+        }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+  <style>
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+    <div class="admin-header">
+        <h1><i class="fa-solid fa-file-prescription"></i> Prescription Verification</h1>
+        <a href="/admin/prescriptions" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    </div>
+
+    <div class="container">
+        <div class="grid-2">
+            <!-- Left: Prescription Details -->
+            <div>
+                <!-- Patient Information -->
+                <div class="card">
+                    <h3><i class="fa-solid fa-user"></i> Patient Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Patient Name</label>
+                            <div class="value"><%= prescription.user?.name || 'N/A' %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Email</label>
+                            <div class="value"><%= prescription.user?.email || 'N/A' %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Phone</label>
+                            <div class="value"><%= prescription.user?.phone || 'N/A' %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Uploaded On</label>
+                            <div class="value"><%= new Date(prescription.createdAt).toLocaleDateString('en-IN') %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prescription Information -->
+                <div class="card">
+                    <h3><i class="fa-solid fa-file-prescription"></i> Prescription Details</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Prescription Number</label>
+                            <div class="value"><%= prescription.prescriptionNumber %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Status</label>
+                            <div class="value">
+                                <span class="status-badge status-<%= prescription.status %>">
+                                    <%= prescription.status.toUpperCase() %>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label>Prescription Date</label>
+                            <div class="value"><%= new Date(prescription.prescriptionDate).toLocaleDateString('en-IN') %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Valid Until</label>
+                            <div class="value"><%= prescription.validUntil ? new Date(prescription.validUntil).toLocaleDateString('en-IN') : 'Not set' %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctor Information -->
+                <div class="card">
+                    <h3><i class="fa-solid fa-user-doctor"></i> Doctor Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Doctor Name</label>
+                            <div class="value"><%= prescription.doctorName || 'Not provided' %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Registration Number</label>
+                            <div class="value"><%= prescription.doctorRegistrationNumber || 'Not provided' %></div>
+                        </div>
+                        <div class="info-item" style="grid-column: span 2;">
+                            <label>Clinic/Hospital</label>
+                            <div class="value"><%= prescription.clinicName || 'Not provided' %></div>
+                        </div>
+                        <div class="info-item" style="grid-column: span 2;">
+                            <label>Clinic Address</label>
+                            <div class="value"><%= prescription.clinicAddress || 'Not provided' %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prescription Images -->
+                <div class="card">
+                    <h3><i class="fa-solid fa-images"></i> Prescription Images</h3>
+                    <div class="images-grid">
+                        <% if (prescription.images && prescription.images.length > 0) { %>
+                            <% prescription.images.forEach(img => { %>
+                                <div class="image-item" onclick="openModal('<%= img.url %>')">
+                                    <img src="<%= img.url %>" alt="Prescription Image">
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <p style="color: var(--text-muted);">No images uploaded</p>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <% if (prescription.notes) { %>
+                <div class="card">
+                    <h3><i class="fa-solid fa-note-sticky"></i> Additional Notes</h3>
+                    <p style="white-space: pre-wrap;"><%= prescription.notes %></p>
+                </div>
+                <% } %>
+            </div>
+
+            <!-- Right: Verification Actions -->
+            <div>
+                <div class="card">
+                    <h3><i class="fa-solid fa-clipboard-check"></i> Verification Actions</h3>
+                    
+                    <% if (prescription.status === 'pending') { %>
+                        <!-- Verify Form -->
+                        <form id="verifyForm">
+                            <div class="form-group">
+                                <label>Validity Period</label>
+                                <select name="validDays" id="validDays">
+                                    <option value="30">30 Days</option>
+                                    <option value="90">90 Days</option>
+                                    <option value="180">6 Months</option>
+                                    <option value="365" selected>1 Year</option>
+                                </select>
+                            </div>
+                            
+                            <button type="button" class="btn btn-primary" style="width: 100%;" onclick="verifyPrescription()">
+                                <i class="fa-solid fa-check-circle"></i> Verify Prescription
+                            </button>
+                        </form>
+
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-danger" style="width: 100%;" onclick="showRejectModal()">
+                                <i class="fa-solid fa-times-circle"></i> Reject Prescription
+                            </button>
+                        </div>
+                    <% } else if (prescription.status === 'verified') { %>
+                        <div style="text-align: center; padding: 20px;">
+                            <i class="fa-solid fa-check-circle" style="font-size: 48px; color: var(--success); margin-bottom: 15px;"></i>
+                            <p><strong>This prescription has been verified</strong></p>
+                            <p style="color: var(--text-muted); font-size: 14px;">
+                                Verified by <%= prescription.verifiedBy?.name || 'Admin' %> on 
+                                <%= new Date(prescription.verifiedAt).toLocaleDateString('en-IN') %>
+                            </p>
+                        </div>
+                    <% } else if (prescription.status === 'rejected') { %>
+                        <div style="text-align: center; padding: 20px;">
+                            <i class="fa-solid fa-times-circle" style="font-size: 48px; color: var(--danger); margin-bottom: 15px;"></i>
+                            <p><strong>This prescription has been rejected</strong></p>
+                            <% if (prescription.rejectionReason) { %>
+                                <div style="background: var(--bg); padding: 15px; border-radius: 8px; margin-top: 15px; text-align: left;">
+                                    <label style="font-size: 12px; color: var(--text-muted);">Reason:</label>
+                                    <p style="margin: 5px 0 0 0;"><%= prescription.rejectionReason %></p>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Auto-Refill Info -->
+                <% if (prescription.autoRefill?.enabled) { %>
+                <div class="card">
+                    <h3><i class="fa-solid fa-rotate"></i> Auto-Refill</h3>
+                    <div class="info-item">
+                        <label>Status</label>
+                        <div class="value" style="color: var(--success);">Enabled</div>
+                    </div>
+                    <div class="info-item" style="margin-top: 10px;">
+                        <label>Frequency</label>
+                        <div class="value"><%= prescription.autoRefill.frequency %></div>
+                    </div>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div id="rejectModal" class="modal">
+        <div class="modal-close" onclick="closeRejectModal()">&times;</div>
+        <div class="card" style="max-width: 500px; width: 90%;">
+            <h3><i class="fa-solid fa-times-circle"></i> Reject Prescription</h3>
+            <div class="form-group">
+                <label>Rejection Reason</label>
+                <textarea id="rejectionReason" rows="4" placeholder="Please provide a reason for rejection..."></textarea>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="rejectPrescription()" style="flex: 1;">
+                    <i class="fa-solid fa-times-circle"></i> Reject
+                </button>
+                <button class="btn btn-secondary" onclick="closeRejectModal()" style="flex: 1;">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="modal-close">&times;</span>
+        <img id="modalImage" src="" alt="Full size image">
+    </div>
+
+    <script>
+        const prescriptionId = '<%= prescription._id %>';
+
+        // Verify prescription
+        async function verifyPrescription() {
+            const validDays = document.getElementById('validDays').value;
+            
+            try {
+                const response = await fetch(`/admin/prescription/${prescriptionId}/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ validDays })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Prescription verified successfully!', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(result.message || 'Verification failed', 'error');
+                }
+            } catch (error) {
+                showToast('Network error. Please try again.', 'error');
+            }
+        }
+
+        // Show reject modal
+        function showRejectModal() {
+            document.getElementById('rejectModal').classList.add('active');
+        }
+
+        // Close reject modal
+        function closeRejectModal() {
+            document.getElementById('rejectModal').classList.remove('active');
+        }
+
+        // Reject prescription
+        async function rejectPrescription() {
+            const reason = document.getElementById('rejectionReason').value.trim();
+            
+            if (!reason) {
+                showToast('Please provide a rejection reason', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/prescription/${prescriptionId}/reject`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ reason })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Prescription rejected', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(result.message || 'Rejection failed', 'error');
+                }
+            } catch (error) {
+                showToast('Network error. Please try again.', 'error');
+            }
+        }
+
+        // Open image modal
+        function openModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').classList.add('active');
+        }
+
+        // Close image modal
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${message}`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeRejectModal();
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

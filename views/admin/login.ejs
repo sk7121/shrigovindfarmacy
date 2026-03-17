@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+    rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Auth Page Stylesheet -->
+  <link rel="stylesheet" href="/css/account.css">
+
+  <!-- Theme Script (run before page renders) -->
+  <script src="/js/theme.js"></script>
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════
+       TOPBAR
+  ══════════════════════════════════ -->
+  <div class="topbar">
+    <i class="fa-solid fa-shield-halved"></i>
+    Admin Panel &nbsp;|&nbsp;
+    Secure Access Only &nbsp;|&nbsp;
+    Call: +91 98765 43210
+  </div>
+
+  <!-- ══════════════════════════════════
+       HEADER / NAVBAR
+  ══════════════════════════════════ -->
+  <header class="main-header">
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-flex">
+
+          <!-- Logo -->
+          <a href="/home" class="logo">
+            <i class="fa-solid fa-mortar-pestle"></i>
+            <div class="logo-text">
+              <span class="logo-main">Shri Govind Pharmacy</span>
+              <span class="brand-sub">Admin Panel</span>
+            </div>
+          </a>
+
+          <!-- Nav Actions -->
+          <div class="nav-actions">
+            <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+              <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </button>
+            <a href="/home" class="btn btn-outline home-btn">
+              <i class="fa-solid fa-house"></i> <span>Back to Store</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ══════════════════════════════════
+       BREADCRUMB
+  ══════════════════════════════════ -->
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/home">
+          <i class="fa-solid fa-house"></i> Home
+        </a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span id="bc-current">Admin Login</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       MAIN AUTH LAYOUT
+  ══════════════════════════════════ -->
+  <main class="auth-page">
+
+    <!-- ── LEFT: Visual / Branding Panel ── -->
+    <aside class="auth-visual">
+
+      <div>
+        <div class="visual-badge">
+          <i class="fa-solid fa-shield-halved"></i>
+          Admin Access — Authorized Personnel Only
+        </div>
+
+        <h2 class="visual-headline">
+          Admin <em>Dashboard</em>,<br>Management Portal
+        </h2>
+
+        <p class="visual-sub">
+          Access the administrative panel to manage products, orders, users,
+          and oversee all operations of Shri Govind Pharmacy.
+        </p>
+
+        <div class="visual-features">
+          <div class="visual-feat">
+            <div class="feat-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <span>Analytics & Reports Dashboard</span>
+          </div>
+          <div class="visual-feat">
+            <div class="feat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+            <span>Product & Inventory Management</span>
+          </div>
+          <div class="visual-feat">
+            <div class="feat-icon"><i class="fa-solid fa-users"></i></div>
+            <span>User & Order Administration</span>
+          </div>
+          <div class="visual-feat">
+            <div class="feat-icon"><i class="fa-solid fa-truck"></i></div>
+            <span>Delivery & Shipping Control</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="visual-stats">
+        <div class="stat-item">
+          <div class="stat-num">500+</div>
+          <div class="stat-label">Products Managed</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">12K+</div>
+          <div class="stat-label">Orders Processed</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">25+</div>
+          <div class="stat-label">Years of Service</div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ── RIGHT: Form Panel ── -->
+    <section class="auth-form-side">
+
+      <% if (success && success.length) { %>
+        <div class="flash success">
+          <%= success %>
+        </div>
+        <% } %>
+          <% if (error && error.length) { %>
+            <div class="flash error">
+              <%= error %>
+            </div>
+            <% } %>
+              <% if (info && info.length) { %>
+                <div class="flash info">
+                  <%= info %>
+                </div>
+                <% } %>
+
+              <!-- ════════════════════════
+           ADMIN LOGIN PANEL
+      ════════════════════════ -->
+              <div class="form-panel active" id="panel-admin-login">
+
+                <div class="panel-head">
+                  <div class="panel-title">Admin Login</div>
+                  <div class="panel-sub">Enter your administrator credentials to access the management panel.</div>
+                </div>
+
+                <form id="form-login" action="/admin/login" method="post">
+
+                  <!-- Redirect URL (hidden field) -->
+                  <input type="hidden" id="redirect-url" name="redirect" value="">
+
+                  <!-- Email -->
+                  <div class="field">
+                    <label class="field-label" for="l-email">Admin Email</label>
+                    <div class="field-wrap">
+                      <input class="field-input" id="l-email" name="email" type="email"
+                        placeholder="admin@shrigovindpharmacy.com" autocomplete="email">
+                      <i class="fa-solid fa-envelope field-icon"></i>
+                    </div>
+                    <div class="field-err" id="e-l-email">
+                      <i class="fa-solid fa-circle-exclamation"></i>
+                      Enter a valid admin email address.
+                    </div>
+                  </div>
+
+                  <!-- Password -->
+                  <div class="field">
+                    <label class="field-label" for="l-password">Password</label>
+                    <div class="field-wrap">
+                      <input class="field-input has-eye" name="password" id="l-password" type="password"
+                        placeholder="Your admin password" autocomplete="current-password">
+                      <i class="fa-solid fa-lock field-icon"></i>
+                      <button type="button" class="toggle-pw" data-t="l-password">
+                        <i class="fa-regular fa-eye"></i>
+                      </button>
+                    </div>
+                    <div class="field-err" id="e-l-password">
+                      <i class="fa-solid fa-circle-exclamation"></i>
+                      Password is required.
+                    </div>
+                  </div>
+
+                  <!-- Remember Me -->
+                  <div class="form-opts">
+                    <label class="check-wrap">
+                      <input type="checkbox" id="remember">
+                      <div class="check-box"></div>
+                      <span class="check-label">Remember me</span>
+                    </label>
+                  </div>
+
+                  <!-- Submit -->
+                  <button type="submit" class="btn-submit">
+                    <span class="btn-txt">
+                      <i class="fa-solid fa-right-to-bracket"></i>&nbsp; Admin Login
+                    </span>
+                    <span class="btn-spin">
+                      <div class="spin-ring"></div>
+                    </span>
+                  </button>
+
+                </form>
+
+                <!-- Back to User Login -->
+                <div style="text-align: center; margin: 20px 0;">
+                  <a href="/login"
+                    style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.95rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Back to User Login
+                  </a>
+                </div>
+
+                <p class="terms-note">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  This area is restricted to authorized administrators only.
+                </p>
+
+              </div><!-- /panel-admin-login -->
+
+    </section>
+
+  </main>
+
+  <!-- ══════════════════════════════════
+       FOOTER
+  ══════════════════════════════════ -->
+  <footer class="main-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <div class="footer-logo">
+            <i class="fa-solid fa-mortar-pestle"></i>
+            <span>Shri Govind Pharmacy</span>
+          </div>
+          <p>Nature's wisdom, delivered to you. Authentic Ayurvedic medicines since 1998.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <a href="/home">Home</a>
+          <a href="/aboutUs">About Us</a>
+          <a href="/contact">Contact</a>
+          <a href="/privacy-policy">Privacy Policy</a>
+        </div>
+        <div class="footer-section">
+          <h4>Contact Info</h4>
+          <p><i class="fa-solid fa-phone"></i> +91 98765 43210</p>
+          <p><i class="fa-solid fa-envelope"></i> info@shrigovindpharmacy.com</p>
+          <p><i class="fa-solid fa-map-marker-alt"></i> Your City, State</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 Shri Govind Pharmacy. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ══════════════════════════════════
+       SCRIPTS
+  ══════════════════════════════════ -->
+  <script src="/js/account.js"></script>
+
+</body>
+
+</html>
