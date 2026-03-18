@@ -792,32 +792,17 @@
                                                             </div>
                                                         </div>
                                                         <div class="delivery-actions">
-                                                            <% if (order.status==='assigned' ) { %>
-                                                                <button
-                                                                    onclick="updateOrderStatus('<%= order._id %>', 'out_for_delivery')"
-                                                                    class="btn btn-success btn-sm">
+                                                            <% if (order.status==='assigned' || order.status==='out_for_delivery' ) { %>
+                                                                <a href="/agent/delivery/<%= order._id %>" class="btn btn-success btn-sm">
                                                                     <i class="fas fa-play"></i> Start Delivery
-                                                                </button>
-                                                                <% } else if (order.status==='out_for_delivery' ) { %>
-                                                                    <div
-                                                                        style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                                                        <button
-                                                                            onclick="uploadProof('<%= order._id %>')"
-                                                                            class="btn btn-primary btn-sm">
-                                                                            <i class="fas fa-camera"></i> Upload Proof
-                                                                        </button>
-                                                                        <button onclick="verifyOTP('<%= order._id %>')"
-                                                                            class="btn btn-success btn-sm">
-                                                                            <i class="fas fa-key"></i> Verify OTP
-                                                                        </button>
-                                                                    </div>
-                                                                    <% } %>
-                                                                        <% if (order.shippingAddress?.phone) { %>
-                                                                            <a href="tel:<%= order.shippingAddress.phone %>"
-                                                                                class="btn btn-outline btn-sm">
-                                                                                <i class="fas fa-phone"></i> Call
-                                                                            </a>
-                                                                            <% } %>
+                                                                </a>
+                                                                <% } %>
+                                                                    <% if (order.shippingAddress?.phone) { %>
+                                                                        <a href="tel:<%= order.shippingAddress.phone %>"
+                                                                            class="btn btn-outline btn-sm">
+                                                                            <i class="fas fa-phone"></i> Call
+                                                                        </a>
+                                                                        <% } %>
                                                         </div>
                                                     </div>
                                                     <% }) %>

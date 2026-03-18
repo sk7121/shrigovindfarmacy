@@ -320,30 +320,44 @@
             <!-- Customer Details Card -->
             <div class="card">
                 <h3 class="card-title"><i class="fas fa-user-circle"></i> Customer Details</h3>
+                <% 
+                    // Get customer info from delivery address or order address
+                    const customerInfo = delivery.deliveryAddress?.fullName ? delivery.deliveryAddress : 
+                                        (delivery.order?.address?.fullName ? delivery.order.address : 
+                                        (delivery.order?.shippingAddress?.fullName ? delivery.order.shippingAddress : {}));
+                    const customerName = customerInfo.fullName || customerInfo.name || 'N/A';
+                    const customerPhone = customerInfo.phone || 'N/A';
+                    const customerEmail = customerInfo.email || delivery.order?.address?.email || 'N/A';
+                    const customerAddress = customerInfo.address || 'N/A';
+                    const customerCity = customerInfo.city || '';
+                    const customerState = customerInfo.state || '';
+                    const customerPincode = customerInfo.pincode || '';
+                    const customerLandmark = customerInfo.landmark || '';
+                %>
                 <div class="info-row">
                     <span class="info-label"><i class="fas fa-user"></i> Name</span>
-                    <span class="info-value"><%= delivery.deliveryAddress?.fullName || delivery.order?.address?.fullName || 'N/A' %></span>
+                    <span class="info-value"><%= customerName %></span>
                 </div>
                 <div class="info-row">
                     <span class="info-label"><i class="fas fa-phone"></i> Phone</span>
                     <span class="info-value">
-                        <a href="tel:<%= delivery.deliveryAddress?.phone || delivery.order?.address?.phone %>" style="color: var(--primary);">
-                            <%= delivery.deliveryAddress?.phone || delivery.order?.address?.phone || 'N/A' %>
+                        <a href="tel:<%= customerPhone %>" style="color: var(--primary);">
+                            <%= customerPhone %>
                             <i class="fas fa-external-link-alt" style="font-size: 12px; margin-left: 5px;"></i>
                         </a>
                     </span>
                 </div>
                 <div class="info-row">
                     <span class="info-label"><i class="fas fa-envelope"></i> Email</span>
-                    <span class="info-value"><%= delivery.order?.address?.email || 'N/A' %></span>
+                    <span class="info-value"><%= customerEmail %></span>
                 </div>
                 <div class="info-row">
                     <span class="info-label"><i class="fas fa-map-marker-alt"></i> Address</span>
                     <span class="info-value">
-                        <%= delivery.deliveryAddress?.address || delivery.order?.address?.address || 'N/A' %><br>
+                        <%= customerAddress %><br>
                         <small style="color: var(--text-muted);">
-                            <%= delivery.deliveryAddress?.landmark ? delivery.deliveryAddress.landmark + ', ' : '' %>
-                            <%= delivery.deliveryAddress?.city || '' %>, <%= delivery.deliveryAddress?.state || '' %> - <%= delivery.deliveryAddress?.pincode || '' %>
+                            <%= customerLandmark ? customerLandmark + ', ' : '' %>
+                            <%= customerCity %>, <%= customerState %> - <%= customerPincode %>
                         </small>
                     </span>
                 </div>
@@ -354,12 +368,12 @@
                 </div>
                 <% } %>
                 <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-                    <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent((delivery.deliveryAddress?.address || '') + ', ' + (delivery.deliveryAddress?.city || '') + ', ' + (delivery.deliveryAddress?.pincode || '')) %>"
+                    <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(customerAddress + ', ' + customerCity + ', ' + customerPincode) %>"
                        target="_blank"
                        class="btn btn-primary btn-sm">
                         <i class="fas fa-map-marked-alt"></i> Navigate
                     </a>
-                    <a href="tel:<%= delivery.deliveryAddress?.phone || delivery.order?.address?.phone %>"
+                    <a href="tel:<%= customerPhone %>"
                        class="btn btn-success btn-sm">
                         <i class="fas fa-phone"></i> Call Customer
                     </a>

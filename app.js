@@ -6846,17 +6846,22 @@ app.get("/agent/delivery/:id", authenticateAgent, async (req, res) => {
     }
 
     // Ensure delivery address is populated from order if not set
-    if (!delivery.deliveryAddress.fullName && delivery.order && delivery.order.address) {
-      delivery.deliveryAddress = {
-        fullName: delivery.order.address.fullName,
-        phone: delivery.order.address.phone,
-        address: delivery.order.address.address,
-        city: delivery.order.address.city,
-        state: delivery.order.address.state,
-        pincode: delivery.order.address.pincode,
-        landmark: delivery.order.address.landmark
-      };
-      await delivery.save();
+    if (!delivery.deliveryAddress.fullName && delivery.order) {
+      // Try multiple possible address field names
+      const orderAddress = delivery.order.address || delivery.order.shippingAddress || delivery.order.shippingInfo;
+      if (orderAddress) {
+        delivery.deliveryAddress = {
+          fullName: orderAddress.fullName || orderAddress.name,
+          phone: orderAddress.phone,
+          email: orderAddress.email,
+          address: orderAddress.address,
+          city: orderAddress.city,
+          state: orderAddress.state,
+          pincode: orderAddress.pincode,
+          landmark: orderAddress.landmark
+        };
+        await delivery.save();
+      }
     }
 
     const qrLabel = QRCodeService.generateDeliveryLabel(
