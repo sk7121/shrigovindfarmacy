@@ -6838,10 +6838,25 @@ app.get("/agent/delivery/:id", authenticateAgent, async (req, res) => {
 
     if (
       !delivery ||
+      !delivery.assignedTo ||
       delivery.assignedTo._id.toString() !== agent._id.toString()
     ) {
       req.flash("error", "Delivery not found or not assigned to you");
       return res.redirect("/agent/deliveries");
+    }
+
+    // Ensure delivery address is populated from order if not set
+    if (!delivery.deliveryAddress.fullName && delivery.order && delivery.order.address) {
+      delivery.deliveryAddress = {
+        fullName: delivery.order.address.fullName,
+        phone: delivery.order.address.phone,
+        address: delivery.order.address.address,
+        city: delivery.order.address.city,
+        state: delivery.order.address.state,
+        pincode: delivery.order.address.pincode,
+        landmark: delivery.order.address.landmark
+      };
+      await delivery.save();
     }
 
     const qrLabel = QRCodeService.generateDeliveryLabel(
@@ -6849,8 +6864,42 @@ app.get("/agent/delivery/:id", authenticateAgent, async (req, res) => {
       delivery.order,
     );
 
-    // Check if delivery is ready for completion (out for delivery)
-    if (delivery.status === 'out_for_delivery') {
+    // Check if delivery is ready for completion (out for delivery, assigned, or processing)
+    if (['out_for_delivery', 'assigned', 'processing'].includes(delivery.status)) {
+      // Auto-generate OTP if not already generated or if expired
+      if (delivery.order && !delivery.order.deliveryOTP?.code || 
+          (delivery.order?.deliveryOTP?.code && new Date() > new Date(delivery.order.deliveryOTP.expiresAt))) {
+        try {
+          const otpCode = QRCodeService.generateOTP();
+          const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+          
+          // Update order with OTP
+          await Order.findByIdAndUpdate(delivery.order._id, {
+            deliveryOTP: {
+              code: otpCode,
+              expiresAt,
+              generatedAt: new Date()
+            }
+          });
+          
+          // Send OTP to customer via SMS
+          const customerName = delivery.deliveryAddress?.fullName || delivery.order.address?.fullName;
+          const customerPhone = delivery.deliveryAddress?.phone || delivery.order.address?.phone;
+          const trackingId = delivery.order.tracking?.orderId || 'N/A';
+          
+          try {
+            await sendOrderStatusSMS(delivery.order, customerPhone, 'assigned', otpCode);
+            console.log('Auto-generated OTP SMS sent to customer:', customerPhone);
+          } catch (smsError) {
+            console.error('Failed to send OTP SMS:', smsError);
+          }
+          
+          req.flash('info', `OTP generated and sent to customer's phone (${customerPhone})`);
+        } catch (otpError) {
+          console.error('Auto OTP generation error:', otpError);
+        }
+      }
+      
       // Render the new delivery complete page
       return res.render("agent/delivery-complete.ejs", {
         agent,

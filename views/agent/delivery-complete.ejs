@@ -287,64 +287,91 @@
         <% if (locals.error && locals.error.length > 0) { %>
             <div class="flash error"><%= error %></div>
         <% } %>
+        <% if (locals.info && locals.info.length > 0) { %>
+            <div class="flash info" style="background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;"><%= info %></div>
+        <% } %>
 
         <div class="alert-box warning">
-            <strong><i class="fas fa-exclamation-triangle"></i> Important:</strong>
-            Both camera capture image and OTP verification are MANDATORY to complete this delivery.
+            <strong><i class="fas fa-exclamation-triangle"></i> Important Instructions:</strong>
+            <ul style="margin: 10px 0 0 20px; font-size: 14px;">
+                <li><strong>Step 1:</strong> Capture a photo of the delivered package using your camera</li>
+                <li><strong>Step 2:</strong> Ask the customer for the 6-digit OTP (sent to their phone)</li>
+                <li><strong>Step 3:</strong> Enter and verify the OTP</li>
+                <li><strong>Step 4:</strong> Click "Complete Delivery" to finalize</li>
+            </ul>
         </div>
 
         <div class="step-indicator">
             <div class="step active" id="step1">
-                <i class="fas fa-camera"></i> Step 1: Capture Delivery Photo
+                <i class="fas fa-user-circle"></i> Customer Info
             </div>
             <div class="step" id="step2">
-                <i class="fas fa-key"></i> Step 2: Enter OTP
+                <i class="fas fa-camera"></i> Capture Photo
             </div>
             <div class="step" id="step3">
-                <i class="fas fa-check"></i> Step 3: Complete
+                <i class="fas fa-key"></i> Verify OTP
+            </div>
+            <div class="step" id="step4">
+                <i class="fas fa-check-circle"></i> Complete
             </div>
         </div>
 
         <div class="grid">
+            <!-- Customer Details Card -->
             <div class="card">
-                <h3 class="card-title"><i class="fas fa-user"></i> Customer Details</h3>
+                <h3 class="card-title"><i class="fas fa-user-circle"></i> Customer Details</h3>
                 <div class="info-row">
-                    <span class="info-label">Name</span>
-                    <span class="info-value"><%= delivery.deliveryAddress?.fullName || 'N/A' %></span>
+                    <span class="info-label"><i class="fas fa-user"></i> Name</span>
+                    <span class="info-value"><%= delivery.deliveryAddress?.fullName || delivery.order?.address?.fullName || 'N/A' %></span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Phone</span>
+                    <span class="info-label"><i class="fas fa-phone"></i> Phone</span>
                     <span class="info-value">
-                        <a href="tel:<%= delivery.deliveryAddress?.phone %>" style="color: var(--primary);">
-                            <%= delivery.deliveryAddress?.phone || 'N/A' %>
+                        <a href="tel:<%= delivery.deliveryAddress?.phone || delivery.order?.address?.phone %>" style="color: var(--primary);">
+                            <%= delivery.deliveryAddress?.phone || delivery.order?.address?.phone || 'N/A' %>
+                            <i class="fas fa-external-link-alt" style="font-size: 12px; margin-left: 5px;"></i>
                         </a>
                     </span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Address</span>
-                    <span class="info-value"><%= delivery.deliveryAddress?.address || 'N/A' %></span>
+                    <span class="info-label"><i class="fas fa-envelope"></i> Email</span>
+                    <span class="info-value"><%= delivery.order?.address?.email || 'N/A' %></span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">City, Pincode</span>
-                    <span class="info-value"><%= delivery.deliveryAddress?.city %>, <%= delivery.deliveryAddress?.pincode %></span>
+                    <span class="info-label"><i class="fas fa-map-marker-alt"></i> Address</span>
+                    <span class="info-value">
+                        <%= delivery.deliveryAddress?.address || delivery.order?.address?.address || 'N/A' %><br>
+                        <small style="color: var(--text-muted);">
+                            <%= delivery.deliveryAddress?.landmark ? delivery.deliveryAddress.landmark + ', ' : '' %>
+                            <%= delivery.deliveryAddress?.city || '' %>, <%= delivery.deliveryAddress?.state || '' %> - <%= delivery.deliveryAddress?.pincode || '' %>
+                        </small>
+                    </span>
                 </div>
                 <% if (delivery.codAmount > 0) { %>
-                <div class="info-row">
-                    <span class="info-label">COD Amount</span>
-                    <span class="info-value" style="color: var(--warning);">₹<%= delivery.codAmount %></span>
+                <div class="info-row" style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                    <span class="info-label"><i class="fas fa-money-bill-wave"></i> COD Amount</span>
+                    <span class="info-value" style="color: var(--warning); font-size: 18px;">₹<%= delivery.codAmount %></span>
                 </div>
                 <% } %>
-                <div style="margin-top: 20px;">
-                    <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(delivery.deliveryAddress?.address + ', ' + delivery.deliveryAddress?.city + ', ' + delivery.deliveryAddress?.pincode) %>"
+                <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent((delivery.deliveryAddress?.address || '') + ', ' + (delivery.deliveryAddress?.city || '') + ', ' + (delivery.deliveryAddress?.pincode || '')) %>"
                        target="_blank"
-                       class="btn btn-outline btn-sm">
+                       class="btn btn-primary btn-sm">
                         <i class="fas fa-map-marked-alt"></i> Navigate
+                    </a>
+                    <a href="tel:<%= delivery.deliveryAddress?.phone || delivery.order?.address?.phone %>"
+                       class="btn btn-success btn-sm">
+                        <i class="fas fa-phone"></i> Call Customer
                     </a>
                 </div>
             </div>
 
+            <!-- Camera Capture Card -->
             <div class="card">
-                <h3 class="card-title"><i class="fas fa-camera"></i> Capture Delivery Proof</h3>
+                <h3 class="card-title"><i class="fas fa-camera"></i> Step 1: Capture Delivery Proof</h3>
+                <div class="alert-box info" style="padding: 10px; font-size: 13px;">
+                    <i class="fas fa-info-circle"></i> Position the camera to capture the delivered package or items at the customer's location.
+                </div>
                 <div class="camera-container">
                     <video id="camera" autoplay playsinline></video>
                     <canvas id="canvas"></canvas>
@@ -352,10 +379,10 @@
                 </div>
                 <div class="camera-controls">
                     <button type="button" id="start-camera" class="btn btn-primary">
-                        <i class="fas fa-camera"></i> Start Camera
+                        <i class="fas fa-camera"></i> Open Camera
                     </button>
                     <button type="button" id="capture-photo" class="btn btn-success" style="display: none;">
-                        <i class="fas fa-camera"></i> Capture Photo
+                        <i class="fas fa-camera"></i> Capture
                     </button>
                     <button type="button" id="retake-photo" class="btn btn-outline" style="display: none;">
                         <i class="fas fa-redo"></i> Retake
@@ -365,21 +392,23 @@
                 <div id="camera-status" style="margin-top: 10px; text-align: center; color: var(--text-muted); font-size: 13px;"></div>
             </div>
 
+            <!-- OTP Verification Card -->
             <div class="card">
-                <h3 class="card-title"><i class="fas fa-key"></i> OTP Verification</h3>
-                
+                <h3 class="card-title"><i class="fas fa-key"></i> Step 2: Verify OTP</h3>
+
                 <div id="otp-section">
                     <div class="alert-box info">
                         <strong><i class="fas fa-info-circle"></i> Instructions:</strong>
                         <p style="margin-top: 8px; font-size: 13px;">
-                            1. Ask the customer for the 6-digit OTP<br>
-                            2. Enter the OTP in the field below<br>
-                            3. Click "Verify OTP" to validate
+                            1. A 6-digit OTP has been sent to the customer's phone<br>
+                            2. Ask the customer for the OTP<br>
+                            3. Enter the OTP below and click "Verify"<br>
+                            4. OTP is valid for 30 minutes
                         </p>
                     </div>
 
                     <div class="form-group">
-                        <label for="otp-input">Enter 6-Digit OTP</label>
+                        <label for="otp-input"><i class="fas fa-lock"></i> Enter 6-Digit OTP</label>
                         <input type="text" id="otp-input" class="otp-input" maxlength="6" placeholder="000000" pattern="[0-9]{6}">
                     </div>
 
@@ -394,25 +423,26 @@
                     <i class="fas fa-check-circle" style="font-size: 48px; color: var(--success); margin-bottom: 10px;"></i>
                     <h4 style="color: var(--success);">OTP Verified Successfully!</h4>
                     <p style="color: var(--text-muted); font-size: 13px; margin-top: 5px;">
-                        You can now complete the delivery
+                        <i class="fas fa-shield-alt"></i> Customer identity confirmed
                     </p>
                 </div>
             </div>
 
+            <!-- Complete Delivery Card -->
             <div class="card">
-                <h3 class="card-title"><i class="fas fa-check-circle"></i> Complete Delivery</h3>
+                <h3 class="card-title"><i class="fas fa-check-circle"></i> Step 3: Complete Delivery</h3>
                 <div class="alert-box info">
-                    <strong><i class="fas fa-clipboard-list"></i> Checklist:</strong>
+                    <strong><i class="fas fa-clipboard-list"></i> Final Checklist:</strong>
                     <ul style="margin: 10px 0 0 20px; font-size: 13px;">
-                        <li>✓ Delivery photo captured</li>
-                        <li>✓ OTP verified</li>
-                        <li>✓ Package handed to customer</li>
-                        <li>✓ COD collected (if applicable)</li>
+                        <li id="checklist-photo"><i class="fas fa-circle" style="color: var(--danger);"></i> Delivery photo captured</li>
+                        <li id="checklist-otp"><i class="fas fa-circle" style="color: var(--danger);"></i> OTP verified</li>
+                        <li><i class="fas fa-circle" style="color: var(--warning);"></i> Package handed to customer</li>
+                        <li id="checklist-cod"><i class="fas fa-circle" style="color: var(--warning);"></i> COD collected (if applicable)</li>
                     </ul>
                 </div>
 
                 <button type="button" id="complete-delivery-btn" class="btn btn-success btn-block" disabled>
-                    <i class="fas fa-check"></i> Complete Delivery
+                    <i class="fas fa-check-double"></i> Complete Delivery
                 </button>
 
                 <p style="margin-top: 15px; font-size: 12px; color: var(--text-muted); text-align: center;">
@@ -447,19 +477,32 @@
         const otpSection = document.getElementById('otp-section');
 
         const completeDeliveryBtn = document.getElementById('complete-delivery-btn');
+        const checklistPhoto = document.getElementById('checklist-photo');
+        const checklistOtp = document.getElementById('checklist-otp');
+        const checklistCod = document.getElementById('checklist-cod');
 
         let photoCaptured = false;
         let otpVerifiedFlag = false;
+
+        // Update COD checklist if COD is applicable
+        const codAmount = '<%= delivery.codAmount %>';
+        if (codAmount && codAmount !== '0' && codAmount !== 'undefined') {
+            checklistCod.innerHTML = '<i class="fas fa-circle" style="color: var(--warning);"></i> Collect COD: ₹' + codAmount;
+        } else {
+            checklistCod.style.display = 'none';
+        }
 
         // Start camera
         startCameraBtn.addEventListener('click', async () => {
             try {
                 cameraStatus.textContent = 'Requesting camera access...';
+                cameraStatus.style.color = 'var(--info)';
                 stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' }
+                    video: { facingMode: 'environment' } // Use back camera on mobile
                 });
                 video.srcObject = stream;
                 cameraStatus.textContent = 'Camera ready. Position the package/customer in frame.';
+                cameraStatus.style.color = 'var(--success)';
                 startCameraBtn.style.display = 'none';
                 capturePhotoBtn.style.display = 'inline-flex';
             } catch (err) {
@@ -498,6 +541,10 @@
                 cameraStatus.textContent = 'Photo captured successfully!';
                 cameraStatus.style.color = 'var(--success)';
                 photoCaptured = true;
+                
+                // Update checklist
+                checklistPhoto.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i> Delivery photo captured';
+                
                 updateStepIndicator();
                 checkCompletion();
             }, 'image/jpeg', 0.8);
@@ -514,6 +561,10 @@
             cameraStatus.textContent = 'Ready to recapture.';
             cameraStatus.style.color = 'var(--text-muted)';
             photoCaptured = false;
+            
+            // Reset checklist
+            checklistPhoto.innerHTML = '<i class="fas fa-circle" style="color: var(--danger);"></i> Delivery photo captured';
+            
             updateStepIndicator();
             checkCompletion();
         });
@@ -546,6 +597,10 @@
                     otpVerifiedFlag = true;
                     otpSection.style.display = 'none';
                     otpVerified.style.display = 'block';
+                    
+                    // Update checklist
+                    checklistOtp.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i> OTP verified';
+                    
                     updateStepIndicator();
                     checkCompletion();
                 } else {
@@ -616,18 +671,27 @@
         function updateStepIndicator() {
             const step1 = document.getElementById('step1');
             const step2 = document.getElementById('step2');
+            const step3 = document.getElementById('step3');
+            const step4 = document.getElementById('step4');
 
             if (photoCaptured) {
                 step1.classList.remove('active');
                 step1.classList.add('completed');
-                step2.classList.add('active');
+                step2.classList.remove('active');
+                step2.classList.add('completed');
+                step3.classList.add('active');
+            }
+            
+            if (otpVerifiedFlag) {
+                step3.classList.remove('active');
+                step3.classList.add('completed');
+                step4.classList.add('active');
             }
         }
 
         function checkCompletion() {
             if (photoCaptured && otpVerifiedFlag) {
                 completeDeliveryBtn.disabled = false;
-                document.getElementById('step3').classList.add('active');
             }
         }
 

@@ -2,10 +2,11 @@ const Order = require('../models/order');
 const Delivery = require('../models/delivery');
 const OTP = require('../models/otp');
 const User = require('../models/user');
+const DeliveryAgent = require('../models/deliveryAgent');
 const { sendOrderStatusUpdate } = require('../services/emailService');
 const { sendOrderStatusSMS } = require('../services/smsService');
 
-// @desc    Get delivery details for agent
+// @desc    Get delivery details for agent with customer information
 // @route   GET /api/delivery/:id
 // @access  Private (Delivery Agent)
 const getDeliveryDetails = async (req, res) => {
@@ -27,6 +28,20 @@ const getDeliveryDetails = async (req, res) => {
                 success: false,
                 message: 'Not authorized to access this delivery'
             });
+        }
+
+        // Ensure delivery address is populated from order if not set
+        if (!delivery.deliveryAddress.fullName && delivery.order && delivery.order.address) {
+            delivery.deliveryAddress = {
+                fullName: delivery.order.address.fullName,
+                phone: delivery.order.address.phone,
+                address: delivery.order.address.address,
+                city: delivery.order.address.city,
+                state: delivery.order.address.state,
+                pincode: delivery.order.address.pincode,
+                landmark: delivery.order.address.landmark
+            };
+            await delivery.save();
         }
 
         res.json({
@@ -56,11 +71,24 @@ const generateDeliveryOTP = async (req, res) => {
             });
         }
 
-        // Check if order is out for delivery
-        if (order.status !== 'out_for_delivery' && order.status !== 'assigned') {
+        // Check if order is out for delivery or assigned
+        if (!['out_for_delivery', 'assigned', 'processing'].includes(order.status)) {
             return res.status(400).json({
                 success: false,
                 message: 'Order is not ready for delivery'
+            });
+        }
+
+        // Check if OTP already exists and is not expired
+        if (order.deliveryOTP && order.deliveryOTP.code && new Date() < new Date(order.deliveryOTP.expiresAt)) {
+            return res.json({
+                success: true,
+                message: 'OTP already generated',
+                data: {
+                    expiresAt: order.deliveryOTP.expiresAt,
+                    expiresIn: '30 minutes',
+                    alreadyGenerated: true
+                }
             });
         }
 
@@ -77,13 +105,21 @@ const generateDeliveryOTP = async (req, res) => {
 
         await order.save();
 
-        // Also send OTP via SMS to customer
+        // Send OTP via SMS to customer
         const customerPhone = order.address.phone;
-        // Note: Implement SMS sending if needed
+        const customerName = order.address.fullName;
+        
+        try {
+            await sendOrderStatusSMS(order, customerPhone, 'assigned', otpCode);
+            console.log('OTP SMS sent to customer:', customerPhone);
+        } catch (smsError) {
+            console.error('Failed to send OTP SMS:', smsError);
+            // Don't fail the request if SMS fails
+        }
 
         res.json({
             success: true,
-            message: 'Delivery OTP generated successfully',
+            message: 'Delivery OTP generated successfully. Please ask customer for this OTP.',
             data: {
                 expiresAt,
                 expiresIn: '30 minutes'
