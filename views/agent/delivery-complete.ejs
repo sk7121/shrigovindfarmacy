@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Delivery - <%= delivery.qrCode %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1c8125;
+            --primary-dark: #145a1a;
+            --secondary: #e67e22;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #2d2d2d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        .header {
+            background: var(--surface);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header h1 { color: var(--primary); font-size: 24px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { border: 2px solid var(--border); background: transparent; color: var(--text); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--text-muted); font-weight: 500; }
+        .info-value { font-weight: 600; }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        .status-badge.out_for_delivery { background: #e2e3e5; color: #383d41; }
+        .status-badge.delivered { background: #d4edda; color: #155724; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .otp-display {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 8px;
+            text-align: center;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 8px;
+            border: 2px dashed var(--primary);
+            margin: 15px 0;
+            color: var(--primary);
+        }
+
+        .otp-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 24px;
+            text-align: center;
+            letter-spacing: 8px;
+            font-weight: 700;
+            transition: border-color 0.3s;
+        }
+        .otp-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #camera {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        #photo-preview {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 12px;
+            display: none;
+            margin: 10px auto;
+            border: 3px solid var(--success);
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .flash {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .flash.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flash.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .flash.warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+
+        .alert-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        .alert-box.warning {
+            background: #fff3cd;
+            border-color: var(--warning);
+            color: #856404;
+        }
+        .alert-box.info {
+            background: #d1ecf1;
+            border-color: var(--info);
+            color: #0c5460;
+        }
+
+        .step-indicator {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .step {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            background: var(--bg);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .step.active {
+            background: var(--primary);
+            color: white;
+        }
+        .step.completed {
+            background: var(--success);
+            color: white;
+        }
+
+        .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1><i class="fas fa-check-circle"></i> Complete Delivery</h1>
+                <p style="color: var(--text-muted);">Order: <%= delivery.order?.tracking?.orderId || 'N/A' %></p>
+            </div>
+            <a href="/agent/deliveries" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Deliveries
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <% if (locals.success && locals.success.length > 0) { %>
+            <div class="flash success"><%= success %></div>
+        <% } %>
+        <% if (locals.error && locals.error.length > 0) { %>
+            <div class="flash error"><%= error %></div>
+        <% } %>
+
+        <div class="alert-box warning">
+            <strong><i class="fas fa-exclamation-triangle"></i> Important:</strong>
+            Both camera capture image and OTP verification are MANDATORY to complete this delivery.
+        </div>
+
+        <div class="step-indicator">
+            <div class="step active" id="step1">
+                <i class="fas fa-camera"></i> Step 1: Capture Delivery Photo
+            </div>
+            <div class="step" id="step2">
+                <i class="fas fa-key"></i> Step 2: Enter OTP
+            </div>
+            <div class="step" id="step3">
+                <i class="fas fa-check"></i> Step 3: Complete
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-user"></i> Customer Details</h3>
+                <div class="info-row">
+                    <span class="info-label">Name</span>
+                    <span class="info-value"><%= delivery.deliveryAddress?.fullName || 'N/A' %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value">
+                        <a href="tel:<%= delivery.deliveryAddress?.phone %>" style="color: var(--primary);">
+                            <%= delivery.deliveryAddress?.phone || 'N/A' %>
+                        </a>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Address</span>
+                    <span class="info-value"><%= delivery.deliveryAddress?.address || 'N/A' %></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">City, Pincode</span>
+                    <span class="info-value"><%= delivery.deliveryAddress?.city %>, <%= delivery.deliveryAddress?.pincode %></span>
+                </div>
+                <% if (delivery.codAmount > 0) { %>
+                <div class="info-row">
+                    <span class="info-label">COD Amount</span>
+                    <span class="info-value" style="color: var(--warning);">₹<%= delivery.codAmount %></span>
+                </div>
+                <% } %>
+                <div style="margin-top: 20px;">
+                    <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(delivery.deliveryAddress?.address + ', ' + delivery.deliveryAddress?.city + ', ' + delivery.deliveryAddress?.pincode) %>"
+                       target="_blank"
+                       class="btn btn-outline btn-sm">
+                        <i class="fas fa-map-marked-alt"></i> Navigate
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-camera"></i> Capture Delivery Proof</h3>
+                <div class="camera-container">
+                    <video id="camera" autoplay playsinline></video>
+                    <canvas id="canvas"></canvas>
+                    <img id="photo-preview" alt="Delivery proof preview">
+                </div>
+                <div class="camera-controls">
+                    <button type="button" id="start-camera" class="btn btn-primary">
+                        <i class="fas fa-camera"></i> Start Camera
+                    </button>
+                    <button type="button" id="capture-photo" class="btn btn-success" style="display: none;">
+                        <i class="fas fa-camera"></i> Capture Photo
+                    </button>
+                    <button type="button" id="retake-photo" class="btn btn-outline" style="display: none;">
+                        <i class="fas fa-redo"></i> Retake
+                    </button>
+                </div>
+                <input type="hidden" id="captured-image" name="deliveryProof">
+                <div id="camera-status" style="margin-top: 10px; text-align: center; color: var(--text-muted); font-size: 13px;"></div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-key"></i> OTP Verification</h3>
+                
+                <div id="otp-section">
+                    <div class="alert-box info">
+                        <strong><i class="fas fa-info-circle"></i> Instructions:</strong>
+                        <p style="margin-top: 8px; font-size: 13px;">
+                            1. Ask the customer for the 6-digit OTP<br>
+                            2. Enter the OTP in the field below<br>
+                            3. Click "Verify OTP" to validate
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="otp-input">Enter 6-Digit OTP</label>
+                        <input type="text" id="otp-input" class="otp-input" maxlength="6" placeholder="000000" pattern="[0-9]{6}">
+                    </div>
+
+                    <button type="button" id="verify-otp-btn" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-check"></i> Verify OTP
+                    </button>
+
+                    <div id="otp-result" style="margin-top: 15px; display: none;"></div>
+                </div>
+
+                <div id="otp-verified" style="display: none; text-align: center; padding: 20px;">
+                    <i class="fas fa-check-circle" style="font-size: 48px; color: var(--success); margin-bottom: 10px;"></i>
+                    <h4 style="color: var(--success);">OTP Verified Successfully!</h4>
+                    <p style="color: var(--text-muted); font-size: 13px; margin-top: 5px;">
+                        You can now complete the delivery
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-check-circle"></i> Complete Delivery</h3>
+                <div class="alert-box info">
+                    <strong><i class="fas fa-clipboard-list"></i> Checklist:</strong>
+                    <ul style="margin: 10px 0 0 20px; font-size: 13px;">
+                        <li>✓ Delivery photo captured</li>
+                        <li>✓ OTP verified</li>
+                        <li>✓ Package handed to customer</li>
+                        <li>✓ COD collected (if applicable)</li>
+                    </ul>
+                </div>
+
+                <button type="button" id="complete-delivery-btn" class="btn btn-success btn-block" disabled>
+                    <i class="fas fa-check"></i> Complete Delivery
+                </button>
+
+                <p style="margin-top: 15px; font-size: 12px; color: var(--text-muted); text-align: center;">
+                    <i class="fas fa-lock"></i> This action cannot be undone
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const deliveryId = '<%= delivery._id %>';
+        const orderId = '<%= delivery.order?._id %>';
+
+        // Camera variables
+        let stream = null;
+        let capturedImageBlob = null;
+
+        // DOM elements
+        const video = document.getElementById('camera');
+        const canvas = document.getElementById('canvas');
+        const photoPreview = document.getElementById('photo-preview');
+        const startCameraBtn = document.getElementById('start-camera');
+        const capturePhotoBtn = document.getElementById('capture-photo');
+        const retakePhotoBtn = document.getElementById('retake-photo');
+        const capturedImageInput = document.getElementById('captured-image');
+        const cameraStatus = document.getElementById('camera-status');
+
+        const otpInput = document.getElementById('otp-input');
+        const verifyOtpBtn = document.getElementById('verify-otp-btn');
+        const otpResult = document.getElementById('otp-result');
+        const otpVerified = document.getElementById('otp-verified');
+        const otpSection = document.getElementById('otp-section');
+
+        const completeDeliveryBtn = document.getElementById('complete-delivery-btn');
+
+        let photoCaptured = false;
+        let otpVerifiedFlag = false;
+
+        // Start camera
+        startCameraBtn.addEventListener('click', async () => {
+            try {
+                cameraStatus.textContent = 'Requesting camera access...';
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                video.srcObject = stream;
+                cameraStatus.textContent = 'Camera ready. Position the package/customer in frame.';
+                startCameraBtn.style.display = 'none';
+                capturePhotoBtn.style.display = 'inline-flex';
+            } catch (err) {
+                console.error('Camera error:', err);
+                cameraStatus.textContent = 'Camera access denied. Please allow camera access and try again.';
+                cameraStatus.style.color = 'var(--danger)';
+            }
+        });
+
+        // Capture photo
+        capturePhotoBtn.addEventListener('click', () => {
+            if (!stream) return;
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert to blob
+            canvas.toBlob((blob) => {
+                capturedImageBlob = blob;
+                const imageUrl = URL.createObjectURL(blob);
+                photoPreview.src = imageUrl;
+                photoPreview.style.display = 'block';
+                video.style.display = 'none';
+
+                // Convert to base64 for form submission
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => {
+                    capturedImageInput.value = reader.result;
+                };
+
+                capturePhotoBtn.style.display = 'none';
+                retakePhotoBtn.style.display = 'inline-flex';
+                cameraStatus.textContent = 'Photo captured successfully!';
+                cameraStatus.style.color = 'var(--success)';
+                photoCaptured = true;
+                updateStepIndicator();
+                checkCompletion();
+            }, 'image/jpeg', 0.8);
+        });
+
+        // Retake photo
+        retakePhotoBtn.addEventListener('click', () => {
+            photoPreview.style.display = 'none';
+            video.style.display = 'block';
+            capturePhotoBtn.style.display = 'inline-flex';
+            retakePhotoBtn.style.display = 'none';
+            capturedImageBlob = null;
+            capturedImageInput.value = '';
+            cameraStatus.textContent = 'Ready to recapture.';
+            cameraStatus.style.color = 'var(--text-muted)';
+            photoCaptured = false;
+            updateStepIndicator();
+            checkCompletion();
+        });
+
+        // Verify OTP
+        verifyOtpBtn.addEventListener('click', async () => {
+            const otp = otpInput.value.trim();
+
+            if (!otp || otp.length !== 6) {
+                showOtpResult('Please enter a valid 6-digit OTP', 'error');
+                return;
+            }
+
+            verifyOtpBtn.disabled = true;
+            verifyOtpBtn.innerHTML = '<span class="loading"><span class="spinner"></span> Verifying...</span>';
+
+            try {
+                const response = await fetch(`/api/delivery/${orderId}/verify-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ otp })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showOtpResult('OTP verified successfully!', 'success');
+                    otpVerifiedFlag = true;
+                    otpSection.style.display = 'none';
+                    otpVerified.style.display = 'block';
+                    updateStepIndicator();
+                    checkCompletion();
+                } else {
+                    showOtpResult(result.message || 'Invalid OTP. Please try again.', 'error');
+                }
+            } catch (err) {
+                console.error('OTP verification error:', err);
+                showOtpResult('Failed to verify OTP. Please try again.', 'error');
+            } finally {
+                verifyOtpBtn.disabled = false;
+                verifyOtpBtn.innerHTML = '<i class="fas fa-check"></i> Verify OTP';
+            }
+        });
+
+        function showOtpResult(message, type) {
+            otpResult.style.display = 'block';
+            otpResult.className = `flash ${type}`;
+            otpResult.textContent = message;
+        }
+
+        // Complete delivery
+        completeDeliveryBtn.addEventListener('click', async () => {
+            if (!photoCaptured || !otpVerifiedFlag) {
+                alert('Please capture delivery photo and verify OTP before completing delivery.');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to complete this delivery? This action cannot be undone.')) {
+                return;
+            }
+
+            completeDeliveryBtn.disabled = true;
+            completeDeliveryBtn.innerHTML = '<span class="loading"><span class="spinner"></span> Completing...</span>';
+
+            const formData = new FormData();
+            formData.append('otp', otpInput.value.trim());
+
+            // If we have a blob, append it as a file
+            if (capturedImageBlob) {
+                const file = new File([capturedImageBlob], 'delivery-proof.jpg', { type: 'image/jpeg' });
+                formData.append('deliveryProof', file);
+            }
+
+            try {
+                const response = await fetch(`/api/delivery/${orderId}/complete`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Delivery completed successfully!');
+                    window.location.href = '/agent/deliveries';
+                } else {
+                    alert('Error: ' + (result.message || 'Failed to complete delivery'));
+                    completeDeliveryBtn.disabled = false;
+                    completeDeliveryBtn.innerHTML = '<i class="fas fa-check"></i> Complete Delivery';
+                }
+            } catch (err) {
+                console.error('Complete delivery error:', err);
+                alert('Failed to complete delivery. Please try again.');
+                completeDeliveryBtn.disabled = false;
+                completeDeliveryBtn.innerHTML = '<i class="fas fa-check"></i> Complete Delivery';
+            }
+        });
+
+        function updateStepIndicator() {
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+
+            if (photoCaptured) {
+                step1.classList.remove('active');
+                step1.classList.add('completed');
+                step2.classList.add('active');
+            }
+        }
+
+        function checkCompletion() {
+            if (photoCaptured && otpVerifiedFlag) {
+                completeDeliveryBtn.disabled = false;
+                document.getElementById('step3').classList.add('active');
+            }
+        }
+
+        // Allow Enter key to verify OTP
+        otpInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                verifyOtpBtn.click();
+            }
+        });
+
+        // Only allow numbers in OTP input
+        otpInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>

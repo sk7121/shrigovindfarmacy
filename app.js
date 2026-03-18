@@ -42,6 +42,7 @@ const {
 const DeliveryService = require("./services/deliveryService");
 const QRCodeService = require("./services/qrCodeService");
 const { upload, uploadProfile, uploadDoctor, uploadProduct, handleUploadError } = require("./config/multer");
+const deliveryController = require("./controllers/deliveryController");
 
 const passport = require("./config/passport");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
@@ -6848,6 +6849,16 @@ app.get("/agent/delivery/:id", authenticateAgent, async (req, res) => {
       delivery.order,
     );
 
+    // Check if delivery is ready for completion (out for delivery)
+    if (delivery.status === 'out_for_delivery') {
+      // Render the new delivery complete page
+      return res.render("agent/delivery-complete.ejs", {
+        agent,
+        delivery,
+      });
+    }
+
+    // Otherwise render the old detail page
     res.render("agent/delivery-detail.ejs", {
       agent,
       delivery,
@@ -7350,6 +7361,48 @@ app.get("/user/order/:orderId/delivery", authenticate, async (req, res) => {
     res.status(500).send("Error loading delivery status");
   }
 });
+
+// ================== DELIVERY API ROUTES ==================
+// Complete delivery with image upload and OTP verification
+app.post(
+  "/api/delivery/:orderId/complete",
+  authenticate,
+  isDeliveryAgent,
+  uploadProfile.single("deliveryProof"),
+  deliveryController.completeDelivery
+);
+
+// Generate delivery OTP
+app.post(
+  "/api/delivery/:orderId/generate-otp",
+  authenticate,
+  isDeliveryAgent,
+  deliveryController.generateDeliveryOTP
+);
+
+// Verify delivery OTP
+app.post(
+  "/api/delivery/:orderId/verify-otp",
+  authenticate,
+  isDeliveryAgent,
+  deliveryController.verifyDeliveryOTP
+);
+
+// Get delivery OTP
+app.get(
+  "/api/delivery/:orderId/otp",
+  authenticate,
+  isDeliveryAgent,
+  deliveryController.getDeliveryOTP
+);
+
+// Get delivery details
+app.get(
+  "/api/delivery/:id",
+  authenticate,
+  isDeliveryAgent,
+  deliveryController.getDeliveryDetails
+);
 
 // ================== ERROR HANDLING ==================
 

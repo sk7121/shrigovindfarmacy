@@ -838,6 +838,37 @@
                           <% } %>
                   </div>
                 </div>
+
+                <% if (order.status === 'delivered' && order.deliveryProof && order.deliveryProof.image) { %>
+                <div class="card">
+                  <h2 class="card-title"><i class="fas fa-camera"></i> Delivery Proof</h2>
+                  <div style="text-align: center;">
+                    <img src="<%= order.deliveryProof.image %>" alt="Delivery Proof" 
+                         style="max-width: 100%; border-radius: 8px; border: 2px solid var(--border);">
+                    <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 10px;">
+                      <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                      Delivered on <%= new Date(order.deliveryProof.uploadedAt).toLocaleString('en-IN') %>
+                    </p>
+                  </div>
+                </div>
+                <% } %>
+
+                <% if (order.deliveryOTP && order.deliveryOTP.verifiedAt) { %>
+                <div class="card">
+                  <h2 class="card-title"><i class="fas fa-shield-alt"></i> OTP Verification</h2>
+                  <div style="padding: 1rem; background: rgba(40, 167, 69, 0.1); border: 1px solid rgba(40, 167, 69, 0.3); border-radius: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px; color: var(--success);">
+                      <i class="fas fa-check-circle" style="font-size: 24px;"></i>
+                      <div>
+                        <div style="font-weight: 600;">Delivery Verified with OTP</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">
+                          Verified on <%= new Date(order.deliveryOTP.verifiedAt).toLocaleString('en-IN') %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <% } %>
               </div>
             </div>
           </main>

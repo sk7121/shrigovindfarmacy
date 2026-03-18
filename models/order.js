@@ -116,6 +116,13 @@ orderSchema.methods.updateStatus = function (newStatus, reason = '') {
     this.status = newStatus;
 
     if (newStatus === 'delivered') {
+        // Validate that delivery proof image and OTP are provided
+        if (!this.deliveryProof || !this.deliveryProof.image) {
+            throw new Error('Delivery proof image is mandatory for marking order as delivered');
+        }
+        if (!this.deliveryOTP || !this.deliveryOTP.code || !this.deliveryOTP.verifiedAt) {
+            throw new Error('OTP verification is mandatory for marking order as delivered');
+        }
         this.tracking.deliveredAt = new Date();
     } else if (newStatus === 'shipped') {
         this.tracking.shippedAt = new Date();
