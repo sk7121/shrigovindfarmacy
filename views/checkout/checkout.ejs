@@ -971,6 +971,7 @@
   <script>
     let currentPaymentId = null;
     let currentOrderId = null;
+    let submitTimeout = null;
 
     // Payment Option Selection
     const paymentOptions = document.querySelectorAll('.payment-option');
@@ -987,6 +988,15 @@
     const form = document.getElementById('checkout-form');
     let isSubmitting = false;
 
+    // Auto-hide alerts after 5 seconds
+    const alerts = document.querySelectorAll('.flash');
+    alerts.forEach(alert => {
+      setTimeout(() => {
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 300);
+      }, 5000);
+    });
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -994,6 +1004,7 @@
 
       if (isSubmitting) {
         console.log('⏸️ Already submitting, ignoring...');
+        showToast('Please wait, order is being processed...', 'info');
         return; // Prevent duplicate submissions
       }
 
@@ -1054,30 +1065,60 @@
       if (['phonepe', 'googlepay', 'razorpay'].includes(paymentMethod)) {
         isSubmitting = true;
         const submitBtn = document.querySelector('.checkout-btn') || form.querySelector('button[type="submit"]');
-        
+
         if (!submitBtn) {
           console.error('Submit button not found!');
           showToast('Error: Submit button not found. Please refresh the page.', 'error');
           isSubmitting = false;
           return;
         }
-        
+
         const originalBtnText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
         submitBtn.disabled = true;
 
+        // Set timeout to reset button if stuck
+        submitTimeout = setTimeout(() => {
+          console.log('⏰ Submission timeout, resetting button');
+          isSubmitting = false;
+          submitBtn.innerHTML = originalBtnText;
+          submitBtn.disabled = false;
+          showToast('Request timed out. Please try again.', 'error');
+        }, 60000); // 60 second timeout
+
         try {
           await initiateRazorpayPayment(paymentMethod);
+          clearTimeout(submitTimeout);
         } catch (err) {
           console.error('Payment error:', err);
+          clearTimeout(submitTimeout);
           isSubmitting = false;
           submitBtn.innerHTML = originalBtnText;
           submitBtn.disabled = false;
           showToast('Payment error: ' + (err.message || 'Please try again'), 'error');
         }
       } else {
-        // COD - submit form normally
+        // COD - submit form with timeout protection
         isSubmitting = true;
+        
+        // Create hidden iframe to prevent page reload issues
+        const submitBtn = document.querySelector('.checkout-btn') || form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        }
+        
+        // Set timeout to reset button if stuck
+        submitTimeout = setTimeout(() => {
+          console.log('⏰ COD submission timeout');
+          isSubmitting = false;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
+          }
+          showToast('Request timed out. Please try again.', 'error');
+        }, 30000); // 30 second timeout for COD
+        
         form.submit();
       }
     });

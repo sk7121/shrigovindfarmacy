@@ -26,6 +26,21 @@ const deliverySchema = new mongoose.Schema({
         ref: 'DeliveryAgent'
     },
     assignedAt: Date,
+    assignmentMethod: {
+        type: String,
+        enum: ['manual', 'auto'],
+        default: 'manual'
+    },
+
+    // OTP for delivery verification
+    deliveryOTP: {
+        type: String,
+        select: false // Don't return OTP in queries by default
+    },
+    otpVerified: {
+        type: Boolean,
+        default: false
+    },
     
     // Shipping partner (if using external logistics)
     shippingPartner: {

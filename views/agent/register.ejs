@@ -304,10 +304,13 @@
                         <i class="fas fa-user-circle"></i> Profile Picture
                         <span style="float: right; font-weight: 400; font-size: 12px; color: var(--text-muted);">Optional</span>
                     </label>
-                    <input type="file" name="profileImage" accept="image/*" style="width: 100%; padding: 10px; border: 2px dashed var(--border); border-radius: 8px;">
+                    <input type="file" name="profileImage" id="profileImage" accept="image/*" capture="user" style="width: 100%; padding: 10px; border: 2px dashed var(--border); border-radius: 8px;">
                     <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
-                        <i class="fas fa-info-circle"></i> Upload a clear photo of yourself (JPG, PNG). Max 5MB.
+                        <i class="fas fa-info-circle"></i> Upload a photo or use camera (JPG, PNG). Max 5MB.
                     </p>
+                    <div id="profilePreview" style="margin-top: 10px; display: none;">
+                        <img id="profilePreviewImg" src="" alt="Profile preview" style="max-width: 150px; border-radius: 8px; border: 2px solid var(--primary);">
+                    </div>
                 </div>
 
                 <!-- Aadhar Number -->
@@ -444,6 +447,25 @@
     </div>
 
     <script>
+        // Profile Image Preview
+        const profileImageInput = document.getElementById('profileImage');
+        const profilePreview = document.getElementById('profilePreview');
+        const profilePreviewImg = document.getElementById('profilePreviewImg');
+
+        if (profileImageInput) {
+            profileImageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        profilePreviewImg.src = e.target.result;
+                        profilePreview.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
         // Auto-format Aadhar number
         const aadharInput = document.querySelector('input[name="aadharNumber"]');
         if (aadharInput) {

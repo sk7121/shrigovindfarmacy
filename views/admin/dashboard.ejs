@@ -495,26 +495,118 @@
         grid-template-columns: 1fr;
       }
 
+      .stat-card {
+        padding: 1rem;
+      }
+
+      .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+      }
+
+      .stat-value {
+        font-size: 1.4rem;
+      }
+
       .actions-bar {
         flex-direction: column;
         align-items: stretch;
       }
 
+      .actions-bar .btn-primary {
+        width: 100%;
+        justify-content: center;
+        position: relative;
+      }
+
+      /* Fix notification badge position on mobile */
+      .actions-bar .btn-primary .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: 15px;
+      }
+
       .search-box {
         width: 100%;
+        order: -1;
       }
 
       .search-box input {
         width: 100%;
+        min-width: 0;
       }
 
       .products-table {
-        font-size: 0.875rem;
+        font-size: 0.8rem;
       }
 
       .products-table th,
       .products-table td {
         padding: 0.75rem 0.5rem;
+      }
+
+      /* Make table scrollable horizontally on mobile */
+      .products-body {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .products-table {
+        min-width: 600px;
+      }
+
+      /* Fix header actions spacing */
+      .admin-header-actions {
+        gap: 0.5rem;
+      }
+
+      .theme-toggle {
+        width: 36px;
+        height: 36px;
+      }
+
+      .btn-logout span.desktop-only {
+        display: none;
+      }
+
+      .btn-logout {
+        padding: 0.5rem;
+        min-width: 40px;
+        justify-content: center;
+      }
+
+      .admin-logo-text {
+        display: none;
+      }
+
+      .admin-logo-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+      }
+    }
+
+    /* Small phones */
+    @media (max-width: 480px) {
+      .admin-header-inner {
+        padding: 0 0.75rem;
+      }
+
+      .admin-main {
+        padding: 0.75rem;
+      }
+
+      .admin-welcome h1 {
+        font-size: 1.4rem;
+      }
+
+      .stat-value {
+        font-size: 1.25rem;
+      }
+
+      .stat-label {
+        font-size: 0.8rem;
       }
     }
   </style>
@@ -536,6 +628,8 @@
       border: 1px solid rgba(0, 0, 0, 0.08);
       background: rgba(255, 255, 255, 0.9);
       box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+      width: calc(100% - 2rem);
+      word-wrap: break-word;
     }
 
     .flash.success {
@@ -548,6 +642,14 @@
       border-color: rgba(255, 107, 107, 0.4);
       color: #b91c1c;
       background: rgba(254, 202, 202, 0.25);
+    }
+
+    @media (max-width: 768px) {
+      .flash {
+        width: calc(100% - 1rem);
+        padding: 10px 12px;
+        font-size: 0.85rem;
+      }
     }
   </style>
   <% if (success && success.length) { %>
@@ -684,19 +786,19 @@
               </div>
               <% } else { %>
                 <!-- Delivery Management Quick Access -->
-                <div class="stat-card" style="border-left: 4px solid var(--primary);">
+                <div class="stat-card" style="border-left: 4px solid var(--primary); margin-bottom: 1.5rem;">
                   <div class="stat-icon" style="background: rgba(28, 129, 37, 0.2); color: var(--primary);">
                     <i class="fas fa-shipping-fast"></i>
                   </div>
                   <div class="stat-info">
                     <div class="stat-label">Delivery Management</div>
-                    <div style="margin-top: 10px;">
+                    <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px;">
                       <a href="/admin/delivery" class="btn-primary"
-                        style="padding: 8px 16px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                        style="padding: 10px 18px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;">
                         <i class="fas fa-tachometer-alt"></i> Delivery Dashboard
                       </a>
                       <a href="/admin/delivery-agents" class="btn-outline"
-                        style="padding: 8px 16px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; margin-left: 8px; border: 2px solid var(--border); background: transparent; color: var(--text);">
+                        style="padding: 10px 18px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border: 2px solid var(--border); background: transparent; color: var(--text); white-space: nowrap;">
                         <i class="fas fa-users"></i> Manage Agents
                       </a>
                     </div>
@@ -705,7 +807,7 @@
 
 
                 <!-- Loyalty Program Quick Access -->
-                <div class="stat-card" style="border-left: 4px solid #ffd700;">
+                <div class="stat-card" style="border-left: 4px solid #ffd700; margin-bottom: 1.5rem;">
                   <div class="stat-icon" style="background: rgba(255, 215, 0, 0.2); color: #ffd700;">
                     <i class="fas fa-gift"></i>
                   </div>
@@ -783,48 +885,116 @@
                   </div>
 
                   <!-- Analytics Sections -->
-                  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
 
-                    <!-- Revenue Chart Placeholder -->
-                    <div class="products-card">
+                    <!-- Revenue Chart -->
+                    <div class="products-card" style="grid-column: 1 / -1;">
                       <div class="products-head">
-                        <h2><i class="fas fa-chart-line"></i> Revenue Trend</h2>
+                        <h2><i class="fas fa-chart-line"></i> Revenue Trend (Last 14 Days)</h2>
                       </div>
-                      <div class="products-body">
-                        <canvas id="revenue-chart" height="80"></canvas>
+                      <div class="products-body" style="padding: 1.5rem;">
+                        <div style="position: relative; height: 300px; width: 100%;">
+                          <canvas id="revenue-chart"></canvas>
+                        </div>
                         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                         <script>
                           const ctx = document.getElementById('revenue-chart').getContext('2d');
                           const revenueData = <% - JSON.stringify(dailyRevenue || []) %>;
 
-                          new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                              labels: revenueData.slice(-14).map(d => d.date),
-                              datasets: [{
-                                label: 'Revenue (₹)',
-                                data: revenueData.slice(-14).map(d => d.revenue),
-                                borderColor: '#1c8125',
-                                backgroundColor: 'rgba(28, 129, 37, 0.1)',
-                                tension: 0.4,
-                                fill: true
-                              }]
-                            },
-                            options: {
-                              responsive: true,
-                              maintainAspectRatio: true,
-                              plugins: {
-                                legend: {
-                                  display: false
-                                }
+                          // Only create chart if data exists
+                          if (revenueData && revenueData.length > 0) {
+                            new Chart(ctx, {
+                              type: 'line',
+                              data: {
+                                labels: revenueData.slice(-14).map(d => {
+                                  const date = new Date(d.date);
+                                  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+                                }),
+                                datasets: [{
+                                  label: 'Revenue (₹)',
+                                  data: revenueData.slice(-14).map(d => d.revenue),
+                                  borderColor: '#1c8125',
+                                  backgroundColor: 'rgba(28, 129, 37, 0.1)',
+                                  tension: 0.4,
+                                  fill: true,
+                                  pointBackgroundColor: '#1c8125',
+                                  pointBorderColor: '#fff',
+                                  pointBorderWidth: 2,
+                                  pointRadius: 5,
+                                  pointHoverRadius: 7
+                                }]
                               },
-                              scales: {
-                                y: {
-                                  beginAtZero: true
+                              options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                  legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                      usePointStyle: true,
+                                      font: {
+                                        family: "'Plus Jakarta Sans', sans-serif",
+                                        size: 12
+                                      }
+                                    }
+                                  },
+                                  tooltip: {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    padding: 12,
+                                    titleFont: {
+                                      family: "'Plus Jakarta Sans', sans-serif",
+                                      size: 13
+                                    },
+                                    bodyFont: {
+                                      family: "'Plus Jakarta Sans', sans-serif",
+                                      size: 12
+                                    },
+                                    callbacks: {
+                                      label: function(context) {
+                                        return 'Revenue: ₹' + context.parsed.y.toLocaleString('en-IN');
+                                      }
+                                    }
+                                  }
+                                },
+                                scales: {
+                                  y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                      color: 'rgba(0, 0, 0, 0.05)'
+                                    },
+                                    ticks: {
+                                      callback: function(value) {
+                                        return '₹' + value.toLocaleString('en-IN');
+                                      },
+                                      font: {
+                                        family: "'Plus Jakarta Sans', sans-serif",
+                                        size: 11
+                                      }
+                                    }
+                                  },
+                                  x: {
+                                    grid: {
+                                      display: false
+                                    },
+                                    ticks: {
+                                      font: {
+                                        family: "'Plus Jakarta Sans', sans-serif",
+                                        size: 11
+                                      }
+                                    }
+                                  }
                                 }
                               }
-                            }
-                          });
+                            });
+                          } else {
+                            // Show empty state if no data
+                            document.getElementById('revenue-chart').parentElement.innerHTML = 
+                              '<div style="text-align: center; padding: 3rem; color: var(--text-muted);">' +
+                              '<i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>' +
+                              '<p>No revenue data available yet</p>' +
+                              '</div>';
+                          }
                         </script>
                       </div>
                     </div>
@@ -838,14 +1008,14 @@
                         <% if (typeof topProducts !=='undefined' && topProducts.length> 0) { %>
                           <% topProducts.slice(0, 5).forEach((product, index)=> { %>
                             <div
-                              style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: <%= index < 4 ? '1px solid var(--border)' : 'none' %>;">
+                              style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: <%= index < 4 ? '1px solid var(--border)' : 'none' %>;">
                               <div style="display: flex; align-items: center; gap: 0.75rem;">
                                 <div
-                                  style="width: 30px; height: 30px; background: <%= index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'var(--bg)' %>; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem;">
+                                  style="width: 30px; height: 30px; background: <%= index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'var(--bg)' %>; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem; color: <%= index < 3 ? '#fff' : 'var(--text)' %>;">
                                   <%= index + 1 %>
                                 </div>
-                                <div>
-                                  <div style="font-weight: 600; font-size: 0.9rem;">
+                                <div style="max-width: 200px;">
+                                  <div style="font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<%= product.name %>">
                                     <%= product.name %>
                                   </div>
                                   <div style="font-size: 0.8rem; color: var(--text-muted);">
@@ -853,14 +1023,16 @@
                                   </div>
                                 </div>
                               </div>
-                              <div style="font-weight: 700; color: var(--primary);">₹<%=
+                              <div style="font-weight: 700; color: var(--primary); white-space: nowrap;">₹<%=
                                   Math.round(product.revenue).toLocaleString('en-IN') %>
                               </div>
                             </div>
                             <% }) %>
                               <% } else { %>
-                                <div style="text-align: center; color: var(--text-muted); padding: 2rem;">No sales data
-                                  yet</div>
+                                <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                                  <i class="fas fa-trophy" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                                  <p>No sales data yet</p>
+                                </div>
                                 <% } %>
                       </div>
                     </div>
@@ -1033,9 +1205,10 @@
                                                 title="Edit">
                                                 <i class="fas fa-edit"></i>
                                               </a>
-                                              <form action="/admin/products/delete/<%= product._id %>?_method=DELETE"
+                                              <form action="/admin/products/delete/<%= product._id %>"
                                                 method="POST" style="display: inline;"
                                                 onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                                <input type="hidden" name="_method" value="DELETE">
                                                 <button type="submit" class="action-btn delete" title="Delete">
                                                   <i class="fas fa-trash"></i>
                                                 </button>

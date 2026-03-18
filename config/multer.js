@@ -56,14 +56,41 @@ const profileStorage = new CloudinaryStorage({
             const agentId = req.params.id || req.body.agentId;
             const email = req.body.email || 'unknown';
             const timestamp = Date.now();
-            
+
             // Clean email for use in filename
             const emailSafe = email.replace(/[@.]/g, '_').substring(0, 30);
-            
+
             if (agentId) {
                 return `agent_profile_${agentId}_${timestamp}`;
             } else {
                 return `agent_profile_${emailSafe}_${timestamp}`;
+            }
+        }
+    }
+});
+
+// Doctor profile image storage configuration (images only, with transformation)
+const doctorStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'shri-govind-pharmacy/doctors',
+        allowed_formats: ['jpg', 'jpeg', 'png'],
+        transformation: [
+            { quality: 'auto', fetch_format: 'auto' },
+            { width: 400, height: 400, gravity: 'face', crop: 'fill' }
+        ],
+        public_id: (req, file) => {
+            const doctorId = req.params.id || req.body.doctorId;
+            const doctorName = req.body.name || 'unknown';
+            const timestamp = Date.now();
+
+            // Clean name for use in filename
+            const nameSafe = doctorName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
+
+            if (doctorId) {
+                return `doctor_profile_${doctorId}_${timestamp}`;
+            } else {
+                return `doctor_profile_${nameSafe}_${timestamp}`;
             }
         }
     }
@@ -125,24 +152,94 @@ const uploadProfile = multer({
     }
 });
 
+// Product image upload storage configuration (images only, with transformation)
+const productStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'shri-govind-pharmacy/products',
+        allowed_formats: ['jpg', 'jpeg', 'png'],
+        transformation: [
+            { quality: 'auto', fetch_format: 'auto' },
+            { width: 600, height: 600, gravity: 'center', crop: 'fill' }
+        ],
+        public_id: (req, file) => {
+            const productName = req.body.name || 'unknown';
+            const timestamp = Date.now();
+
+            // Clean name for use in filename
+            const nameSafe = productName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
+
+            return `product_${nameSafe}_${timestamp}`;
+        }
+    }
+});
+
+// Product image upload middleware
+const uploadProduct = multer({
+    storage: productStorage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        // Only allow image files for product
+        const allowedTypes = /jpeg|jpg|png/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+
+        console.log('Product image upload - File:', {
+            fieldname: file.fieldname,
+            originalname: file.originalname,
+            mimetype: file.mimetype,
+            extname: path.extname(file.originalname).toLowerCase()
+        });
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Only image files (JPEG, JPG, PNG) are allowed for product image. Received: ' + file.mimetype));
+        }
+    }
+});
+
+// Doctor profile image upload middleware
+const uploadDoctor = multer({
+    storage: doctorStorage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        // Only allow image files for doctor profile
+        const allowedTypes = /jpeg|jpg|png/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+
+        console.log('Doctor image upload - File:', {
+            fieldname: file.fieldname,
+            originalname: file.originalname,
+            mimetype: file.mimetype,
+            extname: path.extname(file.originalname).toLowerCase()
+        });
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Only image files (JPEG, JPG, PNG) are allowed for doctor profile picture. Received: ' + file.mimetype));
+        }
+    }
+});
+
 // Error handling middleware for multer
 const handleUploadError = (err, req, res, next) => {
     if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
-            return res.status(400).json({
-                success: false,
-                message: 'File size too large. Maximum size is 5MB'
-            });
+            req.fileValidationError = 'File size too large. Maximum size is 5MB';
+            return next();
         }
-        return res.status(400).json({
-            success: false,
-            message: `Upload error: ${err.message}`
-        });
+        req.fileValidationError = `Upload error: ${err.message}`;
+        return next();
     } else if (err) {
-        return res.status(400).json({
-            success: false,
-            message: err.message
-        });
+        req.fileValidationError = err.message;
+        return next();
     }
     next();
 };
@@ -184,6 +281,8 @@ const uploadPrescription = multer({
 module.exports = {
     upload,
     uploadProfile,
+    uploadDoctor,
+    uploadProduct,
     uploadPrescription,
     handleUploadError,
     cloudinary

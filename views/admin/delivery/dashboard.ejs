@@ -261,9 +261,61 @@
         .agent-status.offline { background: #e2e3e5; color: #383d41; }
 
         @media (max-width: 768px) {
-            .header { flex-direction: column; gap: 15px; }
-            .stats-grid { grid-template-columns: 1fr; }
+            .dashboard { padding: 10px; }
+            
+            .header { 
+                flex-direction: column; 
+                gap: 15px; 
+                padding: 15px;
+            }
+            
+            .header h1 { font-size: 22px; }
+            
+            .header-actions { 
+                flex-wrap: wrap; 
+                justify-content: center;
+                gap: 8px;
+            }
+            
+            .header-actions .btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            
+            .stats-grid { grid-template-columns: 1fr; gap: 15px; }
+            
+            .stat-card { padding: 18px; }
+            
+            .stat-card .value { font-size: 26px; }
+            
             .agents-grid { grid-template-columns: 1fr; }
+            
+            .section { padding: 15px; }
+            
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            table { min-width: 600px; }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 { font-size: 20px; }
+            
+            .header-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .stat-card .value { font-size: 22px; }
+            .stat-card .label { font-size: 12px; }
         }
     </style>
 </head>

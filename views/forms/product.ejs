@@ -297,6 +297,15 @@
         padding: 0 1rem;
       }
 
+      .admin-header {
+        position: static;
+      }
+
+      .admin-header-inner {
+        flex-direction: column;
+        gap: 15px;
+      }
+
       .form-grid {
         grid-template-columns: 1fr;
       }
@@ -308,6 +317,24 @@
       .btn {
         width: 100%;
         justify-content: center;
+      }
+
+      .image-preview {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page-header h1 {
+        font-size: 1.4rem;
+      }
+
+      .form-card {
+        border-radius: 12px;
+      }
+
+      .form-body {
+        padding: 1.25rem;
       }
     }
   </style>
@@ -376,7 +403,7 @@
       <h1><i class="fas fa-plus-circle"></i> Add New Product</h1>
     </div>
 
-    <form class="form-card" action="/admin/products/new" method="POST">
+    <form class="form-card" action="/admin/products/new" method="POST" enctype="multipart/form-data">
       <div class="form-head">
         <h2>Product Information</h2>
       </div>
@@ -389,12 +416,12 @@
           </div>
 
           <div class="form-group full-width">
-            <label class="form-label" for="image">Image URL <span class="required">*</span></label>
-            <input type="url" id="image" name="image" class="form-input" required placeholder="https://example.com/image.jpg">
-            <div class="image-preview" id="image-preview" style="display: none;">
-              <img id="preview-img" src="" alt="Preview">
+            <label class="form-label" for="image">Product Image <span class="required">*</span></label>
+            <input type="file" id="image" name="image" class="form-input" accept="image/*" required>
+            <div class="input-hint">Upload product image (JPG, PNG - max 5MB). Image will be hosted on Cloudinary.</div>
+            <div class="image-preview" id="image-preview" style="display: none; margin-top: 10px;">
+              <img id="preview-img" src="" alt="Preview" style="max-width: 100%; border-radius: 8px;">
             </div>
-            <div class="input-hint">Paste a direct link to the product image</div>
           </div>
 
           <div class="form-group">
@@ -418,7 +445,7 @@
             <select id="category" name="category" class="form-input" required>
               <option value="">Select Category</option>
               <option value="ayurvedic">Ayurvedic</option>
-              <option value="sashtri">Sashtri Ayurvedic</option>
+              <option value="sashtri-ayurvedic">Sashtri Ayurvedic</option>
               <option value="herbal-cosmetics">Herbal Cosmetics</option>
               <option value="fmcg">FMCG</option>
             </select>
@@ -444,11 +471,15 @@
     const imagePreview = document.getElementById('image-preview');
     const previewImg = document.getElementById('preview-img');
 
-    imageInput.addEventListener('input', (e) => {
-      const url = e.target.value;
-      if (url) {
-        previewImg.src = url;
-        imagePreview.style.display = 'block';
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImg.src = e.target.result;
+          imagePreview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
       } else {
         imagePreview.style.display = 'none';
       }

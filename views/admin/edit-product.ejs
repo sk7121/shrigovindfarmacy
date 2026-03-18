@@ -385,6 +385,12 @@
     @media (max-width: 768px) {
       .admin-header-inner {
         padding: 0 1rem;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .admin-header {
+        position: static;
       }
 
       .edit-main {
@@ -402,6 +408,24 @@
       .btn {
         width: 100%;
         justify-content: center;
+      }
+
+      .image-preview {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page-header h1 {
+        font-size: 1.4rem;
+      }
+
+      .form-card {
+        border-radius: 12px;
+      }
+
+      .form-body {
+        padding: 1.25rem;
       }
     }
   </style>
@@ -482,7 +506,7 @@
       <h1><i class="fas fa-edit"></i> Edit Product</h1>
     </div>
 
-    <form class="form-card" action="/admin/products/edit/<%= product._id %>" method="POST">
+    <form class="form-card" action="/admin/products/edit/<%= product._id %>" method="POST" enctype="multipart/form-data">
       <div class="form-head">
         <h2>Product Information</h2>
       </div>
@@ -497,14 +521,25 @@
             <div class="input-hint">Use a clear, descriptive name for the product</div>
           </div>
 
-          <!-- Image URL -->
+          <!-- Image Upload -->
           <div class="form-group full-width">
-            <label class="form-label" for="image">Image URL <span class="required">*</span></label>
-            <input type="url" id="image" name="image" class="form-input" value="<%= product.image || '' %>" required placeholder="https://example.com/image.jpg">
-            <div class="image-preview" id="image-preview" style="display: <%= product.image ? 'block' : 'none' %>;">
-              <img id="preview-img" src="<%= product.image || '' %>" alt="Product preview">
+            <label class="form-label" for="image">Product Image</label>
+            <% if (product.image) { %>
+            <div style="margin-bottom: 10px;">
+              <img id="image-preview-current" src="<%= product.image %>" alt="Current product image" style="max-height: 150px; border-radius: 8px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);" />
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
+                <i class="fa-solid fa-info-circle"></i> Current image is set. Upload a new image to replace it.
+              </p>
             </div>
-            <div class="input-hint">Paste a direct link to the product image</div>
+            <% } %>
+            <input type="file" id="image" name="image" class="form-input" accept="image/*" onchange="previewImage(this)">
+            <div class="image-preview" id="image-preview-new" style="display: none; margin-top: 10px;">
+              <img id="preview-img-new" src="" alt="New product preview" style="max-height: 150px; border-radius: 8px;">
+            </div>
+            <div class="input-hint">
+              <i class="fa-solid fa-circle-info"></i> Upload product image (JPG, PNG - max 5MB). 
+              <% if (product.image) { %>Leave blank to keep existing image.<% } %>
+            </div>
           </div>
 
           <!-- Price -->
@@ -569,20 +604,23 @@
   </div>
 
   <script>
-    // Image Preview
-    const imageInput = document.getElementById('image');
-    const imagePreview = document.getElementById('image-preview');
-    const previewImg = document.getElementById('preview-img');
-
-    imageInput.addEventListener('input', (e) => {
-      const url = e.target.value;
-      if (url) {
-        previewImg.src = url;
-        imagePreview.style.display = 'block';
+    // Image Preview for file upload
+    function previewImage(input) {
+      const file = input.files[0];
+      const previewNew = document.getElementById('image-preview-new');
+      const previewImgNew = document.getElementById('preview-img-new');
+      
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImgNew.src = e.target.result;
+          previewNew.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
       } else {
-        imagePreview.style.display = 'none';
+        previewNew.style.display = 'none';
       }
-    });
+    }
 
     // Show toast on form submission success (via URL param)
     const urlParams = new URLSearchParams(window.location.search);

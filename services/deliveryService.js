@@ -2,9 +2,17 @@ const Delivery = require('../models/delivery');
 const DeliveryAgent = require('../models/deliveryAgent');
 const ShippingPartner = require('../models/shippingPartner');
 const Order = require('../models/order');
+const OTP = require('../models/otp');
 const QRCodeService = require('./qrCodeService');
 const { sendOrderStatusUpdate } = require('./emailService');
 const { sendOrderStatusSMS } = require('./smsService');
+
+// Store location (UPDATE THIS with your actual store coordinates)
+// You can get coordinates from Google Maps by right-clicking on your location
+const STORE_LOCATION = {
+    latitude: parseFloat(process.env.STORE_LATITUDE || 26.9124), // Default: Jaipur
+    longitude: parseFloat(process.env.STORE_LONGITUDE || 75.7873)
+};
 
 /**
  * Delivery Service
@@ -12,6 +20,50 @@ const { sendOrderStatusSMS } = require('./smsService');
  */
 
 class DeliveryService {
+    /**
+     * Calculate distance between two coordinates using Haversine formula
+     * @param {number} lat1 - Latitude of point 1
+     * @param {number} lon1 - Longitude of point 1
+     * @param {number} lat2 - Latitude of point 2
+     * @param {number} lon2 - Longitude of point 2
+     * @returns {number} Distance in kilometers
+     */
+    static calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Earth's radius in km
+        const dLat = this.toRad(lat2 - lat1);
+        const dLon = this.toRad(lon2 - lon1);
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    static toRad(degrees) {
+        return degrees * Math.PI / 180;
+    }
+
+    /**
+     * Calculate distance between store and delivery address
+     * Note: This is a simplified version. For production, use geocoding service
+     * @param {Object} delivery - Delivery document
+     * @returns {number} Distance in km (approximate)
+     */
+    static getDeliveryDistance(delivery) {
+        // If delivery has coordinates, use them
+        if (delivery.location?.coordinates) {
+            return this.calculateDistance(
+                STORE_LOCATION.latitude,
+                STORE_LOCATION.longitude,
+                delivery.location.coordinates[1],
+                delivery.location.coordinates[0]
+            );
+        }
+        // Fallback: Use pincode-based approximation (simplified)
+        // In production, use proper geocoding service
+        return Math.random() * 10 + 1; // Placeholder: 1-11 km
+    }
     /**
      * Create a new delivery for an order
      * @param {Object} order - Order document
@@ -87,12 +139,14 @@ class DeliveryService {
     }
 
     /**
-     * Auto-assign delivery to best available agent
+     * Auto-assign delivery to best available agent based on distance and availability
      * @param {Object} delivery - Delivery document
      * @returns {Object} Assignment result
      */
     static async autoAssignDelivery(delivery) {
         try {
+            console.log('🚀 Auto-assigning delivery:', delivery._id);
+
             // Find available agents in the delivery area
             const availableAgents = await DeliveryAgent.find({
                 isActive: true,
@@ -108,37 +162,76 @@ class DeliveryService {
                 };
             }
 
+            // Get delivery distance from store
+            const deliveryDistance = this.getDeliveryDistance(delivery);
+            console.log('📍 Delivery distance from store:', deliveryDistance.toFixed(2), 'km');
+
             // Score agents based on various factors
             const scoredAgents = availableAgents.map(agent => {
                 let score = 100;
+                let details = [];
 
-                // Current workload (lower is better)
+                // 1. Distance from store (closer is better) - Max 40 points
+                const agentDistance = this.getAgentDistance(agent);
+                const distanceScore = Math.max(0, 40 - (agentDistance * 2));
+                score += distanceScore;
+                details.push(`Distance: ${agentDistance.toFixed(1)}km (+${distanceScore.toFixed(0)})`);
+
+                // 2. Current workload (lower is better) - Max 30 points
                 const workloadFactor = 1 - (agent.currentDeliveries / agent.maxConcurrentDeliveries);
-                score += workloadFactor * 30;
+                const workloadScore = workloadFactor * 30;
+                score += workloadScore;
+                details.push(`Workload: ${agent.currentDeliveries}/${agent.maxConcurrentDeliveries} (+${workloadScore.toFixed(0)})`);
 
-                // Performance rating
-                score += agent.stats.averageRating * 5;
+                // 3. Performance rating - Max 20 points
+                const ratingScore = agent.stats.averageRating * 4;
+                score += ratingScore;
+                details.push(`Rating: ${agent.stats.averageRating.toFixed(1)} (+${ratingScore.toFixed(0)})`);
 
-                // On-time delivery rate
-                score += agent.stats.onTimeDeliveryRate * 0.2;
+                // 4. On-time delivery rate - Max 10 points
+                const onTimeScore = agent.stats.onTimeDeliveryRate * 0.1;
+                score += onTimeScore;
 
-                // Check if delivery area matches agent's coverage
+                // 5. Coverage area match - Bonus 20 points
                 if (agent.coverageAreas && agent.coverageAreas.length > 0) {
-                    const inCoverage = agent.coverageAreas.some(area => 
+                    const inCoverage = agent.coverageAreas.some(area =>
                         area.pincode === delivery.deliveryAddress.pincode
                     );
-                    if (inCoverage) score += 20;
+                    if (inCoverage) {
+                        score += 20;
+                        details.push('In coverage area (+20)');
+                    }
                 }
 
-                return { agent, score };
+                // 6. Availability bonus - Idle agents get priority
+                if (agent.currentStatus === 'idle') {
+                    score += 15;
+                    details.push('Idle status (+15)');
+                }
+
+                console.log(`📊 Agent ${agent.name} score: ${score.toFixed(1)} - ${details.join(', ')}`);
+
+                return { agent, score, details };
             });
 
             // Sort by score and pick best
             scoredAgents.sort((a, b) => b.score - a.score);
             const bestAgent = scoredAgents[0].agent;
 
-            // Assign delivery to agent
-            return await this.assignDeliveryToAgent(delivery, bestAgent);
+            console.log('✅ Best agent selected:', bestAgent.name, 'with score:', scoredAgents[0].score.toFixed(1));
+
+            // Assign delivery to agent with OTP generation
+            const result = await this.assignDeliveryToAgent(delivery, bestAgent, {
+                autoAssigned: true,
+                distance: deliveryDistance
+            });
+
+            if (result.success) {
+                result.assignmentScore = scoredAgents[0].score;
+                result.scoreDetails = scoredAgents[0].details;
+            }
+
+            return result;
         } catch (error) {
             console.error('Auto-assign delivery error:', error);
             return {
@@ -150,7 +243,32 @@ class DeliveryService {
     }
 
     /**
-     * Assign delivery to a specific agent
+     * Get approximate distance of agent from store
+     * @param {Object} agent - DeliveryAgent document
+     * @returns {number} Distance in km (approximate)
+     */
+    static getAgentDistance(agent) {
+        // If agent has current location coordinates, use them
+        if (agent.currentLocation?.latitude && agent.currentLocation?.longitude) {
+            return this.calculateDistance(
+                STORE_LOCATION.latitude,
+                STORE_LOCATION.longitude,
+                agent.currentLocation.latitude,
+                agent.currentLocation.longitude
+            );
+        }
+        // Fallback: Use address pincode-based approximation
+        // In production, use proper geocoding service like Google Maps
+        if (agent.address?.pincode) {
+            // You can implement pincode-to-coordinates mapping here
+            // For now, return random distance
+            return Math.random() * 5 + 1; // 1-6 km
+        }
+        return Math.random() * 5 + 1; // Default fallback
+    }
+
+    /**
+     * Assign delivery to a specific agent with OTP generation
      * @param {Object} delivery - Delivery document or ID
      * @param {Object} agent - DeliveryAgent document or ID
      * @param {Object} options - Assignment options
@@ -158,8 +276,8 @@ class DeliveryService {
      */
     static async assignDeliveryToAgent(delivery, agent, options = {}) {
         try {
-            const deliveryDoc = typeof delivery === 'string' 
-                ? await Delivery.findById(delivery) 
+            const deliveryDoc = typeof delivery === 'string'
+                ? await Delivery.findById(delivery)
                 : delivery;
 
             const agentDoc = typeof agent === 'string'
@@ -175,22 +293,31 @@ class DeliveryService {
             }
 
             if (!agentDoc.canAcceptDelivery()) {
-                return { 
-                    success: false, 
+                return {
+                    success: false,
                     message: 'Agent cannot accept more deliveries',
                     reason: agentDoc.isAvailable ? 'Agent unavailable' : 'Agent at max capacity'
                 };
             }
 
+            // Generate OTP for delivery verification
+            const otpDoc = await OTP.createOTP(agentDoc.email, 'delivery_otp', 24 * 60); // 24 hours expiry
+            console.log('🔐 OTP generated for delivery:', otpDoc.otp);
+
             // Update delivery
             deliveryDoc.assignedTo = agentDoc._id;
             deliveryDoc.assignedAt = new Date();
-            
+            deliveryDoc.deliveryOTP = otpDoc.otp; // Store OTP in delivery document
+
             if (options.notes) {
                 deliveryDoc.instructions = options.notes;
             }
 
-            await deliveryDoc.updateStatus('assigned', `Assigned to agent ${agentDoc.name}`, '', agentDoc._id);
+            if (options.autoAssigned) {
+                deliveryDoc.assignmentMethod = 'auto';
+            }
+
+            await deliveryDoc.updateStatus('assigned', `Assigned to agent ${agentDoc.name}. OTP: ${otpDoc.otp}`, '', agentDoc._id);
 
             // Update agent's current deliveries count
             agentDoc.currentDeliveries += 1;
@@ -199,14 +326,32 @@ class DeliveryService {
             }
             await agentDoc.save();
 
+            // Send OTP via SMS to agent
+            try {
+                const otpMessage = `New Delivery Assigned! Order #${deliveryDoc.tracking?.orderId || 'N/A'}. OTP: ${otpDoc.otp}. Valid for 24hrs. - Shri Govind Pharmacy`;
+                await this.sendDeliveryOTPSMS(agentDoc.phone, otpMessage);
+                console.log('📱 OTP SMS sent to agent:', agentDoc.phone);
+            } catch (smsErr) {
+                console.log('⚠️ OTP SMS failed:', smsErr.message);
+            }
+
+            // Send OTP via email to agent
+            try {
+                await this.sendDeliveryOTPEmail(agentDoc.email, otpDoc.otp, deliveryDoc);
+                console.log('📧 OTP email sent to agent:', agentDoc.email);
+            } catch (emailErr) {
+                console.log('⚠️ OTP email failed:', emailErr.message);
+            }
+
             // Notify agent (via push notification in real implementation)
-            console.log(`Delivery assigned to agent: ${agentDoc.name}`);
+            console.log(`✅ Delivery assigned to agent: ${agentDoc.name}, OTP: ${otpDoc.otp}`);
 
             return {
                 success: true,
                 message: 'Delivery assigned successfully',
                 delivery: deliveryDoc,
-                agent: agentDoc
+                agent: agentDoc,
+                otp: otpDoc.otp // Include OTP in response for debugging
             };
         } catch (error) {
             console.error('Assign delivery error:', error);
@@ -216,6 +361,83 @@ class DeliveryService {
                 error: error.message
             };
         }
+    }
+
+    /**
+     * Send OTP SMS to delivery agent
+     * @param {string} phone - Agent's phone number
+     * @param {string} message - SMS message
+     */
+    static async sendDeliveryOTPSMS(phone, message) {
+        // Use your existing SMS service
+        const https = require('https');
+        
+        return new Promise((resolve, reject) => {
+            // Example: Using Fast2SMS or any SMS provider
+            // Replace with your actual SMS provider credentials
+            const apiKey = process.env.SMS_API_KEY || 'your_api_key';
+            
+            const options = {
+                hostname: 'www.fast2sms.com',
+                path: `/devv2?authorization=${apiKey}&message=${encodeURIComponent(message)}&language=english&route=otp&numbers=${phone}`,
+                method: 'GET'
+            };
+
+            const req = https.request(options, (res) => {
+                let data = '';
+                res.on('data', (chunk) => data += chunk);
+                res.on('end', () => {
+                    console.log('SMS sent:', data);
+                    resolve(data);
+                });
+            });
+
+            req.on('error', (e) => {
+                console.error('SMS error:', e);
+                reject(e);
+            });
+
+            req.end();
+        });
+    }
+
+    /**
+     * Send OTP email to delivery agent
+     * @param {string} email - Agent's email
+     * @param {string} otp - OTP code
+     * @param {Object} delivery - Delivery document
+     */
+    static async sendDeliveryOTPEmail(email, otp, delivery) {
+        const { sendOTPEmail } = require('./emailService');
+        
+        const emailContent = `
+            <h2>🚚 New Delivery Assigned</h2>
+            <p>Hello,</p>
+            <p>A new delivery has been assigned to you.</p>
+            
+            <h3>Delivery Details:</h3>
+            <ul>
+                <li><strong>Order ID:</strong> ${delivery.tracking?.orderId || 'N/A'}</li>
+                <li><strong>Customer:</strong> ${delivery.deliveryAddress?.fullName || 'N/A'}</li>
+                <li><strong>Address:</strong> ${delivery.deliveryAddress?.address}, ${delivery.deliveryAddress?.city}</li>
+                <li><strong>Phone:</strong> ${delivery.deliveryAddress?.phone}</li>
+            </ul>
+            
+            <h3 style="background: #f0f0f0; padding: 15px; border-radius: 8px; text-align: center;">
+                🔐 Your Delivery OTP: <strong style="color: #1c8125; font-size: 24px;">${otp}</strong>
+            </h3>
+            
+            <p><strong>Important:</strong></p>
+            <ul>
+                <li>This OTP is valid for 24 hours</li>
+                <li>Share this OTP with the customer upon successful delivery</li>
+                <li>Do not share this OTP with anyone else</li>
+            </ul>
+            
+            <p>Best regards,<br>Shri Govind Pharmacy</p>
+        `;
+
+        await sendOTPEmail(email, otp, 'delivery_otp', emailContent);
     }
 
     /**

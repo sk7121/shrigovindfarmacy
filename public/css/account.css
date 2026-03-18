@@ -1099,24 +1099,13 @@ body {
     padding: 0 0.75rem;
   }
 
+  /* Hide visual panel on mobile - show only login form */
   .auth-visual {
-    padding: 30px 20px;
+    display: none;
   }
 
-  .visual-headline {
-    font-size: 1.7rem;
-  }
-
-  .visual-sub {
-    font-size: 0.85rem;
-  }
-
-  .visual-stats {
-    gap: 15px;
-  }
-
-  .stat-num {
-    font-size: 1.4rem;
+  .auth-page {
+    grid-template-columns: 1fr;
   }
 
   .auth-form-side {

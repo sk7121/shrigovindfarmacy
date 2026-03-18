@@ -339,6 +339,80 @@
     .btn-add:hover {
       opacity: 0.9;
     }
+
+    @media (max-width: 768px) {
+      .admin-header {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+        position: static;
+      }
+
+      .admin-header h1 {
+        font-size: 1.3rem;
+      }
+
+      .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .nav-links a {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+      }
+
+      .container {
+        padding: 20px 15px;
+      }
+
+      .form-card {
+        padding: 25px 20px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        font-size: 1.1rem;
+      }
+
+      .page-title {
+        font-size: 1.5rem;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .checkbox-group {
+        flex-direction: column;
+      }
+
+      .checkbox-item {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .admin-header h1 {
+        font-size: 1.2rem;
+      }
+
+      .form-card {
+        padding: 20px 15px;
+      }
+
+      .page-title {
+        font-size: 1.3rem;
+      }
+    }
   </style>
   <script src="/js/theme.js"></script>
 
@@ -434,14 +508,27 @@
         </div>
 
         <div class="form-group">
-          <label><i class="fa-solid fa-image"></i> Doctor Profile Image</label>
+          <label><i class="fa-solid fa-image"></i> Doctor Profile Image *</label>
           <% if (doctor?.image) { %>
           <div style="margin-bottom: 10px;">
-            <img src="<%= doctor.image %>" alt="Doctor image" style="max-height: 120px; border-radius: 8px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);" />
+            <img id="image-preview" src="<%= doctor.image %>" alt="Doctor image" style="max-height: 150px; border-radius: 8px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);" />
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
+              <i class="fa-solid fa-info-circle"></i> Current image is set. Upload a new image to replace it.
+            </p>
+          </div>
+          <% } else { %>
+          <div id="image-preview-container" style="display: none; margin-bottom: 10px;">
+            <img id="image-preview" src="" alt="Preview" style="max-height: 150px; border-radius: 8px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);" />
           </div>
           <% } %>
-          <input type="file" name="image" accept="image/*" <%= action === 'create' ? 'required' : '' %>>
-          <small>Upload a clear profile image (ideally 400x400, max 5MB). For edit, leave blank to keep existing image.</small>
+          <input type="file" name="image" id="image-input" accept="image/*" <%= action === 'create' ? 'required' : '' %> onchange="previewImage(this)">
+          <small>
+            <i class="fa-solid fa-circle-info"></i> 
+            Upload a clear profile image (ideally 400x400, max 5MB). 
+            <% if (action === 'edit') { %>For edit, leave blank to keep existing image.<% } %>
+            <br>
+            <i class="fa-solid fa-check"></i> Accepted formats: JPG, JPEG, PNG
+          </small>
         </div>
 
         <div class="form-group">
@@ -720,6 +807,39 @@
       `;
 
       container.appendChild(div);
+    }
+
+    // Image preview function
+    function previewImage(input) {
+      const file = input.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.getElementById('image-preview');
+          let previewContainer = document.getElementById('image-preview-container');
+          
+          // Create preview container if it doesn't exist (for new uploads)
+          if (!previewContainer) {
+            previewContainer = document.createElement('div');
+            previewContainer.id = 'image-preview-container';
+            previewContainer.style.cssText = 'margin-bottom: 10px;';
+            input.parentElement.insertBefore(previewContainer, input);
+          }
+          
+          // Create preview image if it doesn't exist
+          if (!preview) {
+            const newPreview = document.createElement('img');
+            newPreview.id = 'image-preview';
+            newPreview.style.cssText = 'max-height: 150px; border-radius: 8px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);';
+            newPreview.alt = 'Preview';
+            previewContainer.appendChild(newPreview);
+          }
+          
+          previewContainer.style.display = 'block';
+          document.getElementById('image-preview').src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
     }
   </script>
 

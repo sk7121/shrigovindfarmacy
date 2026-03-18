@@ -21,29 +21,33 @@
     .toast-zone {
       position: fixed;
       bottom: 2rem;
-      right: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 10000;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      pointer-events: none;
     }
 
     .toast {
       background: white;
-      padding: 1rem 1.5rem;
+      padding: 1rem 1.25rem;
       border-radius: 10px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      min-width: 300px;
-      transform: translateX(100%);
+      min-width: 320px;
+      max-width: 450px;
+      transform: translateY(20px);
       opacity: 0;
       transition: all 0.3s ease;
+      pointer-events: auto;
     }
 
     .toast.show {
-      transform: translateX(0);
+      transform: translateY(0);
       opacity: 1;
     }
 
@@ -95,13 +99,45 @@
     @media (max-width: 768px) {
       .toast-zone {
         bottom: 1rem;
-        right: 1rem;
-        left: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 2rem);
+        max-width: 400px;
       }
 
       .toast {
         min-width: auto;
         width: 100%;
+        padding: 0.875rem 1rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .toast-action {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.75rem;
+      }
+
+      .toast i {
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .toast-zone {
+        bottom: 0.75rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 1.5rem);
+      }
+
+      .toast {
+        padding: 0.75rem 0.875rem;
+        border-radius: 8px;
+      }
+
+      .toast-action {
+        font-size: 0.7rem;
+        padding: 0.35rem 0.6rem;
       }
     }
 
@@ -294,12 +330,12 @@
                     shrigovindpharmacy212@gmail.com</a>
                 </div>
                 <div class="topbar-right">
-                  <a href="#"><i class="fas fa-truck"></i> Track Order</a>
-                  <a href="#"><i class="fas fa-map-marker-alt"></i> Store Locator</a>
+                  <a href="/user/orders"><i class="fas fa-truck"></i> Track Order</a>
+                  <a href="#about" onclick="event.preventDefault(); document.querySelector('#about').scrollIntoView({behavior: 'smooth'});"><i class="fas fa-map-marker-alt"></i> Store Locator</a>
                   <div class="topbar-social">
-                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="https://wa.me/919413010731" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://facebook.com/shrigovindpharmacy" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://instagram.com/shrigovindpharmacy" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/919413010731" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                   </div>
                 </div>
               </div>
@@ -1098,11 +1134,11 @@
                     products
                     since 1998.</p>
                   <div class="social-links">
-                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="https://wa.me/919413010731" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="https://facebook.com/shrigovindpharmacy" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://twitter.com/shrigovindpharm" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="https://instagram.com/shrigovindpharmacy" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/919413010731" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://youtube.com/@shrigovindpharmacy" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
                   </div>
                   <div class="footer-cert">
                     <span><i class="fas fa-certificate"></i> AYUSH Certified</span>
@@ -1118,19 +1154,19 @@
                     <li><a href="/doctor"><i class="fas fa-chevron-right"></i> Consult Doctor</a></li>
                     <li><a href="/contact"><i class="fas fa-chevron-right"></i> Contact Us</a></li>
                     <li><a href="/agent/register"><i class="fas fa-chevron-right"></i> Become Delivery Partner</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Privacy Policy</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Terms of Service</a></li>
+                    <li><a href="/privacy-policy"><i class="fas fa-chevron-right"></i> Privacy Policy</a></li>
+                    <li><a href="/terms-conditions"><i class="fas fa-chevron-right"></i> Terms of Service</a></li>
                   </ul>
                 </div>
 
                 <div class="footer-links">
                   <h4>Customer Support</h4>
                   <ul>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Track Order</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Return Policy</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Refund Policy</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> Shipping Policy</a></li>
-                    <li><a href="#"><i class="fas fa-chevron-right"></i> FAQs</a></li>
+                    <li><a href="/user/orders"><i class="fas fa-chevron-right"></i> Track Order</a></li>
+                    <li><a href="/refund-policy"><i class="fas fa-chevron-right"></i> Return Policy</a></li>
+                    <li><a href="/refund-policy"><i class="fas fa-chevron-right"></i> Refund Policy</a></li>
+                    <li><a href="/refund-policy"><i class="fas fa-chevron-right"></i> Shipping Policy</a></li>
+                    <li><a href="#about"><i class="fas fa-chevron-right"></i> FAQs</a></li>
                     <li><a href="/login"><i class="fas fa-chevron-right"></i> My Account</a></li>
                   </ul>
                 </div>

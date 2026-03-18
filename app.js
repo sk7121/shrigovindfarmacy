@@ -41,7 +41,7 @@ const {
 } = require("./services/smsService");
 const DeliveryService = require("./services/deliveryService");
 const QRCodeService = require("./services/qrCodeService");
-const { upload, uploadProfile, handleUploadError } = require("./config/multer");
+const { upload, uploadProfile, uploadDoctor, uploadProduct, handleUploadError } = require("./config/multer");
 
 const passport = require("./config/passport");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
@@ -453,7 +453,7 @@ app.get(
       const accessToken = jwt.sign(
         { userId: user._id, email: user.email, role: user.role },
         process.env.ACCESS_SECRET,
-        { expiresIn: "15m" },
+        { expiresIn: "7d" },
       );
 
       const refreshToken = jwt.sign(
@@ -478,7 +478,7 @@ app.get(
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "Lax",
-        maxAge: 15 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
       res.cookie("refreshToken", refreshToken, {
@@ -584,10 +584,34 @@ app.post(
   "/admin/products/edit/:productId",
   authenticate,
   isAdmin,
+  uploadProduct.single("image"),
+  handleUploadError,
   async (req, res) => {
-    const updatedProduct = req.body;
-    await Product.findByIdAndUpdate(req.params.productId, updatedProduct);
-    res.redirect("/admin/home");
+    try {
+      const productData = req.body;
+
+      // Handle image upload to Cloudinary - only update if new file uploaded
+      if (req.file) {
+        productData.image = req.file.secure_url || req.file.path;
+        console.log("✅ Product image updated in Cloudinary:", productData.image);
+      } else {
+        // Remove image from update data if no new file uploaded (keep existing)
+        delete productData.image;
+        console.log("ℹ️ No new image uploaded, keeping existing image");
+      }
+
+      await Product.findByIdAndUpdate(req.params.productId, productData, {
+        new: true,
+        runValidators: true,
+      });
+      console.log("✅ Product updated successfully");
+      req.flash("success", "Product updated successfully!");
+      res.redirect("/admin/home");
+    } catch (err) {
+      console.log("❌ Error updating product:", err);
+      req.flash("error", "Error updating product: " + err.message);
+      res.render("admin/edit-product.ejs", { product: await Product.findById(req.params.productId) });
+    }
   },
 );
 
@@ -635,7 +659,7 @@ app.post("/login", async (req, res) => {
       return res.redirect(`/verify-otp?email=${encodeURIComponent(user.email)}`);
     }
 
-    // Create Access Token
+    // Create Access Token - 7 days
     const accessToken = jwt.sign(
       {
         userId: user._id,
@@ -643,10 +667,10 @@ app.post("/login", async (req, res) => {
         email: user.email,
       },
       process.env.ACCESS_SECRET,
-      { expiresIn: "15m" },
+      { expiresIn: "7d" },
     );
 
-    // Create Refresh Token
+    // Create Refresh Token - 7 days
     const refreshToken = jwt.sign(
       { userId: user._id },
       process.env.REFRESH_SECRET,
@@ -657,16 +681,16 @@ app.post("/login", async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    // Access token cookie
+    // Access token cookie - 7 days
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/",
     });
 
-    // Refresh token cookie
+    // Refresh token cookie - 7 days
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -729,7 +753,7 @@ app.post("/admin/login", async (req, res) => {
 
     console.log("✅ Admin login successful");
 
-    // Create Access Token
+    // Create Access Token - 7 days
     const accessToken = jwt.sign(
       {
         userId: user._id,
@@ -737,10 +761,10 @@ app.post("/admin/login", async (req, res) => {
         email: user.email,
       },
       process.env.ACCESS_SECRET,
-      { expiresIn: "15m" },
+      { expiresIn: "7d" },
     );
 
-    // Create Refresh Token
+    // Create Refresh Token - 7 days
     const refreshToken = jwt.sign(
       { userId: user._id },
       process.env.REFRESH_SECRET,
@@ -751,16 +775,16 @@ app.post("/admin/login", async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    // Access token cookie
+    // Access token cookie - 7 days
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/",
     });
 
-    // Refresh token cookie
+    // Refresh token cookie - 7 days
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -1072,7 +1096,7 @@ app.post("/refresh-token", async (req, res) => {
         email: user.email,
       },
       process.env.ACCESS_SECRET,
-      { expiresIn: "15m" },
+      { expiresIn: "7d" },
     );
 
     const newRefreshToken = jwt.sign(
@@ -1088,7 +1112,7 @@ app.post("/refresh-token", async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/",
     });
 
@@ -1096,7 +1120,7 @@ app.post("/refresh-token", async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/",
     });
 
@@ -2473,18 +2497,24 @@ app.post(
   "/admin/doctors/new",
   authenticate,
   isAdmin,
-  upload.single("image"),
+  uploadDoctor.single("image"),
   handleUploadError,
   async (req, res) => {
+    // Handle upload errors
+    if (req.fileValidationError) {
+      req.flash("error", req.fileValidationError);
+      return res.render("admin/doctor-form.ejs", { doctor: null, action: "create" });
+    }
+
     try {
       const doctorData = req.body;
 
+      // Handle image upload to Cloudinary
       if (req.file) {
-        doctorData.image =
-          req.file.path ||
-          req.file.secure_url ||
-          req.file.url ||
-          doctorData.image;
+        doctorData.image = req.file.secure_url || req.file.path;
+        console.log("✅ Doctor image uploaded to Cloudinary:", doctorData.image);
+      } else {
+        console.log("⚠️ No image file uploaded");
       }
 
       // Parse arrays from form data
@@ -2528,10 +2558,11 @@ app.post(
       }
 
       const doctor = await Doctor.create(doctorData);
+      console.log("✅ Doctor added successfully:", doctor.name);
       res.redirect("/admin/doctors");
     } catch (err) {
-      console.log("Add doctor error:", err);
-      res.status(500).send("Error adding doctor");
+      console.log("❌ Add doctor error:", err);
+      res.status(500).send("Error adding doctor: " + err.message);
     }
   },
 );
@@ -2554,18 +2585,27 @@ app.post(
   "/admin/doctors/edit/:id",
   authenticate,
   isAdmin,
-  upload.single("image"),
+  uploadDoctor.single("image"),
   handleUploadError,
   async (req, res) => {
+    // Handle upload errors
+    if (req.fileValidationError) {
+      req.flash("error", req.fileValidationError);
+      const doctor = await Doctor.findById(req.params.id);
+      return res.render("admin/doctor-form.ejs", { doctor, action: "edit" });
+    }
+
     try {
       const doctorData = req.body;
 
+      // Handle image upload to Cloudinary - only update if new file uploaded
       if (req.file) {
-        doctorData.image =
-          req.file.path ||
-          req.file.secure_url ||
-          req.file.url ||
-          doctorData.image;
+        doctorData.image = req.file.secure_url || req.file.path;
+        console.log("✅ Doctor image updated in Cloudinary:", doctorData.image);
+      } else {
+        // Remove image from update data if no new file uploaded (keep existing)
+        delete doctorData.image;
+        console.log("ℹ️ No new image uploaded, keeping existing image");
       }
 
       // Parse arrays from form data
@@ -2608,11 +2648,15 @@ app.post(
           doctorData.consultationFee.currency || "INR";
       }
 
-      await Doctor.findByIdAndUpdate(req.params.id, doctorData);
+      await Doctor.findByIdAndUpdate(req.params.id, doctorData, {
+        new: true,
+        runValidators: true,
+      });
+      console.log("✅ Doctor updated successfully");
       res.redirect("/admin/doctors");
     } catch (err) {
-      console.log("Update doctor error:", err);
-      res.status(500).send("Error updating doctor");
+      console.log("❌ Update doctor error:", err);
+      res.status(500).send("Error updating doctor: " + err.message);
     }
   },
 );
@@ -2679,24 +2723,41 @@ app.get("/admin/products/new", authenticate, isAdmin, (req, res) => {
   res.render("forms/product.ejs");
 });
 
-app.post("/admin/products/new", authenticate, isAdmin, async (req, res) => {
+app.post("/admin/products/new", authenticate, isAdmin, uploadProduct.single("image"), handleUploadError, async (req, res) => {
   console.log("\n=== ADD PRODUCT ROUTE HIT ===");
   console.log("Request body:", req.body);
+  console.log("Request file:", req.file);
   console.log("User:", req.user?.email, "Role:", req.user?.role);
   console.log("=============================\n");
 
+  // Handle upload errors
+  if (req.fileValidationError) {
+    req.flash("error", req.fileValidationError);
+    return res.render("forms/product.ejs");
+  }
+
   try {
-    const product = req.body;
-    const newProduct = new Product(product);
+    const productData = req.body;
+
+    // Handle image upload to Cloudinary
+    if (req.file) {
+      productData.image = req.file.secure_url || req.file.path;
+      console.log("✅ Product image uploaded to Cloudinary:", productData.image);
+    } else {
+      console.log("⚠️ No image file uploaded");
+      req.flash("error", "Product image is required");
+      return res.render("forms/product.ejs");
+    }
+
+    const newProduct = new Product(productData);
     await newProduct.save();
     console.log("✅ Product added:", newProduct.name);
-    console.log("🔄 Redirecting to /admin/home");
-    // Use 302 redirect with cache control
-    res.set("Cache-Control", "no-store");
+    req.flash("success", "Product added successfully!");
     res.redirect("/admin/home");
   } catch (err) {
     console.log("❌ Error adding product:", err);
-    res.status(500).send("Error adding product");
+    req.flash("error", "Error adding product: " + err.message);
+    res.render("forms/product.ejs");
   }
 });
 
@@ -2706,11 +2767,17 @@ app.post(
   isAdmin,
   async (req, res) => {
     try {
-      await Product.findByIdAndDelete(req.params.id);
+      const product = await Product.findByIdAndDelete(req.params.id);
+      if (!product) {
+        req.flash("error", "Product not found");
+      } else {
+        req.flash("success", "Product deleted successfully!");
+      }
       res.redirect("/admin/home");
     } catch (err) {
       console.log(err);
-      res.status(500).send("Error deleting product");
+      req.flash("error", "Error deleting product: " + err.message);
+      res.redirect("/admin/home");
     }
   },
 );
@@ -6816,6 +6883,118 @@ app.get("/agent/delivery/:id", authenticateAgent, async (req, res) => {
 });
 
 // Agent: Update delivery status
+app.post(
+  "/agent/delivery/:id/status",
+  authenticate,
+  isDeliveryAgent,
+  async (req, res) => {
+    try {
+      const { status, notes, otp } = req.body;
+      const agent = await DeliveryAgent.findById(req.user._id);
+
+      if (!agent) {
+        return res.status(404).json({ success: false, message: "Agent not found" });
+      }
+
+      // For delivered status, verify OTP
+      if (status === 'delivered') {
+        const delivery = await Delivery.findById(req.params.id);
+        
+        if (!delivery) {
+          return res.status(404).json({ success: false, message: "Delivery not found" });
+        }
+
+        // Verify OTP
+        if (!otp) {
+          return res.status(400).json({ 
+            success: false, 
+            message: "OTP is required to complete delivery" 
+          });
+        }
+
+        // Check if OTP matches
+        if (delivery.deliveryOTP !== otp) {
+          return res.status(400).json({ 
+            success: false, 
+            message: "Invalid OTP. Please enter the correct OTP provided by customer." 
+          });
+        }
+
+        // Mark OTP as verified
+        delivery.otpVerified = true;
+        await delivery.save();
+      }
+
+      const result = await DeliveryService.updateDeliveryStatus(
+        req.params.id,
+        status,
+        { notes, agent }
+      );
+
+      if (result.success) {
+        req.flash("success", "Delivery status updated");
+        res.redirect(`/agent/delivery/${req.params.id}`);
+      } else {
+        req.flash("error", result.message);
+        res.redirect(`/agent/delivery/${req.params.id}`);
+      }
+    } catch (err) {
+      console.log("Update status error:", err);
+      req.flash("error", "Failed to update status");
+      res.redirect("/agent/deliveries");
+    }
+  },
+);
+
+// API: Verify delivery OTP
+app.post(
+  "/api/delivery/:id/verify-otp",
+  authenticate,
+  isDeliveryAgent,
+  async (req, res) => {
+    try {
+      const { otp } = req.body;
+      const agent = await DeliveryAgent.findById(req.user._id);
+
+      if (!agent) {
+        return res.json({ success: false, message: "Agent not found" });
+      }
+
+      const delivery = await Delivery.findById(req.params.id);
+
+      if (!delivery || delivery.assignedTo.toString() !== agent._id.toString()) {
+        return res.json({ 
+          success: false, 
+          message: "Delivery not found or not assigned to you" 
+        });
+      }
+
+      // Verify OTP
+      if (!otp) {
+        return res.json({ success: false, message: "OTP is required" });
+      }
+
+      if (delivery.deliveryOTP !== otp) {
+        return res.json({ 
+          success: false, 
+          message: "Invalid OTP. Please enter the correct OTP." 
+        });
+      }
+
+      // Mark OTP as verified
+      delivery.otpVerified = true;
+      await delivery.save();
+
+      res.json({ 
+        success: true, 
+        message: "OTP verified successfully. You can now mark the delivery as delivered." 
+      });
+    } catch (err) {
+      console.log("OTP verification error:", err);
+      res.json({ success: false, message: "OTP verification failed" });
+    }
+  },
+);
 app.post("/agent/delivery/:id/status", authenticateAgent, async (req, res) => {
   try {
     const agent = await DeliveryAgent.findOne({

@@ -252,6 +252,80 @@
       color: var(--text-muted);
       margin-bottom: 20px;
     }
+
+    @media (max-width: 768px) {
+      .admin-header {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+        position: static;
+      }
+
+      .admin-header h1 {
+        font-size: 1.3rem;
+      }
+
+      .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .nav-links a {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+      }
+
+      .container {
+        padding: 20px 15px;
+      }
+
+      .page-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start !important;
+      }
+
+      .page-header .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      table {
+        min-width: 800px;
+      }
+
+      .card {
+        padding: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .admin-header h1 {
+        font-size: 1.2rem;
+      }
+
+      .page-title {
+        font-size: 1.4rem;
+      }
+
+      .card {
+        padding: 12px;
+      }
+
+      table {
+        min-width: 700px;
+        font-size: 0.85rem;
+      }
+
+      th, td {
+        padding: 10px 8px;
+      }
+    }
   </style>
   <script src="/js/theme.js"></script>
 
@@ -319,6 +393,7 @@
         <table>
           <thead>
             <tr>
+              <th>Image</th>
               <th>Doctor Name</th>
               <th>Qualifications</th>
               <th>Experience</th>
@@ -332,6 +407,15 @@
           <tbody>
             <% doctors.forEach(doctor => { %>
             <tr>
+              <td>
+                <% if (doctor.image) { %>
+                  <img src="<%= doctor.image %>" alt="<%= doctor.name %>" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;" />
+                <% } else { %>
+                  <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem;">
+                    <%= doctor.name.charAt(0).toUpperCase() %>
+                  </div>
+                <% } %>
+              </td>
               <td>
                 <strong>Dr. <%= doctor.name %></strong>
                 <% if (doctor.featured) { %>

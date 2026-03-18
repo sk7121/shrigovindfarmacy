@@ -10,7 +10,10 @@ const productSchema = new mongoose.Schema(
 
         image: {
             type: String,
-            required: true,
+            required: function() {
+                // Only required for new documents, not for updates
+                return this.isNew;
+            },
         },
 
         price: {
