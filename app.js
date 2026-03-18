@@ -3302,51 +3302,146 @@ app.post("/checkout", authenticateVerified, isUser, async (req, res) => {
 
     console.log("✅ Order created:", order.tracking.orderId);
 
-    // Award loyalty points
-    try {
-      let loyaltyPoint = await LoyaltyPoint.findOne({ user: req.user._id });
+    // Award loyalty points (non-blocking)
+    Promise.resolve().then(async () => {
+      try {
+        let loyaltyPoint = await LoyaltyPoint.findOne({ user: req.user._id });
 
-      if (!loyaltyPoint) {
-        loyaltyPoint = await LoyaltyPoint.create({
-          user: req.user._id,
-          points: 0,
-          lifetimePoints: 0,
-          tier: "bronze",
+        if (!loyaltyPoint) {
+          loyaltyPoint = await LoyaltyPoint.create({
+            user: req.user._id,
+            points: 0,
+            lifetimePoints: 0,
+            tier: "bronze",
+          });
+        }
+
+        const benefits = LoyaltyPoint.getTierBenefits(loyaltyPoint.tier);
+        const basePoints = Math.floor(total / 100); // 1 point per ₹100
+        const bonusPoints = Math.floor((basePoints * benefits.cashback) / 100);
+        const totalPoints = basePoints + bonusPoints;
+
+        if (totalPoints > 0) {
+          await loyaltyPoint.addPoints(
+            totalPoints,
+            `Order #${order.tracking.orderId} - ₹${total.toFixed(2)}`,
+            order._id,
+          );
+          console.log(
+            `✅ Awarded ${totalPoints} loyalty points (${basePoints} base + ${bonusPoints} bonus)`,
+          );
+        }
+      } catch (loyaltyErr) {
+        console.log("⚠️ Loyalty points award failed:", loyaltyErr.message);
+      }
+    });
+
+    // Send order confirmation notifications (non-blocking to prevent timeout)
+    Promise.allSettled([
+      sendOrderConfirmation(order, req.user).catch(emailErr => {
+        console.log("⚠️ Email notification failed:", emailErr.message);
+      }),
+      sendOrderConfirmationSMS(order, order.address.phone).catch(smsErr => {
+        console.log("⚠️ SMS notification failed:", smsErr.message);
+      })
+    ]).then(results => {
+      console.log("📧 Order confirmation notifications sent");
+    });
+
+    // Auto-assign delivery agent based on distance and availability (non-blocking)
+    Promise.resolve().then(async () => {
+      try {
+        console.log("🚀 Starting auto-assignment for order:", order.tracking.orderId);
+        
+        // Find available agents
+        const availableAgents = await DeliveryAgent.find({
+          isActive: true,
+          isAvailable: true,
+          currentStatus: { $in: ["idle", "on_delivery"] }
+        }).sort({ name: 1 });
+
+        if (availableAgents.length === 0) {
+          console.log("⚠️ No available agents found for auto-assignment");
+          return;
+        }
+
+        // Score agents based on distance and workload
+        const STORE_LOCATION = {
+          latitude: parseFloat(process.env.STORE_LATITUDE || 26.9124),
+          longitude: parseFloat(process.env.STORE_LONGITUDE || 75.7873)
+        };
+
+        const calculateDistance = (lat1, lon1, lat2, lon2) => {
+          const R = 6371;
+          const dLat = (lat2 - lat1) * Math.PI / 180;
+          const dLon = (lon2 - lon1) * Math.PI / 180;
+          const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          return R * c;
+        };
+
+        const scoredAgents = availableAgents.map(agent => {
+          let score = 100;
+          
+          // Distance score (closer is better) - Max 40 points
+          const agentLat = agent.currentLocation?.latitude || STORE_LOCATION.latitude;
+          const agentLon = agent.currentLocation?.longitude || STORE_LOCATION.longitude;
+          const distance = calculateDistance(STORE_LOCATION.latitude, STORE_LOCATION.longitude, agentLat, agentLon);
+          score += Math.max(0, 40 - (distance * 2));
+
+          // Workload score (lower is better) - Max 30 points
+          const workloadFactor = 1 - (agent.currentDeliveries / agent.maxConcurrentDeliveries);
+          score += workloadFactor * 30;
+
+          // Rating score - Max 20 points
+          score += agent.stats.averageRating * 4;
+
+          // On-time delivery rate - Max 10 points
+          score += agent.stats.onTimeDeliveryRate * 0.1;
+
+          // Idle status bonus - 15 points
+          if (agent.currentStatus === "idle") {
+            score += 15;
+          }
+
+          return { agent, score };
         });
+
+        // Sort by score and pick best
+        scoredAgents.sort((a, b) => b.score - a.score);
+        const bestAgent = scoredAgents[0].agent;
+
+        console.log(`✅ Best agent for auto-assignment: ${bestAgent.name} (score: ${scoredAgents[0].score.toFixed(1)})`);
+
+        // Generate OTP for delivery
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiry = new Date();
+        otpExpiry.setHours(otpExpiry.getHours() + 24);
+
+        // Update order with delivery agent and OTP
+        order.deliveryAgent = bestAgent._id;
+        order.status = "assigned";
+        order.deliveryOTP = {
+          code: otp,
+          expiresAt: otpExpiry,
+          generatedAt: new Date()
+        };
+        await order.save();
+
+        // Update agent's assigned orders
+        await DeliveryAgent.findByIdAndUpdate(bestAgent._id, {
+          $push: { assignedOrders: order._id },
+          $inc: { currentDeliveries: 1 },
+          currentStatus: "on_delivery"
+        });
+
+        console.log(`✅ Order ${order.tracking.orderId} auto-assigned to ${bestAgent.name}`);
+      } catch (assignErr) {
+        console.log("⚠️ Auto-assignment failed:", assignErr.message);
       }
-
-      const benefits = LoyaltyPoint.getTierBenefits(loyaltyPoint.tier);
-      const basePoints = Math.floor(total / 100); // 1 point per ₹100
-      const bonusPoints = Math.floor((basePoints * benefits.cashback) / 100);
-      const totalPoints = basePoints + bonusPoints;
-
-      if (totalPoints > 0) {
-        await loyaltyPoint.addPoints(
-          totalPoints,
-          `Order #${order.tracking.orderId} - ₹${total.toFixed(2)}`,
-          order._id,
-        );
-        console.log(
-          `✅ Awarded ${totalPoints} loyalty points (${basePoints} base + ${bonusPoints} bonus)`,
-        );
-      }
-    } catch (loyaltyErr) {
-      console.log("⚠️ Loyalty points award failed:", loyaltyErr.message);
-    }
-
-    // Send order confirmation email
-    try {
-      await sendOrderConfirmation(order, req.user);
-    } catch (emailErr) {
-      console.log("⚠️ Email notification failed:", emailErr.message);
-    }
-
-    // Send order confirmation SMS
-    try {
-      await sendOrderConfirmationSMS(order, order.address.phone);
-    } catch (smsErr) {
-      console.log("⚠️ SMS notification failed:", smsErr.message);
-    }
+    });
 
     console.log("🎉 Redirecting to success page...");
     res.redirect("/user/order-success/" + order._id);
@@ -5885,123 +5980,6 @@ app.post(
     }
   },
 );
-
-// ================== STORE MANAGEMENT ==================
-
-// Admin: Store Management Dashboard
-app.get("/admin/store", authenticate, isAdmin, async (req, res) => {
-  try {
-    // Get pending orders (not assigned to any delivery agent)
-    const pendingOrders = await Order.find({
-      status: { $in: ["pending", "confirmed", "processing"] },
-      deliveryAgent: { $exists: false },
-    })
-      .populate("items.product")
-      .sort({ createdAt: -1 });
-
-    // Get available delivery agents
-    const deliveryAgents = await DeliveryAgent.find({
-      isActive: true,
-      isAvailable: true,
-    }).sort({ name: 1 });
-
-    // Get assigned orders
-    const assignedOrders = await Order.find({
-      status: { $in: ["assigned", "out-for-delivery"] },
-      deliveryAgent: { $exists: true },
-    }).countDocuments();
-
-    // Get delivered today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const deliveredToday = await Order.find({
-      status: "delivered",
-      updatedAt: { $gte: today, $lt: tomorrow },
-    }).countDocuments();
-
-    console.log("Store stats:", {
-      pendingOrders: pendingOrders.length,
-      deliveryAgents: deliveryAgents.length,
-      assignedOrders,
-      deliveredToday,
-    });
-
-    res.render("admin/store.ejs", {
-      pendingOrders: pendingOrders || [],
-      deliveryAgents: deliveryAgents || [],
-      assignedOrdersCount: assignedOrders || 0,
-      deliveredToday: deliveredToday || 0,
-    });
-  } catch (err) {
-    console.log("Store management error:", err);
-    req.flash("error", "Error loading store management");
-    res.redirect("/admin/home");
-  }
-});
-
-// Admin: Assign order to delivery agent
-app.post("/admin/store/assign", authenticate, isAdmin, async (req, res) => {
-  try {
-    const { orderId, deliveryAgentId } = req.body;
-
-    // Update order with delivery agent and generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date();
-    otpExpiry.setHours(otpExpiry.getHours() + 24); // OTP valid for 24 hours
-
-    const order = await Order.findByIdAndUpdate(
-      orderId,
-      {
-        deliveryAgent: deliveryAgentId,
-        status: "assigned",
-        deliveryOTP: {
-          code: otp,
-          expiresAt: otpExpiry,
-          generatedAt: new Date(),
-        },
-      },
-      { new: true },
-    );
-
-    if (!order) {
-      return res.json({ success: false, message: "Order not found" });
-    }
-
-    // Update delivery agent's assigned orders
-    await DeliveryAgent.findByIdAndUpdate(deliveryAgentId, {
-      $push: { assignedOrders: orderId },
-    });
-
-    // Reduce inventory for each product in the order
-    for (const item of order.items) {
-      if (item.product && item.product._id) {
-        await Product.findByIdAndUpdate(item.product._id, {
-          $inc: { stock: -item.quantity },
-        });
-      }
-    }
-
-    // Send SMS to customer with delivery OTP
-    try {
-      await sendOrderStatusSMS(order, order.address.phone, "assigned", otp);
-    } catch (smsError) {
-      console.log("SMS sending failed:", smsError);
-      // Don't fail the assignment if SMS fails
-    }
-
-    res.json({
-      success: true,
-      message: "Order assigned successfully",
-      otp: otp,
-    });
-  } catch (err) {
-    console.log("Assign order error:", err);
-    res.json({ success: false, message: "Error assigning order" });
-  }
-});
 
 // ----- DELIVERY AGENT PORTAL -----
 
