@@ -8,7 +8,7 @@ const {
     getDeliveryOTP
 } = require('../controllers/deliveryController');
 const { authenticate, isDeliveryAgent } = require('../middleware/auth');
-const { uploadProfile } = require('../config/multer');
+const { uploadDeliveryProof } = require('../config/multer');
 
 // All routes are protected and require delivery agent authentication
 router.use(authenticate);
@@ -27,6 +27,6 @@ router.post('/:orderId/generate-otp', generateDeliveryOTP);
 router.post('/:orderId/verify-otp', verifyDeliveryOTP);
 
 // Complete delivery with image upload and OTP verification
-router.post('/:orderId/complete', uploadProfile.single('deliveryProof'), completeDelivery);
+router.post('/:orderId/complete', uploadDeliveryProof.single('deliveryProof'), completeDelivery);
 
 module.exports = router;

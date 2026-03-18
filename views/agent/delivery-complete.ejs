@@ -444,14 +444,24 @@
 
             <!-- Complete Delivery Card -->
             <div class="card">
-                <h3 class="card-title"><i class="fas fa-check-circle"></i> Step 3: Complete Delivery</h3>
+                <h3 class="card-title"><i class="fas fa-check-circle"></i> Complete Delivery</h3>
                 <div class="alert-box info">
-                    <strong><i class="fas fa-clipboard-list"></i> Final Checklist:</strong>
-                    <ul style="margin: 10px 0 0 20px; font-size: 13px;">
-                        <li id="checklist-photo"><i class="fas fa-circle" style="color: var(--danger);"></i> Delivery photo captured</li>
-                        <li id="checklist-otp"><i class="fas fa-circle" style="color: var(--danger);"></i> OTP verified</li>
-                        <li><i class="fas fa-circle" style="color: var(--warning);"></i> Package handed to customer</li>
-                        <li id="checklist-cod"><i class="fas fa-circle" style="color: var(--warning);"></i> COD collected (if applicable)</li>
+                    <strong><i class="fas fa-clipboard-list"></i> Delivery Checklist:</strong>
+                    <ul style="margin: 10px 0 0 20px; font-size: 14px;">
+                        <li id="checklist-photo"><i class="fas fa-circle" style="color: var(--danger);"></i> <strong style="color: var(--danger);">MANDATORY:</strong> Delivery photo captured</li>
+                        <li id="checklist-otp"><i class="fas fa-circle" style="color: var(--danger);"></i> <strong style="color: var(--danger);">MANDATORY:</strong> OTP verified</li>
+                        <li>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="package-handed" style="width: 20px; height: 20px;">
+                                <span><i class="fas fa-box" style="color: var(--text-muted);"></i> OPTIONAL: Package handed to customer</span>
+                            </label>
+                        </li>
+                        <li id="checklist-cod">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="cod-collected" style="width: 20px; height: 20px;">
+                                <span><i class="fas fa-money-bill-wave" style="color: var(--text-muted);"></i> OPTIONAL: COD collected: ₹<%= delivery.codAmount %></span>
+                            </label>
+                        </li>
                     </ul>
                 </div>
 
@@ -469,6 +479,10 @@
     <script>
         const deliveryId = '<%= delivery._id %>';
         const orderId = '<%= delivery.order?._id %>';
+
+        console.log('🔍 Delivery ID:', deliveryId);
+        console.log('🔍 Order ID:', orderId);
+        console.log('🔍 Has order:', !!'<%= delivery.order?._id %>');
 
         // Camera variables
         let stream = null;
@@ -494,6 +508,8 @@
         const checklistPhoto = document.getElementById('checklist-photo');
         const checklistOtp = document.getElementById('checklist-otp');
         const checklistCod = document.getElementById('checklist-cod');
+        const packageHandedCheckbox = document.getElementById('package-handed');
+        const codCollectedCheckbox = document.getElementById('cod-collected');
 
         let photoCaptured = false;
         let otpVerifiedFlag = false;
@@ -501,9 +517,22 @@
         // Update COD checklist if COD is applicable
         const codAmount = '<%= delivery.codAmount %>';
         if (codAmount && codAmount !== '0' && codAmount !== 'undefined') {
-            checklistCod.innerHTML = '<i class="fas fa-circle" style="color: var(--warning);"></i> Collect COD: ₹' + codAmount;
+            checklistCod.innerHTML = `
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" id="cod-collected" style="width: 20px; height: 20px;">
+                    <span><i class="fas fa-money-bill-wave" style="color: var(--warning);"></i> COD collected: ₹${codAmount}</span>
+                </label>
+            `;
         } else {
             checklistCod.style.display = 'none';
+        }
+
+        // Listen for checkbox changes
+        if (packageHandedCheckbox) {
+            packageHandedCheckbox.addEventListener('change', checkCompletion);
+        }
+        if (codCollectedCheckbox) {
+            codCollectedCheckbox.addEventListener('change', checkCompletion);
         }
 
         // Start camera
@@ -528,7 +557,13 @@
 
         // Capture photo
         capturePhotoBtn.addEventListener('click', () => {
-            if (!stream) return;
+            if (!stream) {
+                console.error('❌ No camera stream available');
+                return;
+            }
+
+            console.log('📸 Capturing photo...');
+            console.log('📹 Video dimensions:', video.videoWidth, 'x', video.videoHeight);
 
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -537,6 +572,10 @@
 
             // Convert to blob
             canvas.toBlob((blob) => {
+                console.log('📦 Blob created:', {
+                    type: blob.type,
+                    size: blob.size
+                });
                 capturedImageBlob = blob;
                 const imageUrl = URL.createObjectURL(blob);
                 photoPreview.src = imageUrl;
@@ -555,10 +594,10 @@
                 cameraStatus.textContent = 'Photo captured successfully!';
                 cameraStatus.style.color = 'var(--success)';
                 photoCaptured = true;
-                
+
                 // Update checklist
                 checklistPhoto.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i> Delivery photo captured';
-                
+
                 updateStepIndicator();
                 checkCompletion();
             }, 'image/jpeg', 0.8);
@@ -587,6 +626,9 @@
         verifyOtpBtn.addEventListener('click', async () => {
             const otp = otpInput.value.trim();
 
+            console.log('🔑 Verifying OTP:', otp);
+            console.log('📦 Order ID:', orderId);
+
             if (!otp || otp.length !== 6) {
                 showOtpResult('Please enter a valid 6-digit OTP', 'error');
                 return;
@@ -596,7 +638,10 @@
             verifyOtpBtn.innerHTML = '<span class="loading"><span class="spinner"></span> Verifying...</span>';
 
             try {
-                const response = await fetch(`/api/delivery/${orderId}/verify-otp`, {
+                const url = `/api/delivery/${orderId}/verify-otp`;
+                console.log('🌐 Fetch URL:', url);
+                
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -604,25 +649,28 @@
                     body: JSON.stringify({ otp })
                 });
 
+                console.log('📥 Response status:', response.status);
                 const result = await response.json();
+                console.log('📥 Response data:', result);
 
                 if (result.success) {
                     showOtpResult('OTP verified successfully!', 'success');
                     otpVerifiedFlag = true;
                     otpSection.style.display = 'none';
                     otpVerified.style.display = 'block';
-                    
+
                     // Update checklist
                     checklistOtp.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i> OTP verified';
-                    
+
                     updateStepIndicator();
                     checkCompletion();
                 } else {
+                    console.error('❌ Verification failed:', result.message);
                     showOtpResult(result.message || 'Invalid OTP. Please try again.', 'error');
                 }
             } catch (err) {
-                console.error('OTP verification error:', err);
-                showOtpResult('Failed to verify OTP. Please try again.', 'error');
+                console.error('❌ OTP verification error:', err);
+                showOtpResult('Failed to verify OTP: ' + err.message, 'error');
             } finally {
                 verifyOtpBtn.disabled = false;
                 verifyOtpBtn.innerHTML = '<i class="fas fa-check"></i> Verify OTP';
@@ -637,8 +685,23 @@
 
         // Complete delivery
         completeDeliveryBtn.addEventListener('click', async () => {
-            if (!photoCaptured || !otpVerifiedFlag) {
-                alert('Please capture delivery photo and verify OTP before completing delivery.');
+            const packageHanded = packageHandedCheckbox?.checked || false;
+            const codCollected = codCollectedCheckbox?.checked || false;
+
+            console.log('✅ Complete delivery clicked');
+            console.log('📦 Package handed:', packageHanded);
+            console.log('💰 COD collected:', codCollected);
+            console.log('📷 Photo captured:', photoCaptured);
+            console.log('🔑 OTP verified:', otpVerifiedFlag);
+
+            // MANDATORY: Photo captured and OTP verified
+            if (!photoCaptured) {
+                alert('⚠️ Please capture delivery photo before completing delivery.');
+                return;
+            }
+
+            if (!otpVerifiedFlag) {
+                alert('⚠️ Please verify OTP before completing delivery.');
                 return;
             }
 
@@ -649,36 +712,37 @@
             completeDeliveryBtn.disabled = true;
             completeDeliveryBtn.innerHTML = '<span class="loading"><span class="spinner"></span> Completing...</span>';
 
-            const formData = new FormData();
-            formData.append('otp', otpInput.value.trim());
-
-            // If we have a blob, append it as a file
-            if (capturedImageBlob) {
-                const file = new File([capturedImageBlob], 'delivery-proof.jpg', { type: 'image/jpeg' });
-                formData.append('deliveryProof', file);
-            }
-
             try {
-                const response = await fetch(`/api/delivery/${orderId}/complete`, {
+                // Call the simple deliver endpoint
+                const response = await fetch(`/agent/delivery/${deliveryId}/deliver`, {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        qrCodeVerified: true,
+                        otp: otpVerifiedFlag ? 'verified' : '',
+                        photo: photoCaptured ? 'captured' : '',
+                        codCollected: codCollected
+                    })
                 });
 
-                const result = await response.json();
+                console.log('📥 Response status:', response.status);
 
-                if (result.success) {
-                    alert('Delivery completed successfully!');
+                if (response.ok || response.redirected) {
+                    alert('✅ Delivery completed successfully!');
                     window.location.href = '/agent/deliveries';
                 } else {
+                    const result = await response.json();
                     alert('Error: ' + (result.message || 'Failed to complete delivery'));
                     completeDeliveryBtn.disabled = false;
-                    completeDeliveryBtn.innerHTML = '<i class="fas fa-check"></i> Complete Delivery';
+                    completeDeliveryBtn.innerHTML = '<i class="fas fa-check-double"></i> Complete Delivery';
                 }
             } catch (err) {
-                console.error('Complete delivery error:', err);
+                console.error('❌ Complete delivery error:', err);
                 alert('Failed to complete delivery. Please try again.');
                 completeDeliveryBtn.disabled = false;
-                completeDeliveryBtn.innerHTML = '<i class="fas fa-check"></i> Complete Delivery';
+                completeDeliveryBtn.innerHTML = '<i class="fas fa-check-double"></i> Complete Delivery';
             }
         });
 
@@ -704,8 +768,11 @@
         }
 
         function checkCompletion() {
+            // MANDATORY: Photo captured AND OTP verified
             if (photoCaptured && otpVerifiedFlag) {
                 completeDeliveryBtn.disabled = false;
+            } else {
+                completeDeliveryBtn.disabled = true;
             }
         }
 

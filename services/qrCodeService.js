@@ -12,7 +12,7 @@ class QRCodeService {
      * @param {Object} delivery - Delivery document
      * @returns {Object} QR code data and URL
      */
-    static generateDeliveryQRCode(delivery) {
+    static async generateDeliveryQRCode(delivery) {
         const qrData = {
             deliveryId: delivery._id.toString(),
             qrCode: delivery.qrCode,
@@ -31,10 +31,13 @@ class QRCodeService {
 
         const qrString = `${payload}.${signature}`;
 
+        // Use async toDataURL instead of deprecated toDataURLSync
+        const qrCodeUrl = await QRCode.toDataURL(qrString);
+
         return {
             qrData,
             qrString,
-            qrCodeUrl: `data:image/png;base64,${QRCode.toDataURLSync(qrString)}`,
+            qrCodeUrl: `data:image/png;base64,${qrCodeUrl.replace('data:image/png;base64,', '')}`,
             downloadUrl: `/delivery/qr/${delivery.qrCode}`
         };
     }
@@ -233,9 +236,9 @@ class QRCodeService {
      * @param {Object} order - Order document
      * @returns {Object} Label data
      */
-    static generateDeliveryLabel(delivery, order) {
-        const qrData = this.generateDeliveryQRCode(delivery);
-        
+    static async generateDeliveryLabel(delivery, order) {
+        const qrData = await this.generateDeliveryQRCode(delivery);
+
         const labelData = {
             deliveryId: delivery._id,
             orderId: delivery.tracking?.orderId || order.tracking?.orderId,

@@ -164,6 +164,38 @@ const deliveryAgentSchema = new mongoose.Schema({
         ref: 'Order'
     }],
 
+    // COD (Cash on Delivery) tracking
+    codTracking: {
+        totalCollected: {
+            type: Number,
+            default: 0
+        },
+        pendingToPay: {
+            type: Number,
+            default: 0
+        },
+        paidToAdmin: {
+            type: Number,
+            default: 0
+        }
+    },
+    
+    // COD transaction history
+    codTransactions: [{
+        type: {
+            type: String,
+            enum: ['collected', 'paid_to_admin']
+        },
+        amount: Number,
+        orderId: mongoose.Schema.Types.ObjectId,
+        orderTrackingId: String,
+        timestamp: {
+            type: Date,
+            default: Date.now
+        },
+        notes: String
+    }],
+
     // Ratings and reviews
     ratings: [{
         rating: {

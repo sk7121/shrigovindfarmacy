@@ -2,7 +2,6 @@ const Delivery = require('../models/delivery');
 const DeliveryAgent = require('../models/deliveryAgent');
 const ShippingPartner = require('../models/shippingPartner');
 const Order = require('../models/order');
-const OTP = require('../models/otp');
 const QRCodeService = require('./qrCodeService');
 const { sendOrderStatusUpdate } = require('./emailService');
 const { sendOrderStatusSMS } = require('./smsService');
@@ -115,9 +114,16 @@ class DeliveryService {
                 deliveryData.shippingPartner = options.shippingPartner;
             }
 
+            // Generate QR code and secret
+            const crypto = require('crypto');
+            const timestamp = Date.now().toString(36).toUpperCase();
+            const random = crypto.randomBytes(4).toString('hex').toUpperCase();
+            deliveryData.qrCode = `DLV${timestamp}${random}`;
+            deliveryData.qrCodeSecret = crypto.randomBytes(32).toString('hex');
+
             // Create delivery
             const delivery = new Delivery(deliveryData);
-            
+
             // Add initial timeline entry
             delivery.timeline.push({
                 status: 'pending_assignment',
@@ -300,14 +306,29 @@ class DeliveryService {
                 };
             }
 
-            // Generate OTP for delivery verification
-            const otpDoc = await OTP.createOTP(agentDoc.email, 'delivery_otp', 24 * 60); // 24 hours expiry
-            console.log('🔐 OTP generated for delivery:', otpDoc.otp);
+            // Populate delivery address from order if not already set
+            if (deliveryDoc.order && (!deliveryDoc.deliveryAddress || !deliveryDoc.deliveryAddress.fullName)) {
+                const order = typeof deliveryDoc.order === 'string'
+                    ? await mongoose.model('Order').findById(deliveryDoc.order)
+                    : deliveryDoc.order;
+
+                if (order && order.address) {
+                    deliveryDoc.deliveryAddress = {
+                        fullName: order.address.fullName,
+                        phone: order.address.phone,
+                        email: order.address.email,
+                        address: order.address.address,
+                        city: order.address.city,
+                        state: order.address.state,
+                        pincode: order.address.pincode,
+                        landmark: order.address.landmark
+                    };
+                }
+            }
 
             // Update delivery
             deliveryDoc.assignedTo = agentDoc._id;
             deliveryDoc.assignedAt = new Date();
-            deliveryDoc.deliveryOTP = otpDoc.otp; // Store OTP in delivery document
 
             if (options.notes) {
                 deliveryDoc.instructions = options.notes;
@@ -317,7 +338,7 @@ class DeliveryService {
                 deliveryDoc.assignmentMethod = 'auto';
             }
 
-            await deliveryDoc.updateStatus('assigned', `Assigned to agent ${agentDoc.name}. OTP: ${otpDoc.otp}`, '', agentDoc._id);
+            await deliveryDoc.updateStatus('assigned', `Assigned to agent ${agentDoc.name}`, '', agentDoc._id);
 
             // Update agent's current deliveries count
             agentDoc.currentDeliveries += 1;
@@ -326,32 +347,14 @@ class DeliveryService {
             }
             await agentDoc.save();
 
-            // Send OTP via SMS to agent
-            try {
-                const otpMessage = `New Delivery Assigned! Order #${deliveryDoc.tracking?.orderId || 'N/A'}. OTP: ${otpDoc.otp}. Valid for 24hrs. - Shri Govind Pharmacy`;
-                await this.sendDeliveryOTPSMS(agentDoc.phone, otpMessage);
-                console.log('📱 OTP SMS sent to agent:', agentDoc.phone);
-            } catch (smsErr) {
-                console.log('⚠️ OTP SMS failed:', smsErr.message);
-            }
-
-            // Send OTP via email to agent
-            try {
-                await this.sendDeliveryOTPEmail(agentDoc.email, otpDoc.otp, deliveryDoc);
-                console.log('📧 OTP email sent to agent:', agentDoc.email);
-            } catch (emailErr) {
-                console.log('⚠️ OTP email failed:', emailErr.message);
-            }
-
             // Notify agent (via push notification in real implementation)
-            console.log(`✅ Delivery assigned to agent: ${agentDoc.name}, OTP: ${otpDoc.otp}`);
+            console.log(`✅ Delivery assigned to agent: ${agentDoc.name}`);
 
             return {
                 success: true,
                 message: 'Delivery assigned successfully',
                 delivery: deliveryDoc,
-                agent: agentDoc,
-                otp: otpDoc.otp // Include OTP in response for debugging
+                agent: agentDoc
             };
         } catch (error) {
             console.error('Assign delivery error:', error);

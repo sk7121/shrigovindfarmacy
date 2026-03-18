@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= agent.name %> - COD Details - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1c8125;
+            --primary-dark: #145a1a;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #2d2d2d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem; }
+        
+        .header {
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { color: var(--primary); font-size: 28px; }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { border: 2px solid var(--border); background: transparent; color: var(--text); }
+        .btn-success { background: var(--success); color: white; }
+        
+        .agent-info {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .agent-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+        }
+        
+        .stat-card {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+        }
+        .stat-card.pending { border-left-color: var(--warning); }
+        .stat-card.paid { border-left-color: var(--success); }
+        
+        .stat-label { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
+        .stat-value { font-size: 32px; font-weight: 700; color: var(--text); }
+        
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { font-weight: 600; color: var(--text-muted); font-size: 13px; text-transform: uppercase; }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-collected { background: #fff3cd; color: #856404; }
+        .badge-paid { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1><i class="fas fa-user-circle"></i> <%= agent.name %>'s COD Details</h1>
+            <p style="color: var(--text-muted);"><%= agent.phone %> | <%= agent.employeeId || 'No Employee ID' %></p>
+        </div>
+        <a href="/admin/cod" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to COD Management
+        </a>
+    </div>
+
+    <div class="agent-info">
+        <div class="agent-avatar"><%= agent.name.charAt(0).toUpperCase() %></div>
+        <div>
+            <h2 style="margin-bottom: 5px;"><%= agent.name %></h2>
+            <p style="color: var(--text-muted);">
+                <i class="fas fa-phone"></i> <%= agent.phone %> | 
+                <i class="fas fa-envelope"></i> <%= agent.email %>
+            </p>
+            <% if (agent.codTracking.pendingToPay > 0) { %>
+            <button class="btn btn-success" onclick="openReceiveModal()" style="margin-top: 10px;">
+                <i class="fas fa-hand-holding-usd"></i> Receive Payment (₹<%= agent.codTracking.pendingToPay.toFixed(2) %>)
+            </button>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label"><i class="fas fa-coins"></i> Total Collected</div>
+            <div class="stat-value">₹<%= (agent.codTracking?.totalCollected || 0).toFixed(2) %></div>
+        </div>
+        
+        <div class="stat-card pending">
+            <div class="stat-label"><i class="fas fa-exclamation-circle"></i> Pending to Pay</div>
+            <div class="stat-value" style="color: var(--warning);">₹<%= (agent.codTracking?.pendingToPay || 0).toFixed(2) %></div>
+        </div>
+        
+        <div class="stat-card paid">
+            <div class="stat-label"><i class="fas fa-check-circle"></i> Paid to Admin</div>
+            <div class="stat-value" style="color: var(--success);">₹<%= (agent.codTracking?.paidToAdmin || 0).toFixed(2) %></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title"><i class="fas fa-history"></i> All Transactions</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Type</th>
+                    <th>Order ID</th>
+                    <th>Amount</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (!agent.codTransactions || agent.codTransactions.length === 0) { %>
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted);">No transactions yet</td>
+                </tr>
+                <% } else { %>
+                    <% agent.codTransactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(txn => { %>
+                    <tr>
+                        <td><%= new Date(txn.timestamp).toLocaleString('en-IN') %></td>
+                        <td>
+                            <span class="badge <%= txn.type === 'collected' ? 'badge-collected' : 'badge-paid' %>">
+                                <%= txn.type === 'collected' ? '📥 Collected' : '📤 Paid to Admin' %>
+                            </span>
+                        </td>
+                        <td><%= txn.orderTrackingId || 'N/A' %></td>
+                        <td><strong>₹<%= txn.amount.toFixed(2) %></strong></td>
+                        <td style="color: var(--text-muted); font-size: 13px;"><%= txn.notes || '-' %></td>
+                    </tr>
+                    <% }) %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Receive Payment Modal -->
+    <div id="receiveModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="modal-content" style="background: var(--surface); padding: 30px; border-radius: 12px; max-width: 500px; width: 90%;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: var(--primary);"><i class="fas fa-hand-holding-usd"></i> Receive COD Payment</h3>
+                <button onclick="closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted);">&times;</button>
+            </div>
+            <form id="receiveForm">
+                <p style="margin-bottom: 15px; color: var(--text-muted);">
+                    Receiving payment from: <strong style="color: var(--text);"><%= agent.name %></strong>
+                </p>
+                
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Amount to Receive (₹)</label>
+                    <input type="number" id="amount" name="amount" min="1" max="<%= agent.codTracking.pendingToPay %>" step="0.01" value="<%= agent.codTracking.pendingToPay %>" required>
+                    <small style="color: var(--text-muted);">Max: ₹<%= agent.codTracking.pendingToPay.toFixed(2) %></small>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Payment Method</label>
+                    <select id="paymentMethod" name="paymentMethod" required>
+                        <option value="cash">Cash</option>
+                        <option value="upi">UPI</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Transaction ID / Reference (Optional)</label>
+                    <input type="text" id="transactionId" name="transactionId" placeholder="e.g., UPI TXN ID">
+                </div>
+                
+                <div class="modal-actions" style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" onclick="closeModal()" class="btn btn-outline" style="flex: 1;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;"><i class="fas fa-check"></i> Confirm Receipt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openReceiveModal() {
+            document.getElementById('receiveModal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('receiveModal').style.display = 'none';
+        }
+        
+        document.getElementById('receiveForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                amount: parseFloat(document.getElementById('amount').value),
+                paymentMethod: document.getElementById('paymentMethod').value,
+                transactionId: document.getElementById('transactionId').value
+            };
+            
+            try {
+                const response = await fetch('/admin/cod/<%= agent._id %>/receive', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(result.message);
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (err) {
+                alert('Failed to record payment');
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>

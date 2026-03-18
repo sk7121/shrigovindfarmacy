@@ -169,13 +169,25 @@ const deliverySchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Generate unique QR code and secret
+// Generate unique QR code and secret before saving
 deliverySchema.pre('save', async function() {
-    if (!this.qrCode) {
+    if (!this.qrCode || !this.qrCodeSecret) {
         const timestamp = Date.now().toString(36).toUpperCase();
         const random = crypto.randomBytes(4).toString('hex').toUpperCase();
         this.qrCode = `DLV${timestamp}${random}`;
         this.qrCodeSecret = crypto.randomBytes(32).toString('hex');
+        console.log('Generated QR Code:', this.qrCode, 'for delivery:', this._id);
+    }
+});
+
+// Also ensure QR codes are set during create() operations
+deliverySchema.pre('validate', async function() {
+    if (!this.qrCode || !this.qrCodeSecret) {
+        const timestamp = Date.now().toString(36).toUpperCase();
+        const random = crypto.randomBytes(4).toString('hex').toUpperCase();
+        this.qrCode = `DLV${timestamp}${random}`;
+        this.qrCodeSecret = crypto.randomBytes(32).toString('hex');
+        console.log('Generated QR Code in validate hook:', this.qrCode);
     }
 });
 
@@ -195,26 +207,42 @@ deliverySchema.methods.addTimelineEntry = function(status, notes = '', location 
 deliverySchema.methods.updateStatus = async function(newStatus, notes = '', location = '', updatedBy = null) {
     const oldStatus = this.status;
     this.status = newStatus;
-    
+
     // Add timeline entry
     await this.addTimelineEntry(newStatus, notes, location, updatedBy);
-    
+
     // Handle status-specific logic
     if (newStatus === 'delivered') {
         this.actualDelivery = new Date();
         // Update related order status
         const Order = mongoose.model('Order');
-        await Order.findByIdAndUpdate(this.order, { status: 'delivered' });
+        await Order.findByIdAndUpdate(this.order, { 
+            status: 'delivered',
+            deliveryAgent: this.assignedTo
+        });
     } else if (newStatus === 'picked_up') {
         // Update related order status
         const Order = mongoose.model('Order');
-        await Order.findByIdAndUpdate(this.order, { status: 'processing' });
+        await Order.findByIdAndUpdate(this.order, { 
+            status: 'processing',
+            deliveryAgent: this.assignedTo
+        });
     } else if (newStatus === 'out_for_delivery') {
-        // Update related order status
+        // Update related order status AND set delivery agent
         const Order = mongoose.model('Order');
-        await Order.findByIdAndUpdate(this.order, { status: 'out_for_delivery' });
+        await Order.findByIdAndUpdate(this.order, { 
+            status: 'out_for_delivery',
+            deliveryAgent: this.assignedTo
+        });
+    } else if (newStatus === 'assigned') {
+        // When assigned, set the delivery agent on the order
+        const Order = mongoose.model('Order');
+        await Order.findByIdAndUpdate(this.order, { 
+            status: 'assigned',
+            deliveryAgent: this.assignedTo
+        });
     }
-    
+
     return this.save();
 };
 

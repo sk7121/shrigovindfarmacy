@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COD Management - Admin - Shri Govind Pharmacy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1c8125;
+            --primary-dark: #145a1a;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #2d2d2d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem; }
+        
+        .header {
+            max-width: 1400px;
+            margin: 0 auto 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { color: var(--primary); font-size: 28px; }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { border: 2px solid var(--border); background: transparent; color: var(--text); }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto 2rem;
+        }
+        
+        .stat-card {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+        }
+        .stat-card.pending { border-left-color: var(--warning); }
+        .stat-card.paid { border-left-color: var(--success); }
+        
+        .stat-label { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
+        .stat-value { font-size: 32px; font-weight: 700; color: var(--text); }
+        
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { font-weight: 600; color: var(--text-muted); font-size: 13px; text-transform: uppercase; white-space: nowrap; }
+        tr:hover { background: var(--bg); }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-low { background: #d4edda; color: #155724; }
+        .badge-medium { background: #fff3cd; color: #856404; }
+        .badge-high { background: #f8d7da; color: #721c24; }
+        
+        .agent-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .agent-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .action-btn-view { background: var(--bg); color: var(--text); }
+        .action-btn-receive { background: var(--success); color: white; }
+        .action-btn-receive:hover { background: var(--primary); }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        
+        .modal-content {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 { color: var(--primary); }
+        .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1><i class="fas fa-wallet"></i> COD Management</h1>
+            <p style="color: var(--text-muted);">Track Cash on Delivery collections from agents</p>
+        </div>
+        <a href="/admin/dashboard" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label"><i class="fas fa-coins"></i> Total Collected</div>
+            <div class="stat-value">₹<%= totalCollected.toFixed(2) %></div>
+        </div>
+        
+        <div class="stat-card pending">
+            <div class="stat-label"><i class="fas fa-exclamation-triangle"></i> Total Pending</div>
+            <div class="stat-value" style="color: var(--warning);">₹<%= totalPending.toFixed(2) %></div>
+        </div>
+        
+        <div class="stat-card paid">
+            <div class="stat-label"><i class="fas fa-check-circle"></i> Total Received</div>
+            <div class="stat-value" style="color: var(--success);">₹<%= totalPaid.toFixed(2) %></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title"><i class="fas fa-users"></i> Delivery Agents COD Status</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Agent</th>
+                    <th>Employee ID</th>
+                    <th>Phone</th>
+                    <th>Total Collected</th>
+                    <th>Pending to Pay</th>
+                    <th>Paid to Admin</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (agents.length === 0) { %>
+                <tr>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted);">No agents found</td>
+                </tr>
+                <% } else { %>
+                    <% agents.forEach(agent => { 
+                        const pending = agent.codTracking?.pendingToPay || 0;
+                        const statusClass = pending > 1000 ? 'badge-high' : pending > 0 ? 'badge-medium' : 'badge-low';
+                        const statusText = pending > 1000 ? 'High' : pending > 0 ? 'Pending' : 'Clear';
+                    %>
+                    <tr>
+                        <td>
+                            <div class="agent-name">
+                                <div class="agent-avatar"><%= agent.name.charAt(0).toUpperCase() %></div>
+                                <strong><%= agent.name %></strong>
+                            </div>
+                        </td>
+                        <td><%= agent.employeeId || 'N/A' %></td>
+                        <td><%= agent.phone %></td>
+                        <td><strong>₹<%= (agent.codTracking?.totalCollected || 0).toFixed(2) %></strong></td>
+                        <td style="color: var(--warning); font-weight: 600;">₹<%= pending.toFixed(2) %></td>
+                        <td style="color: var(--success);">₹<%= (agent.codTracking?.paidToAdmin || 0).toFixed(2) %></td>
+                        <td><span class="badge <%= statusClass %>"><%= statusText %></span></td>
+                        <td>
+                            <button class="action-btn action-btn-view" onclick="location.href='/admin/cod/<%= agent._id %>'">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <% if (pending > 0) { %>
+                            <button class="action-btn action-btn-receive" onclick="openReceiveModal('<%= agent._id %>', '<%= agent.name %>', <%= pending %>)">
+                                <i class="fas fa-hand-holding-usd"></i> Receive
+                            </button>
+                            <% } %>
+                        </td>
+                    </tr>
+                    <% }) %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Receive Payment Modal -->
+    <div id="receiveModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-hand-holding-usd"></i> Receive COD Payment</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="receiveForm">
+                <input type="hidden" id="agentId">
+                <p style="margin-bottom: 15px; color: var(--text-muted);">
+                    Receiving payment from: <strong id="agentName" style="color: var(--text);"></strong>
+                </p>
+                
+                <div class="form-group">
+                    <label>Amount to Receive (₹)</label>
+                    <input type="number" id="amount" name="amount" min="1" step="0.01" required>
+                    <small style="color: var(--text-muted);">Max: ₹<span id="maxAmount">0</span></small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="paymentMethod" name="paymentMethod" required>
+                        <option value="cash">Cash</option>
+                        <option value="upi">UPI</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Transaction ID / Reference (Optional)</label>
+                    <input type="text" id="transactionId" name="transactionId" placeholder="e.g., UPI TXN ID">
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal()" style="flex: 1;">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        <i class="fas fa-check"></i> Confirm Receipt
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openReceiveModal(agentId, agentName, maxAmount) {
+            document.getElementById('agentId').value = agentId;
+            document.getElementById('agentName').textContent = agentName;
+            document.getElementById('amount').max = maxAmount;
+            document.getElementById('maxAmount').textContent = maxAmount.toFixed(2);
+            document.getElementById('amount').value = maxAmount;
+            document.getElementById('receiveModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('receiveModal').classList.remove('active');
+            document.getElementById('receiveForm').reset();
+        }
+        
+        document.getElementById('receiveForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const agentId = document.getElementById('agentId').value;
+            const formData = {
+                amount: parseFloat(document.getElementById('amount').value),
+                paymentMethod: document.getElementById('paymentMethod').value,
+                transactionId: document.getElementById('transactionId').value
+            };
+            
+            try {
+                const response = await fetch(`/admin/cod/${agentId}/receive`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(result.message);
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (err) {
+                alert('Failed to record payment');
+                console.error(err);
+            }
+        });
+        
+        // Close modal on outside click
+        document.getElementById('receiveModal').addEventListener('click', (e) => {
+            if (e.target.id === 'receiveModal') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

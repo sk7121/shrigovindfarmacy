@@ -228,6 +228,50 @@ const uploadDoctor = multer({
     }
 });
 
+// Delivery proof image upload storage configuration (images only)
+const deliveryProofStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'shri-govind-pharmacy/delivery-proof',
+        allowed_formats: ['jpg', 'jpeg', 'png'],
+        transformation: [
+            { quality: 'auto', fetch_format: 'auto' }
+        ],
+        public_id: (req, file) => {
+            const orderId = req.params.orderId || req.body.orderId || 'unknown';
+            const timestamp = Date.now();
+            return `delivery_proof_${orderId}_${timestamp}`;
+        }
+    }
+});
+
+// Delivery proof image upload middleware
+const uploadDeliveryProof = multer({
+    storage: deliveryProofStorage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        // Only allow image files for delivery proof
+        const allowedTypes = /jpeg|jpg|png/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+
+        console.log('Delivery proof upload - File:', {
+            fieldname: file.fieldname,
+            originalname: file.originalname,
+            mimetype: file.mimetype,
+            extname: path.extname(file.originalname).toLowerCase()
+        });
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Only image files (JPEG, JPG, PNG) are allowed for delivery proof. Received: ' + file.mimetype));
+        }
+    }
+});
+
 // Error handling middleware for multer
 const handleUploadError = (err, req, res, next) => {
     if (err instanceof multer.MulterError) {
@@ -284,6 +328,7 @@ module.exports = {
     uploadDoctor,
     uploadProduct,
     uploadPrescription,
+    uploadDeliveryProof,
     handleUploadError,
     cloudinary
 };

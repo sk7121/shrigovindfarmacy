@@ -213,46 +213,95 @@ const completeDelivery = async (req, res) => {
     try {
         const { otp } = req.body;
 
+        console.log('📦 Complete Delivery - Order ID:', req.params.orderId);
+        console.log('📷 File received:', !!req.file);
+        console.log('🔑 OTP provided:', !!otp);
+
         if (!req.file) {
+            console.error('❌ No file uploaded');
             return res.status(400).json({
                 success: false,
-                message: 'Delivery proof image is required'
+                message: 'Delivery proof image is required. Please capture a photo of the delivered package.'
             });
         }
 
         if (!otp) {
+            console.error('❌ No OTP provided');
             return res.status(400).json({
                 success: false,
-                message: 'OTP verification is required'
+                message: 'OTP verification is required. Please ask the customer for the 6-digit OTP.'
             });
         }
 
         const order = await Order.findById(req.params.orderId);
 
         if (!order) {
+            console.error('❌ Order not found:', req.params.orderId);
             return res.status(404).json({
                 success: false,
                 message: 'Order not found'
             });
         }
 
-        // Verify OTP first
-        if (!order.deliveryOTP || !order.deliveryOTP.code || order.deliveryOTP.code !== otp) {
+        // Check if OTP exists
+        if (!order.deliveryOTP || !order.deliveryOTP.code) {
+            console.error('❌ No OTP generated for this order');
             return res.status(400).json({
                 success: false,
-                message: 'Invalid or unverified OTP'
+                message: 'No OTP generated for this order. Please generate OTP first using the "Generate OTP" button.'
             });
         }
 
+        // Check if OTP is expired
         if (new Date() > new Date(order.deliveryOTP.expiresAt)) {
+            console.error('❌ OTP has expired');
             return res.status(400).json({
                 success: false,
-                message: 'OTP has expired'
+                message: 'OTP has expired. Please generate a new OTP.'
             });
+        }
+
+        // Check if OTP was already verified (preferred flow)
+        // Check both order.deliveryOTP.verifiedAt and delivery.otpVerified for compatibility
+        const DeliveryModel = require('../models/delivery');
+        const deliveryRecord = await DeliveryModel.findOne({ order: order._id });
+        const isOtpPreVerified = order.deliveryOTP.verifiedAt || (deliveryRecord && deliveryRecord.otpVerified);
+
+        if (isOtpPreVerified) {
+            console.log('✅ OTP was already verified (order.verifiedAt:', order.deliveryOTP.verifiedAt, ', delivery.otpVerified:', deliveryRecord?.otpVerified, ')');
+        } else {
+            console.log('⚠️ OTP not pre-verified, verifying code now...');
+            if (order.deliveryOTP.code !== otp) {
+                console.error('❌ Invalid OTP code');
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid OTP. Please check the OTP provided by the customer and try again.'
+                });
+            }
+            console.log('✅ OTP code verified successfully');
         }
 
         // Upload image to Cloudinary (handled by multer middleware)
+        console.log('📦 File details:', {
+            fieldname: req.file?.fieldname,
+            originalname: req.file?.originalname,
+            mimetype: req.file?.mimetype,
+            path: req.file?.path,
+            secure_url: req.file?.secure_url,
+            cloudinary_id: req.file?.cloudinary_id,
+            size: req.file?.size
+        });
+
+        if (!req.file || (!req.file.path && !req.file.secure_url && !req.file.cloudinary_id)) {
+            console.error('❌ Cloudinary upload failed - no file path:', req.file);
+            return res.status(400).json({
+                success: false,
+                message: 'Failed to upload delivery proof image. Please check your internet connection and try again.'
+            });
+        }
+
         const imageUrl = req.file.path || req.file.secure_url;
+        console.log('✅ Delivery proof image uploaded:', imageUrl);
 
         // Update order with delivery proof and mark as delivered
         order.deliveryProof = {
@@ -261,36 +310,30 @@ const completeDelivery = async (req, res) => {
         };
 
         order.deliveryOTP.verifiedAt = new Date();
-        order.status = 'delivered';
-        order.tracking.deliveredAt = new Date();
-
-        // Add status history entry
-        if (!order.status) {
-            order.status = {
-                current: 'delivered',
-                history: []
-            };
-        } else if (typeof order.status === 'string') {
-            order.status = {
-                current: 'delivered',
-                history: [{
-                    status: order.status,
-                    timestamp: new Date()
-                }]
-            };
-        } else {
-            order.status.current = 'delivered';
+        
+        // Update order status and set delivery agent
+        const updateData = {
+            status: 'delivered',
+            tracking: {
+                ...order.tracking,
+                deliveredAt: new Date()
+            },
+            deliveryProof: order.deliveryProof,
+            deliveryOTP: order.deliveryOTP
+        };
+        
+        // Set deliveryAgent if not already set
+        if (!order.deliveryAgent) {
+            const Delivery = require('../models/delivery');
+            const delivery = await Delivery.findOne({ order: order._id });
+            if (delivery && delivery.assignedTo) {
+                updateData.deliveryAgent = delivery.assignedTo;
+                console.log('✅ Setting deliveryAgent:', delivery.assignedTo);
+            }
         }
-
-        if (order.status.history) {
-            order.status.history.push({
-                status: 'delivered',
-                timestamp: new Date(),
-                note: 'Delivered with proof image and OTP verification'
-            });
-        }
-
-        await order.save();
+        
+        await Order.findByIdAndUpdate(order._id, updateData);
+        console.log('✅ Order updated to delivered:', order._id);
 
         // Update delivery record if exists
         const delivery = await Delivery.findOne({ order: order._id });
@@ -309,6 +352,47 @@ const completeDelivery = async (req, res) => {
                 }
             });
             await delivery.save();
+            console.log('✅ Delivery record updated to delivered:', delivery._id);
+            
+            // Update agent's stats
+            const DeliveryAgent = require('../models/deliveryAgent');
+            const agent = await DeliveryAgent.findById(delivery.assignedTo);
+            
+            if (agent) {
+                // Update delivery stats
+                agent.stats.successfulDeliveries += 1;
+                agent.stats.totalDeliveries += 1;
+                agent.currentDeliveries = Math.max(0, agent.currentDeliveries - 1);
+                
+                // Set agent to idle if no more deliveries
+                if (agent.currentDeliveries === 0) {
+                    agent.currentStatus = 'idle';
+                }
+                
+                await agent.save();
+                console.log('✅ Agent stats updated:', agent.name, '- Successful:', agent.stats.successfulDeliveries, 'Current:', agent.currentDeliveries);
+                
+                // Update agent's COD tracking if COD order
+                if (order.payment.method === 'cod' && order.pricing.total > 0) {
+                    // Update COD tracking
+                    agent.codTracking.totalCollected += order.pricing.total;
+                    agent.codTracking.pendingToPay += order.pricing.total;
+
+                    // Add transaction record
+                    agent.codTransactions.push({
+                        type: 'collected',
+                        amount: order.pricing.total,
+                        orderId: order._id,
+                        orderTrackingId: order.tracking.orderId,
+                        notes: `COD collected for order ${order.tracking.orderId}`
+                    });
+
+                    await agent.save();
+                    console.log(`💰 COD tracked: ₹${order.pricing.total} for agent ${agent.name}`);
+                }
+            }
+        } else {
+            console.warn('⚠️ No delivery record found for order:', order._id);
         }
 
         // Send notification to customer
@@ -325,10 +409,23 @@ const completeDelivery = async (req, res) => {
             data: order
         });
     } catch (error) {
-        console.error('Complete delivery error:', error);
+        console.error('❌ Complete delivery error:', error);
+        console.error('Error stack:', error.stack);
+        console.error('Request details:', {
+            orderId: req.params.orderId,
+            hasFile: !!req.file,
+            hasOTP: !!req.body.otp,
+            fileDetails: req.file ? {
+                fieldname: req.file.fieldname,
+                originalname: req.file.originalname,
+                mimetype: req.file.mimetype,
+                path: req.file.path,
+                secure_url: req.file.secure_url
+            } : null
+        });
         res.status(500).json({
             success: false,
-            message: 'Error completing delivery'
+            message: 'Error completing delivery: ' + (error.message || 'Unknown error')
         });
     }
 };

@@ -471,6 +471,21 @@
             flex-wrap: wrap;
         }
 
+        .otp-display-box {
+            background: #fff3cd;
+            border: 2px dashed var(--warning);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
         /* Sidebar */
         .sidebar-section {
             background: var(--surface);
@@ -745,7 +760,7 @@
                                             <div class="section-header">
                                                 <h2 class="section-title"><i class="fas fa-clipboard-list"></i> Assigned
                                                     Orders</h2>
-                                                <a href="/agent/orders" class="btn btn-primary btn-sm">View All</a>
+                                                <a href="/agent/deliveries" class="btn btn-primary btn-sm">View All</a>
                                             </div>
 
                                             <% if (assignedOrders && assignedOrders.length> 0) { %>
@@ -792,10 +807,23 @@
                                                             </div>
                                                         </div>
                                                         <div class="delivery-actions">
-                                                            <% if (order.status==='assigned' || order.status==='out_for_delivery' ) { %>
-                                                                <a href="/agent/delivery/<%= order._id %>" class="btn btn-success btn-sm">
+                                                            <% if (order.status==='assigned' || order.status==='processing' ) { %>
+                                                                <button onclick="startDelivery('<%= order._id %>', '<%= order.tracking.orderId %>')" 
+                                                                        class="btn btn-success btn-sm" id="start-btn-<%= order._id %>">
                                                                     <i class="fas fa-play"></i> Start Delivery
-                                                                </a>
+                                                                </button>
+                                                                <% } else if (order.status === 'out_for_delivery') { %>
+                                                                    <a href="/agent/delivery/<%= order._id %>" class="btn btn-primary btn-sm">
+                                                                        <i class="fas fa-shipping-fast"></i> Complete Delivery
+                                                                    </a>
+                                                                    <% if (order.deliveryOTP?.code) { %>
+                                                                        <div class="otp-info-box" style="background: #e7f3ff; border: 2px dashed var(--info); padding: 10px; border-radius: 8px; margin-top: 10px; text-align: center;">
+                                                                            <small style="color: var(--text-muted); display: block;">
+                                                                                <i class="fas fa-info-circle"></i> OTP sent to customer's phone<br>
+                                                                                <strong>Ask the customer for the 6-digit OTP</strong>
+                                                                            </small>
+                                                                        </div>
+                                                                    <% } %>
                                                                 <% } %>
                                                                     <% if (order.shippingAddress?.phone) { %>
                                                                         <a href="tel:<%= order.shippingAddress.phone %>"
@@ -822,7 +850,7 @@
                                             <div class="section-header">
                                                 <h2 class="section-title"><i class="fas fa-history"></i> Recently
                                                     Completed</h2>
-                                                <a href="/agent/orders?status=delivered"
+                                                <a href="/agent/deliveries?status=delivered"
                                                     class="btn btn-outline btn-sm">View All</a>
                                             </div>
 
@@ -1051,6 +1079,48 @@
         }, 5000);
 
         // Order management functions
+        async function startDelivery(orderId, orderDisplayId) {
+            if (!confirm(`Start delivery for order ${orderDisplayId}? This will mark the order as "Out for Delivery" and generate an OTP for the customer.`)) {
+                return;
+            }
+
+            const btn = document.getElementById(`start-btn-${orderId}`);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...';
+            }
+
+            try {
+                const response = await fetch(`/agent/delivery/${orderId}/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`Delivery started successfully!\n\nOTP: ${result.data.otp}\nValid until: ${new Date(result.data.expiresAt).toLocaleTimeString('en-IN')}\n\nThis OTP has been sent to the customer's phone. Please collect it upon delivery.`);
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-play"></i> Start Delivery';
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while starting delivery.');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-play"></i> Start Delivery';
+                }
+            }
+        }
+
         async function updateOrderStatus(orderId, status) {
             try {
                 const response = await fetch(`/agent/order/${orderId}/status`, {

@@ -236,6 +236,21 @@
             border-top: 1px solid var(--border);
         }
 
+        .otp-display-box {
+            background: #fff3cd;
+            border: 2px dashed var(--warning);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -347,6 +362,9 @@
             <a href="/agent/deliveries?status=failed,cancelled" class="<%= currentStatus === 'failed,cancelled' ? 'active' : '' %>">
                 <i class="fas fa-times-circle"></i> Failed/Cancelled
             </a>
+            <a href="/agent/cod" class="<%= locals.currentPage === 'cod' ? 'active' : '' %>" style="background: <%= locals.currentPage === 'cod' ? 'var(--primary)' : 'var(--warning)' %>; color: <%= locals.currentPage === 'cod' ? 'white' : '#856404' %>;">
+                <i class="fas fa-wallet"></i> COD
+            </a>
         </div>
 
         <!-- Statistics -->
@@ -447,9 +465,11 @@
                                 <strong style="color: var(--warning);">₹<%= request.refundAmount %></strong>
                             </div>
                             <% if (request.cancellationOTP?.code) { %>
-                                <div class="delivery-info">
-                                    <label><i class="fas fa-key"></i> Pickup OTP</label>
-                                    <strong style="font-size: 1.2em; letter-spacing: 2px;"><%= request.cancellationOTP.code %></strong>
+                                <div class="otp-info-box" style="background: #e7f3ff; border: 2px dashed var(--info); padding: 10px; border-radius: 8px; margin-top: 10px; text-align: center; width: 100%;">
+                                    <small style="color: var(--text-muted); display: block;">
+                                        <i class="fas fa-info-circle"></i> Pickup OTP sent to customer's phone<br>
+                                        <strong>Ask the customer for the 6-digit OTP</strong>
+                                    </small>
                                 </div>
                             <% } %>
                         </div>
@@ -517,17 +537,36 @@
                         </div>
 
                         <div class="delivery-actions">
-                            <a href="/agent/delivery/<%= delivery._id %>" class="btn btn-primary btn-sm">
-                                <i class="fas fa-arrow-right"></i> Manage Delivery
-                            </a>
+                            <% if (delivery.status === 'assigned' || delivery.status === 'processing') { %>
+                                <button onclick="startDelivery('<%= delivery._id %>', '<%= delivery.qrCode %>')" 
+                                        class="btn btn-success btn-sm" id="start-btn-<%= delivery._id %>">
+                                    <i class="fas fa-play"></i> Start Delivery
+                                </button>
+                            <% } else if (delivery.status === 'out_for_delivery') { %>
+                                <a href="/agent/delivery/<%= delivery._id %>" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-shipping-fast"></i> Complete Delivery
+                                </a>
+                                <% if (delivery.order?.deliveryOTP?.code) { %>
+                                    <div class="otp-info-box" style="background: #e7f3ff; border: 2px dashed var(--info); padding: 10px; border-radius: 8px; margin-top: 10px; text-align: center; width: 100%;">
+                                        <small style="color: var(--text-muted); display: block;">
+                                            <i class="fas fa-info-circle"></i> OTP sent to customer's phone<br>
+                                            <strong>Ask the customer for the 6-digit OTP</strong>
+                                        </small>
+                                    </div>
+                                <% } %>
+                            <% } else { %>
+                                <a href="/agent/delivery/<%= delivery._id %>" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-arrow-right"></i> View Details
+                                </a>
+                            <% } %>
                             <% if (delivery.deliveryAddress?.phone) { %>
                                 <a href="tel:<%= delivery.deliveryAddress.phone %>" class="btn btn-outline btn-sm">
                                     <i class="fas fa-phone"></i> Call Customer
                                 </a>
                             <% } %>
                             <% if (delivery.deliveryAddress?.address) { %>
-                                <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(delivery.deliveryAddress.address + ', ' + delivery.deliveryAddress.city + ', ' + delivery.deliveryAddress.pincode) %>" 
-                                   target="_blank" 
+                                <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(delivery.deliveryAddress.address + ', ' + delivery.deliveryAddress.city + ', ' + delivery.deliveryAddress.pincode) %>"
+                                   target="_blank"
                                    class="btn btn-outline btn-sm">
                                     <i class="fas fa-map-marked-alt"></i> Navigate
                                 </a>
@@ -586,6 +625,49 @@
     </div>
 
     <script>
+        // Start delivery function
+        async function startDelivery(deliveryId, deliveryDisplayId) {
+            if (!confirm(`Start delivery for ${deliveryDisplayId}? This will mark the delivery as "Out for Delivery" and generate an OTP for the customer.`)) {
+                return;
+            }
+
+            const btn = document.getElementById(`start-btn-${deliveryId}`);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...';
+            }
+
+            try {
+                const response = await fetch(`/agent/delivery/${deliveryId}/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`Delivery started successfully!\n\nOTP: ${result.data.otp}\nValid until: ${new Date(result.data.expiresAt).toLocaleTimeString('en-IN')}\n\nThis OTP has been sent to the customer's phone. Please collect it upon delivery.`);
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-play"></i> Start Delivery';
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while starting delivery.');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-play"></i> Start Delivery';
+                }
+            }
+        }
+
         // Filter functionality
         const filterForm = document.getElementById('filterForm');
         const searchInput = document.getElementById('searchInput');
