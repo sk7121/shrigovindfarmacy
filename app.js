@@ -10,7 +10,7 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const session = require("express-session");
 const flash = require("connect-flash");
-require("dotenv").config();
+require("dotenv").config({ override: false });
 
 console.log("🔍 ENV CHECK START ------------------");
 
@@ -137,14 +137,14 @@ app.use(cookieParser());
 // Session and flash middleware
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "shri-govind-pharmacy-secret-key",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
+      secure: process.env.NODE_ENV === "production" && process.env.HTTPS === "true",
+      sameSite: "lax",
     },
   }),
 );
@@ -182,8 +182,7 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 // ================== DATABASE ==================
-const MONGO_URL =
-  process.env.MONGO_URL || "mongodb://localhost:27017/shri_govind_pharmacy";
+const MONGO_URL = process.env.MONGO_URL;
 
 mongoose
   .connect(process.env.MONGO_URL, {
@@ -1143,7 +1142,17 @@ app.post("/signIn", async (req, res) => {
     const redirectUrl = `/verify-otp?email=${encodeURIComponent(normalizedEmail)}`;
 
     console.log("[Registration] Redirect URL:", redirectUrl);
-    return res.redirect(redirectUrl);
+    console.log("[Registration] Session ID:", req.sessionID);
+    console.log("[Registration] pendingRegistration exists:", !!req.session.pendingRegistration);
+    
+    // Save session explicitly before redirect
+    return new Promise((resolve) => {
+      req.session.save(() => {
+        console.log("[Registration] Session saved successfully");
+        console.log("[Registration] Session keys:", Object.keys(req.session));
+        return res.redirect(redirectUrl);
+      });
+    });
   } catch (error) {
     console.log("Signup error:", error);
     req.flash("error", "Server error. Please try again.");
@@ -7975,7 +7984,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 // ================== SERVER ==================
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 app.listen(port, () => {
   console.log(`🚀 Server running on http://localhost:${port}`);

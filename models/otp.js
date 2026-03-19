@@ -130,6 +130,8 @@ otpSchema.statics.verifyOTP = async function(email, otp, purpose) {
     const OTP = this;
     const normalizedEmail = String(email || '').trim().toLowerCase();
 
+    console.log("[OTP Model] Verifying OTP for email:", normalizedEmail, "Purpose:", purpose, "OTP:", otp);
+
     // Find valid OTP by email
     const otpDoc = await OTP.findOne({
         email: normalizedEmail,
@@ -140,15 +142,66 @@ otpSchema.statics.verifyOTP = async function(email, otp, purpose) {
     });
 
     if (!otpDoc) {
+        console.log("[OTP Model] No valid OTP found. Checking if expired or used...");
+        
+        // Check if OTP exists but is expired
+        const expiredOtp = await OTP.findOne({
+            email: normalizedEmail,
+            otp,
+            purpose,
+            expiresAt: { $lte: new Date() }
+        });
+        
+        if (expiredOtp) {
+            console.log("[OTP Model] OTP has expired");
+            return {
+                success: false,
+                message: 'OTP has expired. Please request a new one.'
+            };
+        }
+        
+        // Check if OTP exists but is already used
+        const usedOtp = await OTP.findOne({
+            email: normalizedEmail,
+            otp,
+            purpose,
+            isUsed: true
+        });
+        
+        if (usedOtp) {
+            console.log("[OTP Model] OTP has already been used");
+            return {
+                success: false,
+                message: 'OTP has already been used. Please request a new one.'
+            };
+        }
+        
+        // Check if there are any OTPs for this email to debug wrong OTP
+        const anyOtp = await OTP.findOne({
+            email: normalizedEmail,
+            purpose,
+            isUsed: false,
+            expiresAt: { $gt: new Date() }
+        }).sort({ createdAt: -1 });
+        
+        if (anyOtp) {
+            console.log("[OTP Model] Found OTP but doesn't match. Expected:", anyOtp.otp, "Got:", otp);
+        } else {
+            console.log("[OTP Model] No active OTP found for this email");
+        }
+        
         return {
             success: false,
             message: 'Invalid or expired OTP'
         };
     }
 
+    console.log("[OTP Model] OTP found, checking attempts:", otpDoc.attempts, '/', otpDoc.maxAttempts);
+
     // Check attempts
     if (otpDoc.attempts >= otpDoc.maxAttempts) {
         await OTP.deleteOne({ _id: otpDoc._id });
+        console.log("[OTP Model] Maximum attempts exceeded");
         return {
             success: false,
             message: 'Maximum attempts exceeded. Please request a new OTP.'
@@ -158,6 +211,7 @@ otpSchema.statics.verifyOTP = async function(email, otp, purpose) {
     // Mark as used
     otpDoc.isUsed = true;
     await otpDoc.save();
+    console.log("[OTP Model] OTP verified successfully and marked as used");
 
     return {
         success: true,

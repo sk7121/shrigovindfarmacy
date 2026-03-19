@@ -192,11 +192,18 @@ const verifyOTP = async (req, res) => {
       // Check if there's a pending registration in session
       const pendingRegistration = req.session.pendingRegistration;
 
+      console.log("[OTP Verify] Session ID:", req.sessionID);
+      console.log("[OTP Verify] Pending registration:", !!pendingRegistration);
+      console.log("[OTP Verify] Session data:", JSON.stringify(req.session));
+      console.log("[OTP Verify] All session keys:", Object.keys(req.session));
+      console.log("[OTP Verify] Session saved:", req.session.saved);
+
       if (!pendingRegistration) {
         console.log("[OTP Verify] No pending registration found in session");
         // Check if user already exists and just needs email verification
         const existingUser = await User.findOne({ email });
         if (existingUser) {
+          console.log("[OTP Verify] Existing user found:", existingUser._id);
           existingUser.isEmailVerified = true;
           existingUser.emailVerifiedAt = new Date();
           await existingUser.save();
@@ -237,6 +244,56 @@ const verifyOTP = async (req, res) => {
           });
         }
 
+        // Check if there's a pending user ID (for users who logged in but need email verification)
+        const pendingUserId = req.session.pendingUserId;
+        if (pendingUserId) {
+          console.log("[OTP Verify] Found pendingUserId:", pendingUserId);
+          const user = await User.findById(pendingUserId);
+          if (user && user.email === email) {
+            user.isEmailVerified = true;
+            user.emailVerifiedAt = new Date();
+            await user.save();
+
+            // Generate tokens
+            const accessToken = jwt.sign(
+              { userId: user._id, email: user.email },
+              process.env.ACCESS_SECRET,
+              { expiresIn: "15m" },
+            );
+
+            const refreshToken = jwt.sign(
+              { userId: user._id },
+              process.env.REFRESH_SECRET,
+              { expiresIn: "7d" },
+            );
+
+            user.refreshToken = refreshToken;
+            await user.save();
+
+            res.cookie("accessToken", accessToken, {
+              httpOnly: true,
+              secure: false,
+              sameSite: "Lax",
+              maxAge: 15 * 60 * 1000,
+            });
+
+            res.cookie("refreshToken", refreshToken, {
+              httpOnly: true,
+              secure: false,
+              sameSite: "Lax",
+            });
+
+            delete req.session.pendingUserId;
+
+            return res.json({
+              success: true,
+              message: "Email verified successfully!",
+              redirect: redirect || "/home",
+            });
+          }
+        }
+
+        console.log("[OTP Verify] No matching user or pending registration");
         return res.status(400).json({
           success: false,
           message: "No pending registration found. Please register again.",
