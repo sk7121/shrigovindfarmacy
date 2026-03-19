@@ -162,9 +162,18 @@ if (redirectInput && redirectUrl) {
   redirectInput.value = redirectUrl;
 }
 
+/* ── PREVENT DOUBLE SUBMISSION ── */
+let isSubmitting = false;
+
 /* ── LOGIN FORM SUBMISSION ── */
 document.getElementById('form-login').addEventListener('submit', async e => {
   e.preventDefault();
+
+  // Prevent double submission
+  if (isSubmitting) {
+    return;
+  }
+  isSubmitting = true;
 
   const email = document.getElementById('l-email').value.trim();
   const pass = document.getElementById('l-password').value;
@@ -176,19 +185,40 @@ document.getElementById('form-login').addEventListener('submit', async e => {
   if (!pass) { ok = false; markField('l-password', 'e-l-password', true); }
   else markField('l-password', 'e-l-password', false);
 
-  if (!ok) return;
+  if (!ok) {
+    isSubmitting = false;
+    return;
+  }
 
   const btn = e.target.querySelector('.btn-submit');
+  const originalBtnText = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing In...';
+  btn.disabled = true;
   btn.classList.add('loading');
+  
   await wait(1800);
+  
   btn.classList.remove('loading');
   toast('🙏 Welcome back! Redirecting to your dashboard…', 'success');
   e.target.submit();
+  
+  // Reset after submission
+  setTimeout(() => {
+    isSubmitting = false;
+    btn.innerHTML = originalBtnText;
+    btn.disabled = false;
+  }, 1000);
 });
 
 /* ── SIGNUP FORM SUBMISSION ── */
 document.getElementById('form-signup').addEventListener('submit', async e => {
   e.preventDefault();
+
+  // Prevent double submission
+  if (isSubmitting) {
+    return;
+  }
+  isSubmitting = true;
 
   console.log('[Signup Form] Form submitted');
 
@@ -219,24 +249,40 @@ document.getElementById('form-signup').addEventListener('submit', async e => {
 
   if (!ok) {
     console.log('[Signup Form] Validation failed');
+    isSubmitting = false;
     return;
   }
 
   console.log('[Signup Form] Validation passed, submitting...');
   const btn = e.target.querySelector('.btn-submit');
+  const originalBtnText = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending OTP...';
+  btn.disabled = true;
   btn.classList.add('loading');
+  
   await wait(2000);
+  
   btn.classList.remove('loading');
   toast('🎉 OTP sent! Check your email to verify.', 'success');
 
   // Submit the form to the server
   e.target.submit();
+  
+  // Reset after submission
+  setTimeout(() => {
+    isSubmitting = false;
+    btn.innerHTML = originalBtnText;
+    btn.disabled = false;
+  }, 1000);
 });
 
 /* ── FORGOT PASSWORD: SEND OTP ── */
 const btnSendOtp = document.getElementById('btn-send-otp');
 if (btnSendOtp) {
   btnSendOtp.addEventListener('click', async () => {
+    // Prevent double submission
+    if (btnSendOtp.disabled) return;
+    
     const email = document.getElementById('f-contact').value.trim();
 
     if (!isContact(email)) {
@@ -245,8 +291,11 @@ if (btnSendOtp) {
     }
     markField('f-contact', 'e-f-contact', false);
 
+    btnSendOtp.disabled = true;
+    const originalBtnText = btnSendOtp.innerHTML;
+    btnSendOtp.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
     btnSendOtp.classList.add('loading');
-    
+
     try {
       const response = await fetch('/api/forgot-password', {
         method: 'POST',
@@ -256,18 +305,19 @@ if (btnSendOtp) {
       const result = await response.json();
 
       if (result.success) {
-        btnSendOtp.classList.remove('loading');
         toast('✅ OTP sent successfully! Check your email.', 'success');
         // Show step 2
         document.getElementById('forgot-step1').style.display = 'none';
         document.getElementById('forgot-step2').style.display = 'block';
       } else {
-        btnSendOtp.classList.remove('loading');
         toast(result.message || 'Failed to send OTP', 'error');
       }
     } catch (error) {
-      btnSendOtp.classList.remove('loading');
       toast('Network error. Please try again.', 'error');
+    } finally {
+      btnSendOtp.disabled = false;
+      btnSendOtp.innerHTML = originalBtnText;
+      btnSendOtp.classList.remove('loading');
     }
   });
 }
@@ -330,6 +380,9 @@ if (fPwInp && fSegs[0]) {
 const btnResetPassword = document.getElementById('btn-reset-password');
 if (btnResetPassword) {
   btnResetPassword.addEventListener('click', async () => {
+    // Prevent double submission
+    if (btnResetPassword.disabled) return;
+    
     const otp = document.getElementById('f-otp').value.trim();
     const email = document.getElementById('f-contact').value.trim();
     const password = document.getElementById('f-password').value;
@@ -363,6 +416,9 @@ if (btnResetPassword) {
 
     if (!ok) return;
 
+    btnResetPassword.disabled = true;
+    const originalBtnText = btnResetPassword.innerHTML;
+    btnResetPassword.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Resetting...';
     btnResetPassword.classList.add('loading');
 
     try {
@@ -380,6 +436,8 @@ if (btnResetPassword) {
       const verifyResult = await verifyResponse.json();
 
       if (!verifyResult.success) {
+        btnResetPassword.disabled = false;
+        btnResetPassword.innerHTML = originalBtnText;
         btnResetPassword.classList.remove('loading');
         toast(verifyResult.message || 'Invalid OTP', 'error');
         return;
@@ -403,10 +461,14 @@ if (btnResetPassword) {
           window.location.href = '/login';
         }, 2000);
       } else {
+        btnResetPassword.disabled = false;
+        btnResetPassword.innerHTML = originalBtnText;
         btnResetPassword.classList.remove('loading');
         toast(resetResult.message || 'Failed to reset password', 'error');
       }
     } catch (error) {
+      btnResetPassword.disabled = false;
+      btnResetPassword.innerHTML = originalBtnText;
       btnResetPassword.classList.remove('loading');
       toast('Network error. Please try again.', 'error');
     }

@@ -147,6 +147,7 @@ const authenticateAgent = async (req, res, next) => {
   const token = req.cookies.accessToken;
 
   if (!token) {
+    console.log("🔐 Agent auth: No token found");
     return res.redirect("/agent/login");
   }
 
@@ -158,14 +159,81 @@ const authenticateAgent = async (req, res, next) => {
     );
 
     if (!agent) {
+      console.log("🔐 Agent auth: Agent not found");
       return res.redirect("/agent/login");
     }
+
+    // Check if session has expired
+    if (agent.sessionExpiry && agent.sessionExpiry < new Date()) {
+      console.log("🔐 Agent auth: Session expired for", agent.email);
+      // Clear cookies
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+      // Clear session expiry in database
+      agent.sessionExpiry = null;
+      agent.refreshToken = null;
+      await agent.save();
+      
+      req.flash("error", "Your session has expired. Please login again.");
+      return res.redirect("/agent/login");
+    }
+
+    // Update last active time
+    agent.lastActive = new Date();
+    await agent.save();
 
     req.user = agent;
     req.userRole = "delivery_agent";
     next();
   } catch (err) {
-    console.log("Agent authentication error:", err.message);
+    console.log("🔐 Agent authentication error:", err.message);
+    
+    // If token expired, try to refresh
+    if (err.name === 'TokenExpiredError') {
+      const refreshToken = req.cookies.refreshToken;
+      if (refreshToken) {
+        try {
+          const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+          const agent = await DeliveryAgent.findById(decoded.userId);
+          
+          if (agent && agent.refreshToken === refreshToken) {
+            // Check session expiry
+            if (agent.sessionExpiry && agent.sessionExpiry < new Date()) {
+              console.log("🔐 Agent token refresh: Session expired");
+              res.clearCookie("accessToken");
+              res.clearCookie("refreshToken");
+              agent.sessionExpiry = null;
+              agent.refreshToken = null;
+              await agent.save();
+              req.flash("error", "Your session has expired. Please login again.");
+              return res.redirect("/agent/login");
+            }
+            
+            // Generate new access token
+            const newAccessToken = jwt.sign(
+              { userId: agent._id, role: "delivery_agent", email: agent.email },
+              process.env.ACCESS_SECRET,
+              { expiresIn: "15m" },
+            );
+            
+            res.cookie("accessToken", newAccessToken, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+              sameSite: "Lax",
+              maxAge: 24 * 60 * 60 * 1000,
+            });
+            
+            req.user = agent;
+            req.userRole = "delivery_agent";
+            console.log("🔐 Agent token refreshed successfully");
+            return next();
+          }
+        } catch (refreshErr) {
+          console.log("🔐 Agent token refresh failed:", refreshErr.message);
+        }
+      }
+    }
+    
     return res.redirect("/agent/login");
   }
 };

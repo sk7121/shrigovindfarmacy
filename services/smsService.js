@@ -1,12 +1,19 @@
 /**
  * SMS Notification Service
- * Configure with your SMS provider (Twilio, MSG91, TextLocal, etc.)
+ * Configure with your SMS provider (Bravo SMS, MSG91, Twilio, TextLocal, etc.)
  */
 
 // Example configuration for different providers
 const SMS_CONFIG = {
-  // Twilio (International)
-  provider: process.env.SMS_PROVIDER || "twilio",
+  // Default provider
+  provider: process.env.SMS_PROVIDER || "bravo",
+
+  // Bravo SMS credentials
+  bravo: {
+    apiKey: process.env.BRAVO_API_KEY,
+    senderId: process.env.BRAVO_SENDER_ID || "SGPHAR",
+    baseUrl: process.env.BRAVO_BASE_URL || "https://api.bravo-sms.com",
+  },
 
   // Twilio credentials
   twilio: {
@@ -44,6 +51,8 @@ async function sendSMS(phone, message) {
 
   try {
     switch (SMS_CONFIG.provider) {
+      case "bravo":
+        return await sendViaBravo(cleanPhone, message);
       case "twilio":
         return await sendViaTwilio(fullPhone, message);
       case "msg91":
@@ -60,6 +69,39 @@ async function sendSMS(phone, message) {
   } catch (error) {
     console.log("❌ SMS send error:", error.message);
     return { success: false, error: error.message };
+  }
+}
+
+// Send via Bravo SMS
+async function sendViaBravo(phone, message) {
+  if (!SMS_CONFIG.bravo.apiKey || SMS_CONFIG.bravo.apiKey === "your-bravo-api-key-here") {
+    console.log("⚠️ Bravo SMS not configured. Message:", message);
+    return { success: true, message: "Bravo SMS not configured (mock mode)" };
+  }
+
+  const axios = require("axios");
+  const url = `${SMS_CONFIG.bravo.baseUrl}/send`;
+
+  const payload = {
+    api_key: SMS_CONFIG.bravo.apiKey,
+    to: phone,
+    message: message,
+    sender_id: SMS_CONFIG.bravo.senderId,
+    type: "transactional",
+  };
+
+  const response = await axios.post(url, payload, {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+  });
+
+  if (response.data && (response.data.success || response.data.status === "success")) {
+    console.log("✅ SMS sent via Bravo SMS");
+    return { success: true, messageId: response.data.message_id };
+  } else {
+    throw new Error(response.data.message || "Bravo SMS API error");
   }
 }
 
@@ -147,6 +189,8 @@ async function sendOrderStatusSMS(order, phone, status, otp = null) {
 
   if (status === "assigned" && otp) {
     message += ` Your delivery OTP is ${otp}. Please share this with the delivery agent.`;
+  } else if (status === "out_for_delivery" && otp) {
+    message += ` Your delivery OTP is ${otp}. Please share this with the delivery agent upon delivery.`;
   } else if (status === "shipped") {
     message += ` Est. delivery: ${new Date(order.tracking.estimatedDelivery).toLocaleDateString("en-IN")}`;
   }
@@ -202,5 +246,7 @@ module.exports = {
   sendOrderConfirmationSMS,
   sendOrderStatusSMS,
   sendOTPSMS,
+  sendCancellationOTP,
+  sendCancellationStatusSMS,
   SMS_CONFIG,
 };

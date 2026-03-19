@@ -2,6 +2,7 @@ const OTP = require("../models/otp");
 const User = require("../models/user");
 const DeliveryAgent = require("../models/deliveryAgent");
 const { sendOTPEmail } = require("../services/emailService");
+const { sendBravoOTP, getBravoConfig } = require("../services/bravoService");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -10,57 +11,111 @@ const jwt = require("jsonwebtoken");
 // @access  Public
 const sendOTP = async (req, res) => {
   try {
-    const { email, purpose = "email_verification" } = req.body;
+    const { email, phone, purpose = "email_verification", provider = "bravo" } = req.body;
 
-    // Validate email
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide a valid email address",
-      });
-    }
-
-    // Check if user exists for password reset
-    if (purpose === "password_reset") {
-      const user = await User.findOne({ email });
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: "No account found with this email address",
-        });
-      }
-    }
-
-    // Check if email already verified (for new registration)
-    if (purpose === "email_verification") {
-      const existingUser = await User.findOne({ email, isEmailVerified: true });
-      if (existingUser) {
+    // Validate input based on provider
+    if (provider === "bravo" || provider === "sms") {
+      // Phone-based OTP via Bravo SMS
+      if (!phone || !/^[6-9]\d{9}$/.test(phone.replace(/[^0-9]/g, ""))) {
         return res.status(400).json({
           success: false,
-          message: "This email is already verified. Please login instead.",
+          message: "Please provide a valid 10-digit Indian mobile number",
         });
       }
-    }
 
-    // Generate and save OTP
-    const { otp, expiresAt } = await OTP.createOTP(email, purpose, 10);
+      const cleanPhone = phone.replace(/[^0-9]/g, "");
 
-    // Send OTP via email
-    const emailResult = await sendOTPEmail(email, otp, purpose);
+      // Check if user exists for password reset
+      if (purpose === "password_reset") {
+        const user = await User.findOne({ phone: cleanPhone });
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: "No account found with this phone number",
+          });
+        }
+      }
 
-    if (!emailResult.success) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to send OTP email. Please try again.",
+      // Send OTP via Bravo SMS
+      const bravoResult = await sendBravoOTP(cleanPhone, purpose, 10);
+
+      if (!bravoResult.success) {
+        console.error("Bravo SMS send failed:", bravoResult.error);
+        return res.status(500).json({
+          success: false,
+          message: bravoResult.error || "Failed to send OTP via SMS",
+          provider: "Bravo",
+        });
+      }
+
+      // Store OTP in database
+      const { otp, expiresAt } = await OTP.createPhoneOTP(
+        cleanPhone,
+        purpose,
+        10,
+        "bravo",
+        bravoResult.messageId
+      );
+
+      res.json({
+        success: true,
+        message: "OTP sent successfully to your mobile number",
+        expiresAt,
+        expiresIn: "10 minutes",
+        provider: "Bravo",
+        maskedPhone: `XXXXX${cleanPhone.slice(-4)}`,
+      });
+    } else {
+      // Email-based OTP (existing functionality)
+      if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide a valid email address",
+        });
+      }
+
+      // Check if user exists for password reset
+      if (purpose === "password_reset") {
+        const user = await User.findOne({ email });
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: "No account found with this email address",
+          });
+        }
+      }
+
+      // Check if email already verified (for new registration)
+      if (purpose === "email_verification") {
+        const existingUser = await User.findOne({ email, isEmailVerified: true });
+        if (existingUser) {
+          return res.status(400).json({
+            success: false,
+            message: "This email is already verified. Please login instead.",
+          });
+        }
+      }
+
+      // Generate and save OTP
+      const { otp, expiresAt } = await OTP.createOTP(email, purpose, 10);
+
+      // Send OTP via email
+      const emailResult = await sendOTPEmail(email, otp, purpose);
+
+      if (!emailResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to send OTP email. Please try again.",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "OTP sent successfully to your email",
+        expiresAt,
+        expiresIn: "10 minutes",
       });
     }
-
-    res.json({
-      success: true,
-      message: "OTP sent successfully to your email",
-      expiresAt,
-      expiresIn: "10 minutes",
-    });
   } catch (error) {
     console.error("Send OTP error:", error);
     res.status(500).json({
@@ -70,39 +125,57 @@ const sendOTP = async (req, res) => {
   }
 };
 
-// @desc    Verify OTP
+// @desc    Verify OTP (supports both email and phone)
 // @route   POST /api/otp/verify
 // @access  Public
 const verifyOTP = async (req, res) => {
   try {
-    const { email, otp, purpose = "email_verification" } = req.body;
-    const redirect = req.query.redirect || req.body.redirect; // Get redirect from query or body
+    const { email, phone, otp, purpose = "email_verification", provider = "email" } = req.body;
+    const redirect = req.query.redirect || req.body.redirect;
 
     console.log(
-      "[OTP Verify] Email:",
-      email,
-      "Purpose:",
-      purpose,
-      "OTP:",
-      otp,
-      "Redirect:",
-      redirect,
-    );
-    console.log(
-      "[OTP Verify] Session pendingRegistration:",
-      req.session.pendingRegistration,
+      "[OTP Verify] Email:", email,
+      "Phone:", phone,
+      "Purpose:", purpose,
+      "OTP:", otp,
+      "Provider:", provider,
+      "Redirect:", redirect,
     );
 
     // Validate input
-    if (!email || !otp) {
+    if (!otp) {
       return res.status(400).json({
         success: false,
-        message: "Please provide email and OTP",
+        message: "Please provide OTP",
       });
     }
 
-    // Verify OTP
-    const result = await OTP.verifyOTP(email, otp, purpose);
+    let result;
+
+    // Verify based on provider
+    if (provider === "bravo" || provider === "sms" || phone) {
+      // Phone-based OTP verification
+      const cleanPhone = phone ? phone.replace(/[^0-9]/g, "") : null;
+
+      if (!cleanPhone) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide phone number",
+        });
+      }
+
+      result = await OTP.verifyPhoneOTP(cleanPhone, otp, purpose);
+    } else {
+      // Email-based OTP verification
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide email address",
+        });
+      }
+
+      result = await OTP.verifyOTP(email, otp, purpose);
+    }
 
     if (!result.success) {
       console.log("[OTP Verify] OTP verification failed:", result.message);
@@ -115,7 +188,7 @@ const verifyOTP = async (req, res) => {
     console.log("[OTP Verify] OTP verified successfully");
 
     // For email verification during registration
-    if (purpose === "email_verification") {
+    if (purpose === "email_verification" && email) {
       // Check if there's a pending registration in session
       const pendingRegistration = req.session.pendingRegistration;
 
@@ -243,20 +316,34 @@ const verifyOTP = async (req, res) => {
       });
     }
 
-    // For password reset
-    if (purpose === "password_reset") {
-      const user = await User.findOne({ email });
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: "User not found",
-        });
+    // For phone verification (Bravo SMS)
+    if (purpose === "phone_verification" && phone) {
+      const cleanPhone = phone.replace(/[^0-9]/g, "");
+
+      // Update user's phone verification status
+      const user = await User.findOne({ phone: cleanPhone });
+      if (user) {
+        user.isPhoneVerified = true;
+        user.phoneVerifiedAt = new Date();
+        await user.save();
       }
 
-      // Store email in session for password reset
-      req.session.passwordResetEmail = email;
+      return res.json({
+        success: true,
+        message: "Phone number verified successfully!",
+        redirect: redirect || "/home",
+      });
+    }
 
-      console.log("[OTP Verify] Password reset OTP verified for:", email);
+    // For password reset
+    if (purpose === "password_reset") {
+      const userEmail = email || (phone ? await User.findOne({ phone: phone.replace(/[^0-9]/g, "") }).then(u => u?.email) : null);
+      
+      if (userEmail) {
+        req.session.passwordResetEmail = userEmail;
+      }
+
+      console.log("[OTP Verify] Password reset OTP verified for:", email || phone);
       return res.json({
         success: true,
         message: "OTP verified successfully! You can now reset your password.",
@@ -266,7 +353,7 @@ const verifyOTP = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Email verified successfully!",
+      message: "OTP verified successfully!",
     });
   } catch (error) {
     console.error("Verify OTP error:", error);
@@ -277,76 +364,132 @@ const verifyOTP = async (req, res) => {
   }
 };
 
-// @desc    Resend OTP
+// @desc    Resend OTP (supports both email and phone)
 // @route   POST /api/otp/resend
 // @access  Public
 const resendOTP = async (req, res) => {
   try {
-    const { email, purpose = "email_verification" } = req.body;
+    const { email, phone, purpose = "email_verification", provider = "bravo" } = req.body;
 
-    // Validate email
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide a valid email address",
-      });
-    }
+    // Handle phone-based OTP resend (Bravo SMS)
+    if (provider === "bravo" || provider === "sms" || phone) {
+      const cleanPhone = phone ? phone.replace(/[^0-9]/g, "") : null;
 
-    // For registration, check if there's a pending registration
-    if (purpose === "email_verification") {
-      const pendingRegistration = req.session.pendingRegistration;
-      if (pendingRegistration && pendingRegistration.email === email) {
-        // Allow resend for pending registration
-      } else {
-        // Check if email already verified
-        const existingUser = await User.findOne({
-          email,
-          isEmailVerified: true,
+      if (!cleanPhone || !/^[6-9]\d{9}$/.test(cleanPhone)) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide a valid 10-digit Indian mobile number",
         });
-        if (existingUser) {
-          return res.status(400).json({
-            success: false,
-            message: "This email is already verified. No need to resend OTP.",
+      }
+
+      // Check rate limiting - only 3 resends per hour
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      const recentOTPs = await OTP.countDocuments({
+        phone: cleanPhone,
+        purpose,
+        createdAt: { $gte: oneHourAgo },
+      });
+
+      if (recentOTPs >= 3) {
+        return res.status(429).json({
+          success: false,
+          message:
+            "Too many OTP requests. Please wait 1 hour before trying again.",
+        });
+      }
+
+      // Send OTP via Bravo SMS
+      const bravoResult = await sendBravoOTP(cleanPhone, purpose, 10);
+
+      if (!bravoResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: bravoResult.error || "Failed to send OTP via SMS",
+        });
+      }
+
+      // Store new OTP in database
+      const { otp, expiresAt } = await OTP.createPhoneOTP(
+        cleanPhone,
+        purpose,
+        10,
+        "bravo",
+        bravoResult.messageId
+      );
+
+      res.json({
+        success: true,
+        message: "OTP resent successfully to your mobile number",
+        expiresAt,
+        expiresIn: "10 minutes",
+        provider: "Bravo",
+        maskedPhone: `XXXXX${cleanPhone.slice(-4)}`,
+      });
+    } else {
+      // Handle email-based OTP resend (existing functionality)
+      if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide a valid email address",
+        });
+      }
+
+      // For registration, check if there's a pending registration
+      if (purpose === "email_verification") {
+        const pendingRegistration = req.session.pendingRegistration;
+        if (pendingRegistration && pendingRegistration.email === email) {
+          // Allow resend for pending registration
+        } else {
+          // Check if email already verified
+          const existingUser = await User.findOne({
+            email,
+            isEmailVerified: true,
           });
+          if (existingUser) {
+            return res.status(400).json({
+              success: false,
+              message: "This email is already verified. No need to resend OTP.",
+            });
+          }
         }
       }
-    }
 
-    // Check rate limiting - only 3 resends per hour
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    const recentOTPs = await OTP.countDocuments({
-      email,
-      purpose,
-      createdAt: { $gte: oneHourAgo },
-    });
+      // Check rate limiting - only 3 resends per hour
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      const recentOTPs = await OTP.countDocuments({
+        email,
+        purpose,
+        createdAt: { $gte: oneHourAgo },
+      });
 
-    if (recentOTPs >= 3) {
-      return res.status(429).json({
-        success: false,
-        message:
-          "Too many OTP requests. Please wait 1 hour before trying again.",
+      if (recentOTPs >= 3) {
+        return res.status(429).json({
+          success: false,
+          message:
+            "Too many OTP requests. Please wait 1 hour before trying again.",
+        });
+      }
+
+      // Generate and save new OTP
+      const { otp, expiresAt } = await OTP.createOTP(email, purpose, 10);
+
+      // Send OTP via email
+      const emailResult = await sendOTPEmail(email, otp, purpose);
+
+      if (!emailResult.success) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to send OTP email. Please try again.",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "OTP resent successfully to your email",
+        expiresAt,
+        expiresIn: "10 minutes",
       });
     }
-
-    // Generate and save new OTP
-    const { otp, expiresAt } = await OTP.createOTP(email, purpose, 10);
-
-    // Send OTP via email
-    const emailResult = await sendOTPEmail(email, otp, purpose);
-
-    if (!emailResult.success) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to send OTP email. Please try again.",
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "OTP resent successfully to your email",
-      expiresAt,
-      expiresIn: "10 minutes",
-    });
   } catch (error) {
     console.error("Resend OTP error:", error);
     res.status(500).json({
@@ -356,23 +499,47 @@ const resendOTP = async (req, res) => {
   }
 };
 
-// @desc    Check OTP status (without verifying)
+// @desc    Check OTP status (without verifying) - supports email and phone
 // @route   POST /api/otp/check
 // @access  Public
 const checkOTP = async (req, res) => {
   try {
-    const { email, otp, purpose = "email_verification" } = req.body;
+    const { email, phone, otp, purpose = "email_verification", provider = "bravo" } = req.body;
 
     // Validate input
-    if (!email || !otp) {
+    if (!otp) {
       return res.status(400).json({
         success: false,
-        message: "Please provide email and OTP",
+        message: "Please provide OTP",
       });
     }
 
-    // Check OTP validity
-    const result = await OTP.checkOTP(email, otp, purpose);
+    let result;
+
+    // Check based on provider
+    if (provider === "bravo" || provider === "sms" || phone) {
+      // Phone-based OTP check
+      const cleanPhone = phone ? phone.replace(/[^0-9]/g, "") : null;
+
+      if (!cleanPhone) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide phone number",
+        });
+      }
+
+      result = await OTP.checkPhoneOTP(cleanPhone, otp, purpose);
+    } else {
+      // Email-based OTP check
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide email address",
+        });
+      }
+
+      result = await OTP.checkOTP(email, otp, purpose);
+    }
 
     res.json(result);
   } catch (error) {
@@ -384,9 +551,29 @@ const checkOTP = async (req, res) => {
   }
 };
 
+// @desc    Get Bravo SMS configuration status
+// @route   GET /api/otp/bravo-status
+// @access  Public
+const getBravoStatus = async (req, res) => {
+  try {
+    const config = getBravoConfig();
+    res.json({
+      success: true,
+      config,
+    });
+  } catch (error) {
+    console.error("Get Bravo status error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error getting Bravo status",
+    });
+  }
+};
+
 module.exports = {
   sendOTP,
   verifyOTP,
   resendOTP,
   checkOTP,
+  getBravoStatus,
 };

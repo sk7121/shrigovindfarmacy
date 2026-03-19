@@ -279,7 +279,11 @@
         <div class="nav-menu">
             <a href="/agent/profile" class="active"><i class="fas fa-user"></i> Profile</a>
             <a href="/agent/deliveries"><i class="fas fa-shipping-fast"></i> My Deliveries</a>
-            <a href="/agent/login"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <form action="/agent/logout" method="POST" style="display: inline;">
+                <button type="submit" class="nav-link-btn" style="background: none; border: none; padding: 0; cursor: pointer; color: var(--text); font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
         </div>
 
         <div class="profile-grid">

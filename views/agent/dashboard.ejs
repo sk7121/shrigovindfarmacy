@@ -667,6 +667,11 @@
                 </div>
                 <a href="/agent/profile" class="btn btn-outline"><i class="fas fa-user"></i> Profile</a>
                 <a href="/agent/deliveries" class="btn btn-primary"><i class="fas fa-list"></i> All Deliveries</a>
+                <form action="/agent/logout" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
             </div>
         </div>
 
@@ -1207,6 +1212,30 @@
                 alert('An error occurred while verifying OTP.');
             }
         }
+
+        // Auto-refresh session every 6 hours to keep agent logged in
+        async function refreshSession() {
+            try {
+                const response = await fetch('/agent/refresh-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    console.log('✅ Session refreshed. Expires:', new Date(result.sessionExpiry).toLocaleString());
+                }
+            } catch (error) {
+                console.error('Session refresh failed:', error);
+            }
+        }
+
+        // Refresh session on page load and then every 6 hours
+        refreshSession();
+        setInterval(refreshSession, 6 * 60 * 60 * 1000); // 6 hours
     </script>
     <script src="/js/theme.js"></script>
 </body>

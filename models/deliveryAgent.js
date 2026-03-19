@@ -235,6 +235,16 @@ const deliveryAgentSchema = new mongoose.Schema({
     // Token for authentication
     refreshToken: String,
 
+    // Session management
+    sessionExpiry: {
+        type: Date,
+        default: null
+    },
+    lastActive: {
+        type: Date,
+        default: Date.now
+    },
+
     // Email verification
     isEmailVerified: {
         type: Boolean,

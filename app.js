@@ -39,6 +39,7 @@ const {
   sendOrderConfirmationSMS,
   sendOrderStatusSMS,
 } = require("./services/smsService");
+const { sendBravoOTP, getBravoConfig } = require("./services/bravoService");
 const DeliveryService = require("./services/deliveryService");
 const QRCodeService = require("./services/qrCodeService");
 const {
@@ -50,6 +51,7 @@ const {
   handleUploadError,
 } = require("./config/multer");
 const deliveryController = require("./controllers/deliveryController");
+const otpController = require("./controllers/otpController");
 
 const passport = require("./config/passport");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
@@ -173,6 +175,7 @@ const optionalAuth = async (req, res, next) => {
   const token = req.cookies.accessToken;
 
   if (!token) {
+    res.locals.user = null;
     return next(); // no redirect
   }
 
@@ -182,10 +185,14 @@ const optionalAuth = async (req, res, next) => {
 
     if (user) {
       req.user = user;
+      res.locals.user = user; // Make user available to views
+    } else {
+      res.locals.user = null;
     }
 
     next();
   } catch (err) {
+    res.locals.user = null;
     next(); // invalid token → ignore
   }
 };
@@ -282,7 +289,7 @@ const isDistributor = (req, res, next) => {
 // Home
 app.get("/", (req, res) => res.redirect("/home"));
 
-app.get("/home", authenticateVerified, async (req, res) => {
+app.get("/home", optionalAuth, async (req, res) => {
   try {
     // Build search and filter query
     let query = {};
@@ -855,12 +862,20 @@ app.post("/api/forgot-password", async (req, res) => {
     const { otp, expiresAt } = await OTP.createOTP(email, "password_reset", 10);
 
     // Send OTP via email
+    console.log("\n📧 Password Reset OTP Email...");
+    console.log("   To:", email);
     const emailResult = await sendOTPEmail(email, otp, "password_reset");
+
+    console.log("   Result:", emailResult.success);
+    if (!emailResult.success) {
+      console.log("   Error:", emailResult.message);
+    }
 
     if (!emailResult.success) {
       return res.json({
         success: false,
         message: "Failed to send OTP. Please try again.",
+        error: emailResult.message,
       });
     }
 
@@ -1313,269 +1328,22 @@ app.get("/api/user/counts", authenticate, async (req, res) => {
 });
 
 // ================== OTP ROUTES ==================
+// Using OTP controller with Bravo SMS support
 
-// Send OTP for email verification
-app.post("/api/otp/send", async (req, res) => {
-  try {
-    let { email, purpose = "email_verification", name = "" } = req.body;
-    email = String(email || "")
-      .trim()
-      .toLowerCase();
+// Send OTP (email or phone via Bravo SMS)
+app.post("/api/otp/send", otpController.sendOTP);
 
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide a valid email address",
-      });
-    }
+// Verify OTP (email or phone via Bravo SMS)
+app.post("/api/otp/verify", otpController.verifyOTP);
 
-    // Generate OTP
-    const { otp, expiresAt } = await OTP.createOTP(email, purpose, 10);
+// Resend OTP (email or phone via Bravo SMS)
+app.post("/api/otp/resend", otpController.resendOTP);
 
-    // Send OTP email
-    const emailResult = await sendOTPEmail(email, otp, purpose, name);
+// Check OTP status
+app.post("/api/otp/check", otpController.checkOTP);
 
-    if (!emailResult.success) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to send OTP. Please try again.",
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "OTP sent successfully to your email",
-      expiresAt,
-      expiresIn: "10 minutes",
-    });
-  } catch (error) {
-    console.error("Send OTP error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error sending OTP. Please try again.",
-    });
-  }
-});
-
-// Verify OTP
-app.post("/api/otp/verify", async (req, res) => {
-  try {
-    let { email, otp, purpose = "email_verification" } = req.body;
-    email = String(email || "")
-      .trim()
-      .toLowerCase();
-
-    console.log("[OTP Verify] Email:", email, "Purpose:", purpose, "OTP:", otp);
-    console.log(
-      "[OTP Verify] Session pendingRegistration:",
-      req.session.pendingRegistration,
-    );
-
-    if (!email || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide email and OTP",
-      });
-    }
-
-    // Verify OTP
-    const result = await OTP.verifyOTP(email, otp, purpose);
-
-    if (!result.success) {
-      console.log("[OTP Verify] OTP verification failed:", result.message);
-      return res.status(400).json({
-        success: false,
-        message: result.message,
-      });
-    }
-
-    console.log("[OTP Verify] OTP verified successfully");
-
-    // For email verification during registration
-    if (purpose === "email_verification") {
-      // Check if there's a pending registration in session
-      const pendingRegistration = req.session.pendingRegistration;
-
-      if (pendingRegistration && pendingRegistration.email === email) {
-        console.log(
-          "[OTP Verify] Creating user account from pending registration...",
-        );
-        // Create the user account now that OTP is verified
-        const newUser = await User.create({
-          name: pendingRegistration.name,
-          email: pendingRegistration.email,
-          password: pendingRegistration.password,
-          address: pendingRegistration.address,
-          phone: pendingRegistration.phone,
-          isEmailVerified: true,
-          emailVerifiedAt: new Date(),
-        });
-
-        console.log("[OTP Verify] User created:", newUser._id);
-
-        // Clear pending registration from session
-        req.session.pendingRegistration = null;
-
-        // Generate tokens
-        const accessToken = jwt.sign(
-          { userId: newUser._id, email: newUser.email },
-          process.env.ACCESS_SECRET,
-          { expiresIn: "15m" },
-        );
-
-        const refreshToken = jwt.sign(
-          { userId: newUser._id },
-          process.env.REFRESH_SECRET,
-          { expiresIn: "7d" },
-        );
-
-        newUser.refreshToken = refreshToken;
-        await newUser.save();
-
-        // Set cookies
-        res.cookie("accessToken", accessToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "Lax",
-          maxAge: 15 * 60 * 1000,
-        });
-
-        res.cookie("refreshToken", refreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "Lax",
-          maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-
-        console.log("[OTP Verify] Registration complete, redirecting to /home");
-        return res.json({
-          success: true,
-          message: "Email verified successfully! Account created.",
-          redirect: "/home",
-        });
-      }
-
-      // For existing users verifying email
-      const user = await User.findOne({ email });
-      if (user) {
-        user.isEmailVerified = true;
-        user.emailVerifiedAt = new Date();
-        await user.save();
-
-        console.log(`✅ Email verified for user: ${user.email}`);
-
-        // Generate new tokens for verified user
-        const accessToken = jwt.sign(
-          {
-            userId: user._id,
-            role: user.role,
-            email: user.email,
-          },
-          process.env.ACCESS_SECRET,
-          { expiresIn: "15m" },
-        );
-
-        const refreshToken = jwt.sign(
-          { userId: user._id },
-          process.env.REFRESH_SECRET,
-          { expiresIn: "7d" },
-        );
-
-        user.refreshToken = refreshToken;
-        await user.save();
-
-        // Set cookies
-        res.cookie("accessToken", accessToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "Lax",
-          maxAge: 15 * 60 * 1000,
-        });
-
-        res.cookie("refreshToken", refreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "Lax",
-          maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-
-        return res.json({
-          success: true,
-          message: "Email verified successfully!",
-          redirect: "/home",
-        });
-      }
-
-      // No pending registration and no existing user
-      return res.status(400).json({
-        success: false,
-        message: "No pending registration found. Please register again.",
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "Email verified successfully!",
-    });
-  } catch (error) {
-    console.error("Verify OTP error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error verifying OTP. Please try again.",
-    });
-  }
-});
-
-// Resend OTP
-app.post("/api/otp/resend", async (req, res) => {
-  try {
-    let { email, purpose = "email_verification", name = "" } = req.body;
-    email = String(email || "")
-      .trim()
-      .toLowerCase();
-
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide a valid email address",
-      });
-    }
-
-    // Rate limiting: max 3 resends per hour
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    const recentOTPs = await OTP.countDocuments({
-      email,
-      purpose,
-      createdAt: { $gte: oneHourAgo },
-    });
-
-    if (recentOTPs >= 3) {
-      return res.status(429).json({
-        success: false,
-        message: "Too many OTP requests. Please wait 1 hour.",
-      });
-    }
-
-    // Generate new OTP
-    const { otp, expiresAt } = await OTP.createOTP(email, purpose, 10);
-
-    // Send OTP email
-    await sendOTPEmail(email, otp, purpose, name);
-
-    res.json({
-      success: true,
-      message: "OTP resent successfully",
-      expiresAt,
-      expiresIn: "10 minutes",
-    });
-  } catch (error) {
-    console.error("Resend OTP error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error resending OTP. Please try again.",
-    });
-  }
-});
+// Bravo SMS Configuration Status
+app.get("/api/otp/bravo-status", otpController.getBravoStatus);
 
 // ================== LOYALTY POINTS ROUTES ==================
 
@@ -1842,7 +1610,7 @@ app.get("/cart", authenticateVerified, (req, res) => {
   return res.redirect("/user/cart");
 });
 
-app.get("/product", authenticate, (req, res) => {
+app.get("/product", optionalAuth, (req, res) => {
   res.render("user/product.ejs");
 });
 
@@ -6401,7 +6169,7 @@ app.get("/agent/login", (req, res) => {
 // Agent: Login
 app.post("/agent/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
 
     // Find agent by email or phone
     const agent = await DeliveryAgent.findOne({
@@ -6439,25 +6207,31 @@ app.post("/agent/login", async (req, res) => {
     const refreshToken = jwt.sign(
       { userId: agent._id },
       process.env.REFRESH_SECRET,
-      { expiresIn: "7d" },
+      { expiresIn: rememberMe ? "30d" : "7d" },
     );
 
-    // Store refresh token (optional, for token rotation)
+    // Set session expiry - 30 days if remember me, 7 days otherwise
+    const sessionExpiryDays = rememberMe ? 30 : 7;
+    agent.sessionExpiry = new Date(Date.now() + sessionExpiryDays * 24 * 60 * 60 * 1000);
+    agent.lastActive = new Date();
     agent.refreshToken = refreshToken;
     await agent.save();
+
+    console.log(`✅ Agent login: ${agent.name}, Session expires: ${agent.sessionExpiry}`);
 
     // Set cookies
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
+      maxAge: sessionExpiryDays * 24 * 60 * 60 * 1000,
     });
 
     req.flash("success", `Welcome back, ${agent.name}!`);
@@ -6466,6 +6240,84 @@ app.post("/agent/login", async (req, res) => {
     console.log("Agent login error:", err);
     req.flash("error", "Login failed. Please try again.");
     res.redirect("/agent/login");
+  }
+});
+
+// Agent: Logout
+app.post("/agent/logout", authenticateAgent, async (req, res) => {
+  try {
+    // Clear session expiry and refresh token in database
+    const agent = await DeliveryAgent.findOne({
+      $or: [{ email: req.user.email }, { phone: req.user.phone }],
+    });
+    
+    if (agent) {
+      agent.sessionExpiry = null;
+      agent.refreshToken = null;
+      await agent.save();
+      console.log(`✅ Agent logout: ${agent.name}`);
+    }
+
+    // Clear cookies
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+
+    req.flash("success", "You have been logged out successfully.");
+    res.redirect("/agent/login");
+  } catch (err) {
+    console.log("Agent logout error:", err);
+    // Still clear cookies even if there's an error
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    res.redirect("/agent/login");
+  }
+});
+
+// Agent: Refresh session (extend expiry)
+app.post("/agent/refresh-session", authenticateAgent, async (req, res) => {
+  try {
+    const agent = await DeliveryAgent.findOne({
+      $or: [{ email: req.user.email }, { phone: req.user.phone }],
+    });
+    
+    if (!agent) {
+      return res.json({ success: false, message: "Agent not found" });
+    }
+
+    // Extend session expiry by 7 days from now
+    const extendDays = 7;
+    agent.sessionExpiry = new Date(Date.now() + extendDays * 24 * 60 * 60 * 1000);
+    agent.lastActive = new Date();
+    await agent.save();
+
+    // Generate new refresh token
+    const refreshToken = jwt.sign(
+      { userId: agent._id },
+      process.env.REFRESH_SECRET,
+      { expiresIn: `${extendDays}d` },
+    );
+
+    agent.refreshToken = refreshToken;
+    await agent.save();
+
+    // Update refresh token cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: extendDays * 24 * 60 * 60 * 1000,
+    });
+
+    console.log(`🔄 Agent session refreshed: ${agent.name}, new expiry: ${agent.sessionExpiry}`);
+
+    res.json({
+      success: true,
+      message: "Session refreshed successfully",
+      sessionExpiry: agent.sessionExpiry,
+    });
+  } catch (err) {
+    console.log("Agent session refresh error:", err);
+    res.status(500).json({ success: false, message: "Failed to refresh session" });
   }
 });
 

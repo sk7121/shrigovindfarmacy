@@ -51,6 +51,13 @@ const register = async (req, res) => {
         // Send OTP via email
         const emailResult = await sendOTPEmail(email, otp, 'email_verification');
 
+        console.log("\n📧 Registration OTP Email Result:");
+        console.log("   Success:", emailResult.success);
+        if (!emailResult.success) {
+            console.log("   Error:", emailResult.message);
+            console.log("   Code:", emailResult.code);
+        }
+
         if (!emailResult.success) {
             req.flash('error', 'Failed to send OTP email. Please try again.');
             return res.redirect('/login');
@@ -238,6 +245,13 @@ const sendOTPLogin = async (req, res) => {
         // Generate and send OTP for login
         const { otp, expiresAt } = await OTP.createOTP(email, 'email_verification', 10);
         const emailResult = await sendOTPEmail(email, otp, 'email_verification', user.name);
+
+        console.log("\n📧 OTP Login Email Result:");
+        console.log("   To:", email);
+        console.log("   Success:", emailResult.success);
+        if (!emailResult.success) {
+            console.log("   Error:", emailResult.message);
+        }
 
         if (!emailResult.success) {
             return res.json({ success: false, message: 'Failed to send OTP. Please try again.' });

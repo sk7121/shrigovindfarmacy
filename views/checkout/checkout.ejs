@@ -987,6 +987,19 @@
     // Form Validation
     const form = document.getElementById('checkout-form');
     let isSubmitting = false;
+    let submitTimeout = null;
+
+    // Add click event listener to submit button for extra protection
+    const submitBtn = document.querySelector('.checkout-btn') || form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.addEventListener('click', function(e) {
+        if (isSubmitting) {
+          e.preventDefault();
+          showToast('Please wait, order is being processed...', 'info');
+          return false;
+        }
+      });
+    }
 
     // Auto-hide alerts after 5 seconds
     const alerts = document.querySelectorAll('.flash');

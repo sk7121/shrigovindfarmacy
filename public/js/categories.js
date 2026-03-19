@@ -225,14 +225,31 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  // Track buttons being processed to prevent double-clicks
+  const processingButtons = new Set();
+
   document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', async function (e) {
       e.stopPropagation();
+      
+      // Prevent double-click on same button
+      if (processingButtons.has(this)) {
+        return;
+      }
+      
       const productId = this.dataset.productId;
       const name = this.dataset.name || 'Product';
 
       // If productId exists, add to server cart
       if (productId && productId !== 'undefined') {
+        // Mark button as processing
+        processingButtons.add(this);
+        
+        // Disable button visually
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+        this.disabled = true;
+        
         try {
           const response = await fetch('/user/add-to-cart/' + productId, {
             method: 'POST',
@@ -248,22 +265,22 @@ document.addEventListener('DOMContentLoaded', function () {
               cartBadge.classList.add('pop');
               setTimeout(() => cartBadge.classList.remove('pop'), 300);
             }
+            toast(`✅ ${name} added to cart!`, 'success', 'Go to Cart', '/user/cart');
           }
         } catch (err) {
           console.log('Error adding to cart:', err);
+          toast('Error adding to cart. Please try again.', 'error');
+        } finally {
+          // Re-enable button
+          processingButtons.delete(this);
+          this.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
+          this.disabled = false;
         }
       } else {
         // Fallback to local storage
         updateCart(1);
+        toast(`✅ ${name} added to cart!`, 'success', 'Go to Cart', '/user/cart');
       }
-
-      this.innerHTML = '<i class="fas fa-check"></i> Added!';
-      this.classList.add('added');
-      toast(`✅ ${name} added to cart!`, 'success', 'Go to Cart', '/user/cart');
-      setTimeout(() => {
-        this.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
-        this.classList.remove('added');
-      }, 1800);
     });
   });
 

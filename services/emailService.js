@@ -3,7 +3,7 @@ const nodemailer = require("nodemailer");
 // Create transporter with proper error handling
 const createTransporter = () => {
   const config = {
-    host: process.env.EMAIL_HOST || process.env.SMTP_HOST || "smtp.gmail.com",
+    host: process.env.EMAIL_HOST || process.env.SMTP_HOST || "smtp-relay.brevo.com",
     port: parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT || "587"),
     secure: false, // true for 465, false for other ports
     auth: {
@@ -20,19 +20,30 @@ const createTransporter = () => {
     config.auth.pass === "your-app-password"
   ) {
     console.log("⚠️  Email not configured - notifications will be skipped");
+    console.log("📧 Configured email:", config.auth.user);
     return null;
   }
 
+  console.log("📧 Initializing email transporter with:");
+  console.log("   Host:", config.host);
+  console.log("   Port:", config.port);
+  console.log("   User:", config.auth.user);
+
   const transporter = nodemailer.createTransport(config);
 
-  // Verify transporter
-  transporter.verify((error, success) => {
-    if (error) {
-      console.log("❌ Email configuration error:", error.message);
-    } else {
+  // Verify transporter with promise-based approach
+  transporter.verify()
+    .then(() => {
       console.log("✅ Email server ready to send messages");
-    }
-  });
+    })
+    .catch((error) => {
+      console.log("❌ Email configuration error:", error.message);
+      console.log("🔍 Troubleshooting tips:");
+      console.log("   1. Check if EMAIL_USER is a verified sender in Brevo dashboard");
+      console.log("   2. Verify EMAIL_PASS is correct (starts with xsmtpsib-)");
+      console.log("   3. Ensure port 587 is not blocked by firewall");
+      console.log("   4. Check Brevo account status and quota");
+    });
 
   return transporter;
 };
@@ -394,12 +405,36 @@ async function sendOTPEmail(
   };
 
   try {
+    console.log("\n📧 Sending OTP email...");
+    console.log("   To:", email);
+    console.log("   Subject:", config.subject);
+    console.log("   From:", mailOptions.from);
+    
     const info = await transporter.sendMail(mailOptions);
+    
     console.log(`✅ ${config.action} OTP sent to: ${email}`);
+    console.log("   Message ID:", info.messageId);
+    console.log("   Preview URL:", nodemailer.getTestMessageUrl(info));
+    
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error(`❌ ${config.action} OTP email failed:`, error.message);
-    return { success: false, message: error.message };
+    console.error(`\n❌ ${config.action} OTP email failed:`);
+    console.error("   Error:", error.message);
+    console.error("   Code:", error.code);
+    console.error("   Command:", error.command);
+    
+    // Common Brevo/Brevo errors
+    if (error.code === "EAUTH") {
+      console.error("   🔍 Authentication failed - Check EMAIL_USER and EMAIL_PASS");
+    }
+    if (error.code === "ECONNECTION") {
+      console.error("   🔍 Connection failed - Check network/firewall");
+    }
+    if (error.message.includes("Sender address not verified")) {
+      console.error("   🔍 Sender email must be verified in Brevo dashboard");
+    }
+    
+    return { success: false, message: error.message, code: error.code };
   }
 }
 
