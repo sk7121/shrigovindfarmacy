@@ -12,6 +12,51 @@ const session = require("express-session");
 const flash = require("connect-flash");
 require("dotenv").config();
 
+console.log("🔍 ENV CHECK START ------------------");
+
+console.log("MONGO_URL:", process.env.MONGO_URL);
+console.log("PORT:", process.env.PORT);
+console.log("NODE_ENV:", process.env.NODE_ENV);
+
+console.log("SESSION_SECRET:", process.env.SESSION_SECRET);
+console.log("ACCESS_SECRET:", process.env.ACCESS_SECRET);
+console.log("REFRESH_SECRET:", process.env.REFRESH_SECRET);
+
+console.log("RAZORPAY_KEY_ID:", process.env.RAZORPAY_KEY_ID);
+console.log("RAZORPAY_KEY_SECRET:", process.env.RAZORPAY_KEY_SECRET);
+
+console.log("EMAIL_HOST:", process.env.EMAIL_HOST);
+console.log("EMAIL_PORT:", process.env.EMAIL_PORT);
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Loaded" : "❌ Missing");
+console.log("EMAIL_FROM:", process.env.EMAIL_FROM);
+
+console.log("SMS_PROVIDER:", process.env.SMS_PROVIDER);
+
+console.log("BRAVO_MOCK_MODE:", process.env.BRAVO_MOCK_MODE);
+console.log(
+  "BRAVO_API_KEY:",
+  process.env.BRAVO_API_KEY ? "✅ Loaded" : "❌ Missing",
+);
+console.log("BRAVO_SENDER_ID:", process.env.BRAVO_SENDER_ID);
+console.log("BRAVO_BASE_URL:", process.env.BRAVO_BASE_URL);
+
+console.log("CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
+console.log("CLOUDINARY_API_KEY:", process.env.CLOUDINARY_API_KEY);
+console.log(
+  "CLOUDINARY_API_SECRET:",
+  process.env.CLOUDINARY_API_SECRET ? "✅ Loaded" : "❌ Missing",
+);
+
+console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+console.log(
+  "GOOGLE_CLIENT_SECRET:",
+  process.env.GOOGLE_CLIENT_SECRET ? "✅ Loaded" : "❌ Missing",
+);
+console.log("GOOGLE_CALLBACK_URL:", process.env.GOOGLE_CALLBACK_URL);
+
+console.log("🔍 ENV CHECK END ------------------");
+
 const User = require("./models/user");
 const Product = require("./models/product");
 const Cart = require("./models/cart");
@@ -6212,12 +6257,16 @@ app.post("/agent/login", async (req, res) => {
 
     // Set session expiry - 30 days if remember me, 7 days otherwise
     const sessionExpiryDays = rememberMe ? 30 : 7;
-    agent.sessionExpiry = new Date(Date.now() + sessionExpiryDays * 24 * 60 * 60 * 1000);
+    agent.sessionExpiry = new Date(
+      Date.now() + sessionExpiryDays * 24 * 60 * 60 * 1000,
+    );
     agent.lastActive = new Date();
     agent.refreshToken = refreshToken;
     await agent.save();
 
-    console.log(`✅ Agent login: ${agent.name}, Session expires: ${agent.sessionExpiry}`);
+    console.log(
+      `✅ Agent login: ${agent.name}, Session expires: ${agent.sessionExpiry}`,
+    );
 
     // Set cookies
     res.cookie("accessToken", accessToken, {
@@ -6250,7 +6299,7 @@ app.post("/agent/logout", authenticateAgent, async (req, res) => {
     const agent = await DeliveryAgent.findOne({
       $or: [{ email: req.user.email }, { phone: req.user.phone }],
     });
-    
+
     if (agent) {
       agent.sessionExpiry = null;
       agent.refreshToken = null;
@@ -6279,14 +6328,16 @@ app.post("/agent/refresh-session", authenticateAgent, async (req, res) => {
     const agent = await DeliveryAgent.findOne({
       $or: [{ email: req.user.email }, { phone: req.user.phone }],
     });
-    
+
     if (!agent) {
       return res.json({ success: false, message: "Agent not found" });
     }
 
     // Extend session expiry by 7 days from now
     const extendDays = 7;
-    agent.sessionExpiry = new Date(Date.now() + extendDays * 24 * 60 * 60 * 1000);
+    agent.sessionExpiry = new Date(
+      Date.now() + extendDays * 24 * 60 * 60 * 1000,
+    );
     agent.lastActive = new Date();
     await agent.save();
 
@@ -6308,7 +6359,9 @@ app.post("/agent/refresh-session", authenticateAgent, async (req, res) => {
       maxAge: extendDays * 24 * 60 * 60 * 1000,
     });
 
-    console.log(`🔄 Agent session refreshed: ${agent.name}, new expiry: ${agent.sessionExpiry}`);
+    console.log(
+      `🔄 Agent session refreshed: ${agent.name}, new expiry: ${agent.sessionExpiry}`,
+    );
 
     res.json({
       success: true,
@@ -6317,7 +6370,9 @@ app.post("/agent/refresh-session", authenticateAgent, async (req, res) => {
     });
   } catch (err) {
     console.log("Agent session refresh error:", err);
-    res.status(500).json({ success: false, message: "Failed to refresh session" });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to refresh session" });
   }
 });
 
@@ -6326,7 +6381,7 @@ app.get("/agent/dashboard", authenticateAgent, async (req, res) => {
   try {
     // Check if user is a delivery agent
     const agent = await DeliveryAgent.findOne({
-      $or: [{ email: req.user.email  }, {phone: req.user.phone }],
+      $or: [{ email: req.user.email }, { phone: req.user.phone }],
     }).populate("verifiedBy", "name email");
 
     if (!agent) {
@@ -6927,13 +6982,16 @@ app.post("/agent/delivery/:id/start", authenticateAgent, async (req, res) => {
       if (!delivery) {
         const orderAddress =
           order.address || order.shippingAddress || order.shippingInfo;
-        
+
         // Generate QR code and secret
         const timestamp = Date.now().toString(36).toUpperCase();
-        const random = require('crypto').randomBytes(4).toString('hex').toUpperCase();
+        const random = require("crypto")
+          .randomBytes(4)
+          .toString("hex")
+          .toUpperCase();
         const qrCode = `DLV${timestamp}${random}`;
-        const qrCodeSecret = require('crypto').randomBytes(32).toString('hex');
-        
+        const qrCodeSecret = require("crypto").randomBytes(32).toString("hex");
+
         delivery = await Delivery.create({
           order: order._id,
           assignedTo: agent._id,
@@ -7072,13 +7130,16 @@ app.get("/agent/delivery/:id", authenticateAgent, async (req, res) => {
         // Create a new Delivery document
         const orderAddress =
           order.address || order.shippingAddress || order.shippingInfo;
-        
+
         // Generate QR code and secret
         const timestamp = Date.now().toString(36).toUpperCase();
-        const random = require('crypto').randomBytes(4).toString('hex').toUpperCase();
+        const random = require("crypto")
+          .randomBytes(4)
+          .toString("hex")
+          .toUpperCase();
         const qrCode = `DLV${timestamp}${random}`;
-        const qrCodeSecret = require('crypto').randomBytes(32).toString('hex');
-        
+        const qrCodeSecret = require("crypto").randomBytes(32).toString("hex");
+
         delivery = await Delivery.create({
           order: order._id,
           assignedTo: agent._id,
@@ -7241,7 +7302,9 @@ app.post(
 
       // For delivered status, verify OTP
       if (status === "delivered") {
-        const delivery = await Delivery.findById(req.params.id).populate('order');
+        const delivery = await Delivery.findById(req.params.id).populate(
+          "order",
+        );
 
         if (!delivery) {
           return res
@@ -7258,10 +7321,15 @@ app.post(
         }
 
         // Check if OTP exists and is not expired
-        if (!delivery.order || !delivery.order.deliveryOTP || !delivery.order.deliveryOTP.code) {
+        if (
+          !delivery.order ||
+          !delivery.order.deliveryOTP ||
+          !delivery.order.deliveryOTP.code
+        ) {
           return res.status(400).json({
             success: false,
-            message: "No OTP generated for this order. Please generate OTP first.",
+            message:
+              "No OTP generated for this order. Please generate OTP first.",
           });
         }
 
@@ -7324,7 +7392,7 @@ app.post(
 
       // Find delivery by order ID and populate order
       const delivery = await Delivery.findOne({ order: req.params.orderId });
-      
+
       if (!delivery) {
         console.log("❌ Delivery not found for order:", req.params.orderId);
         return res.json({
@@ -7334,7 +7402,7 @@ app.post(
       }
 
       // Populate order separately to ensure it's loaded
-      await delivery.populate('order');
+      await delivery.populate("order");
 
       console.log("🔍 Verifying OTP for delivery:", delivery._id);
       console.log("📦 Order ID:", delivery.order?._id);
@@ -7358,11 +7426,16 @@ app.post(
       }
 
       // Check if OTP exists and is not expired
-      if (!delivery.order || !delivery.order.deliveryOTP || !delivery.order.deliveryOTP.code) {
+      if (
+        !delivery.order ||
+        !delivery.order.deliveryOTP ||
+        !delivery.order.deliveryOTP.code
+      ) {
         console.log("❌ No OTP found in order");
         return res.json({
           success: false,
-          message: "No OTP generated for this order. Please generate OTP first.",
+          message:
+            "No OTP generated for this order. Please generate OTP first.",
         });
       }
 
@@ -7389,9 +7462,9 @@ app.post(
       // Also update the order's deliveryOTP.verifiedAt
       if (delivery.order) {
         await Order.findByIdAndUpdate(delivery.order._id, {
-          'deliveryOTP.verifiedAt': new Date()
+          "deliveryOTP.verifiedAt": new Date(),
         });
-        console.log('✅ Order deliveryOTP.verifiedAt set');
+        console.log("✅ Order deliveryOTP.verifiedAt set");
       }
 
       console.log("✅ OTP verified successfully");
@@ -7403,7 +7476,10 @@ app.post(
     } catch (err) {
       console.error("❌ OTP verification error:", err);
       console.error("Error stack:", err.stack);
-      res.json({ success: false, message: "OTP verification failed: " + err.message });
+      res.json({
+        success: false,
+        message: "OTP verification failed: " + err.message,
+      });
     }
   },
 );
@@ -7451,35 +7527,42 @@ app.post("/agent/delivery/:id/deliver", authenticateAgent, async (req, res) => {
     }
 
     const { qrCodeVerified, photo, signature, otp, codCollected } = req.body;
-    
-    const delivery = await Delivery.findById(req.params.id).populate('order');
-    
+
+    const delivery = await Delivery.findById(req.params.id).populate("order");
+
     if (!delivery) {
-      return res.status(404).json({ success: false, message: "Delivery not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Delivery not found" });
     }
 
     // Check if delivery is assigned to this agent
-    if (delivery.assignedTo && delivery.assignedTo.toString() !== agent._id.toString()) {
-      return res.status(403).json({ success: false, message: "Delivery not assigned to you" });
+    if (
+      delivery.assignedTo &&
+      delivery.assignedTo.toString() !== agent._id.toString()
+    ) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Delivery not assigned to you" });
     }
 
     // Update delivery status
-    delivery.status = 'delivered';
+    delivery.status = "delivered";
     delivery.actualDelivery = new Date();
-    delivery.otpVerified = otp === 'verified' || qrCodeVerified;
-    
+    delivery.otpVerified = otp === "verified" || qrCodeVerified;
+
     // Add delivery attempt
     delivery.attempts.push({
       attemptNumber: delivery.attempts.length + 1,
       timestamp: new Date(),
-      status: 'success',
-      notes: 'Delivery completed successfully',
+      status: "success",
+      notes: "Delivery completed successfully",
       agent: agent._id,
       proof: {
         photo: photo || null,
         signature: signature || null,
-        otp: otp || null
-      }
+        otp: otp || null,
+      },
     });
 
     await delivery.save();
@@ -7487,45 +7570,45 @@ app.post("/agent/delivery/:id/deliver", authenticateAgent, async (req, res) => {
     // Update order status
     if (delivery.order) {
       await Order.findByIdAndUpdate(delivery.order._id, {
-        status: 'delivered',
+        status: "delivered",
         deliveryProof: {
           image: photo || null,
-          uploadedAt: new Date()
+          uploadedAt: new Date(),
         },
         deliveryOTP: {
           ...delivery.order.deliveryOTP,
-          verifiedAt: new Date()
-        }
+          verifiedAt: new Date(),
+        },
       });
 
       // Update agent stats
       agent.stats.successfulDeliveries += 1;
       agent.stats.totalDeliveries += 1;
       agent.currentDeliveries = Math.max(0, agent.currentDeliveries - 1);
-      
+
       if (agent.currentDeliveries === 0) {
-        agent.currentStatus = 'idle';
+        agent.currentStatus = "idle";
       }
 
       // Handle COD
       if (codCollected && delivery.codAmount > 0) {
         agent.codTracking.totalCollected += delivery.codAmount;
         agent.codTracking.pendingToPay += delivery.codAmount;
-        
+
         agent.codTransactions.push({
-          type: 'collected',
+          type: "collected",
           amount: delivery.codAmount,
           orderId: delivery.order._id,
-          notes: `COD collected for order ${delivery.order.tracking?.orderId}`
+          notes: `COD collected for order ${delivery.order.tracking?.orderId}`,
         });
       }
 
       await agent.save();
     }
 
-    console.log('✅ Delivery completed:', delivery._id);
-    console.log('✅ Order updated to delivered:', delivery.order?._id);
-    console.log('✅ Agent stats updated:', agent.name);
+    console.log("✅ Delivery completed:", delivery._id);
+    console.log("✅ Order updated to delivered:", delivery.order?._id);
+    console.log("✅ Agent stats updated:", agent.name);
 
     req.flash("success", "Delivery completed successfully!");
     res.redirect("/agent/deliveries");
