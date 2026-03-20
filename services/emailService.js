@@ -4,12 +4,12 @@ const nodemailer = require("nodemailer");
 const createTransporter = () => {
   const useSSL = process.env.EMAIL_SECURE === "true" || process.env.EMAIL_PORT === "465";
   const config = {
-    host: process.env.EMAIL_HOST || process.env.SMTP_HOST || "smtp-relay.brevo.com",
-    port: parseInt(process.env.EMAIL_PORT || (useSSL ? "465" : "587")),
+    host: (process.env.EMAIL_HOST || process.env.SMTP_HOST || "smtp-relay.brevo.com").trim(),
+    port: parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT || (useSSL ? "465" : "587")),
     secure: useSSL, // true for 465, false for other ports
     auth: {
-      user: process.env.EMAIL_USER || process.env.SMTP_USER,
-      pass: process.env.EMAIL_PASS || process.env.SMTP_PASS,
+      user: (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim(),
+      pass: (process.env.EMAIL_PASS || process.env.SMTP_PASS || "").trim(),
     },
     connectionTimeout: 10000, // 10 seconds timeout
     socketTimeout: 10000, // 10 seconds socket timeout
@@ -20,6 +20,14 @@ const createTransporter = () => {
       rejectUnauthorized: false // Allow self-signed certs (optional, for testing)
     }
   };
+
+  console.log("\n📧 Email Configuration Check:");
+  console.log("   Host:", config.host);
+  console.log("   Port:", config.port);
+  console.log("   User:", config.auth.user);
+  console.log("   Pass length:", config.auth.pass ? config.auth.pass.length : 0);
+  console.log("   Pass starts with 'xsmtpsib-':", config.auth.pass ? config.auth.pass.startsWith("xsmtpsib-") : "N/A");
+  console.log("   Secure:", config.secure ? "SSL" : "TLS");
 
   // Only create transporter if credentials exist
   if (
@@ -425,23 +433,37 @@ async function sendOTPEmail(
     console.log("   To:", email);
     console.log("   Subject:", config.subject);
     console.log("   From:", mailOptions.from);
+    
+    // Check if transporter exists
+    if (!transporter) {
+      console.log("❌ Email transporter is null - credentials issue?");
+      return { success: false, message: "Email service not configured", code: "NOT_CONFIGURED" };
+    }
+    
+    console.log("   Transporter status:", transporter ? "✅ Available" : "❌ Missing");
 
     // Retry logic for connection issues
     let lastError = null;
     const maxRetries = 2;
-    
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
+        console.log(`   🔄 Send attempt ${attempt}/${maxRetries}...`);
+        const startTime = Date.now();
         const info = await transporter.sendMail(mailOptions);
-        console.log(`✅ ${config.action} OTP sent to: ${email}`);
+        const elapsed = Date.now() - startTime;
+        console.log(`✅ ${config.action} OTP sent to: ${email} (took ${elapsed}ms)`);
         console.log("   Message ID:", info.messageId);
         return { success: true, messageId: info.messageId };
       } catch (retryError) {
         lastError = retryError;
         console.log(`⚠️ Email send attempt ${attempt}/${maxRetries} failed:`, retryError.message);
+        console.log("   Error code:", retryError.code);
+        console.log("   Command:", retryError.command);
         
         // Don't retry on auth errors
         if (retryError.code === "EAUTH") {
+          console.log("   ❌ Auth error - not retrying");
           break;
         }
         
@@ -455,6 +477,7 @@ async function sendOTPEmail(
     }
     
     // All retries failed
+    console.log("❌ All email send attempts failed");
     throw lastError;
   } catch (error) {
     console.error(`\n❌ ${config.action} OTP email failed:`);

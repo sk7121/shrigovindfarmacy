@@ -51,3 +51,6 @@ coverage/
 # Misc
 *.bak
 *.backup
+
+# Documentation (internal only)
+docs/
