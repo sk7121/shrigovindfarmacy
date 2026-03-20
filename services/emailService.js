@@ -1,15 +1,24 @@
 const nodemailer = require("nodemailer");
 
-// Create transporter with proper error handling
+// Create transporter with proper error handling and timeout configuration
 const createTransporter = () => {
+  const useSSL = process.env.EMAIL_SECURE === "true" || process.env.EMAIL_PORT === "465";
   const config = {
     host: process.env.EMAIL_HOST || process.env.SMTP_HOST || "smtp-relay.brevo.com",
-    port: parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT || "587"),
-    secure: false, // true for 465, false for other ports
+    port: parseInt(process.env.EMAIL_PORT || (useSSL ? "465" : "587")),
+    secure: useSSL, // true for 465, false for other ports
     auth: {
       user: process.env.EMAIL_USER || process.env.SMTP_USER,
       pass: process.env.EMAIL_PASS || process.env.SMTP_PASS,
     },
+    connectionTimeout: 10000, // 10 seconds timeout
+    socketTimeout: 10000, // 10 seconds socket timeout
+    pool: true, // Enable connection pooling
+    maxConnections: 5, // Max connections to pool
+    maxMessages: 100, // Max messages per connection
+    tls: {
+      rejectUnauthorized: false // Allow self-signed certs (optional, for testing)
+    }
   };
 
   // Only create transporter if credentials exist
@@ -17,17 +26,21 @@ const createTransporter = () => {
     !config.auth.user ||
     !config.auth.pass ||
     config.auth.user === "your-email@gmail.com" ||
-    config.auth.pass === "your-app-password"
+    config.auth.pass === "your-app-password" ||
+    !config.auth.pass.startsWith("xsmtpsib-")
   ) {
     console.log("⚠️  Email not configured - notifications will be skipped");
     console.log("📧 Configured email:", config.auth.user);
+    console.log("📧 Email pass starts with xsmtpsib-:", config.auth.pass ? config.auth.pass.startsWith("xsmtpsib-") : "N/A");
     return null;
   }
 
   console.log("📧 Initializing email transporter with:");
   console.log("   Host:", config.host);
   console.log("   Port:", config.port);
+  console.log("   Secure:", config.secure ? "SSL (465)" : "TLS (587)");
   console.log("   User:", config.auth.user);
+  console.log("   Connection Timeout:", config.connectionTimeout + "ms");
 
   const transporter = nodemailer.createTransport(config);
 
@@ -41,8 +54,11 @@ const createTransporter = () => {
       console.log("🔍 Troubleshooting tips:");
       console.log("   1. Check if EMAIL_USER is a verified sender in Brevo dashboard");
       console.log("   2. Verify EMAIL_PASS is correct (starts with xsmtpsib-)");
-      console.log("   3. Ensure port 587 is not blocked by firewall");
+      console.log("   3. Ensure port", config.port, "is not blocked by firewall");
       console.log("   4. Check Brevo account status and quota");
+      console.log("   5. Try alternative port:", useSSL ? "587 (TLS)" : "465 (SSL)");
+      console.log("   6. Check DNS resolution for smtp-relay.brevo.com");
+      console.log("   7. Set EMAIL_SECURE=true in .env to use SSL port 465");
     });
 
   return transporter;
@@ -409,31 +425,58 @@ async function sendOTPEmail(
     console.log("   To:", email);
     console.log("   Subject:", config.subject);
     console.log("   From:", mailOptions.from);
+
+    // Retry logic for connection issues
+    let lastError = null;
+    const maxRetries = 2;
     
-    const info = await transporter.sendMail(mailOptions);
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`✅ ${config.action} OTP sent to: ${email}`);
+        console.log("   Message ID:", info.messageId);
+        return { success: true, messageId: info.messageId };
+      } catch (retryError) {
+        lastError = retryError;
+        console.log(`⚠️ Email send attempt ${attempt}/${maxRetries} failed:`, retryError.message);
+        
+        // Don't retry on auth errors
+        if (retryError.code === "EAUTH") {
+          break;
+        }
+        
+        // Wait before retry (exponential backoff)
+        if (attempt < maxRetries) {
+          const waitTime = attempt * 2000;
+          console.log(`⏳ Waiting ${waitTime}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+      }
+    }
     
-    console.log(`✅ ${config.action} OTP sent to: ${email}`);
-    console.log("   Message ID:", info.messageId);
-    console.log("   Preview URL:", nodemailer.getTestMessageUrl(info));
-    
-    return { success: true, messageId: info.messageId };
+    // All retries failed
+    throw lastError;
   } catch (error) {
     console.error(`\n❌ ${config.action} OTP email failed:`);
     console.error("   Error:", error.message);
     console.error("   Code:", error.code);
     console.error("   Command:", error.command);
-    
+
     // Common Brevo/Brevo errors
     if (error.code === "EAUTH") {
       console.error("   🔍 Authentication failed - Check EMAIL_USER and EMAIL_PASS");
+      console.error("   🔍 Ensure EMAIL_PASS starts with 'xsmtpsib-'");
     }
-    if (error.code === "ECONNECTION") {
+    if (error.code === "ECONNECTION" || error.message.includes("timeout")) {
       console.error("   🔍 Connection failed - Check network/firewall");
+      console.error("   🔍 Try pinging smtp-relay.brevo.com");
+      console.error("   🔍 Check if port 587 is blocked");
+      console.error("   🔍 Alternative: Use port 465 with secure: true");
     }
     if (error.message.includes("Sender address not verified")) {
       console.error("   🔍 Sender email must be verified in Brevo dashboard");
     }
-    
+
     return { success: false, message: error.message, code: error.code };
   }
 }
