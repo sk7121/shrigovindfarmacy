@@ -11,14 +11,19 @@ const createTransporter = () => {
       user: (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim(),
       pass: (process.env.EMAIL_PASS || process.env.SMTP_PASS || "").trim(),
     },
-    connectionTimeout: 10000, // 10 seconds timeout
-    socketTimeout: 10000, // 10 seconds socket timeout
-    pool: true, // Enable connection pooling
-    maxConnections: 5, // Max connections to pool
+    // Production-optimized timeout settings
+    connectionTimeout: 30000, // 30 seconds timeout (longer for production)
+    socketTimeout: 30000, // 30 seconds socket timeout
+    pool: true, // Enable connection pooling for better performance
+    maxConnections: 10, // More connections for production
     maxMessages: 100, // Max messages per connection
+    // TLS configuration for production
     tls: {
-      rejectUnauthorized: false // Allow self-signed certs (optional, for testing)
-    }
+      rejectUnauthorized: false, // Allow connection even if cert validation fails
+      minVersion: 'TLSv1.2' // Minimum TLS version for security
+    },
+    // DNS lookup timeout
+    dnsTimeout: 5000
   };
 
   console.log("\n📧 Email Configuration Check:");
