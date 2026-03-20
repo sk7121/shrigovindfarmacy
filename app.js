@@ -9,51 +9,43 @@ const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const session = require("express-session");
+const MongoStore = require("connect-mongo").default;
 const flash = require("connect-flash");
 require("dotenv").config({ override: false });
 
 console.log("🔍 ENV CHECK START ------------------");
 
-console.log("MONGO_URL:", process.env.MONGO_URL);
-console.log("PORT:", process.env.PORT);
-console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("MONGO_URL:", process.env.MONGO_URL ? "✅ Loaded" : "❌ Missing");
+console.log("PORT:", process.env.PORT || "❌ Missing");
+console.log("NODE_ENV:", process.env.NODE_ENV || "❌ Missing");
 
-console.log("SESSION_SECRET:", process.env.SESSION_SECRET);
-console.log("ACCESS_SECRET:", process.env.ACCESS_SECRET);
-console.log("REFRESH_SECRET:", process.env.REFRESH_SECRET);
+console.log("SESSION_SECRET:", process.env.SESSION_SECRET ? "✅ Loaded" : "❌ Missing");
+console.log("ACCESS_SECRET:", process.env.ACCESS_SECRET ? "✅ Loaded" : "❌ Missing");
+console.log("REFRESH_SECRET:", process.env.REFRESH_SECRET ? "✅ Loaded" : "❌ Missing");
 
-console.log("RAZORPAY_KEY_ID:", process.env.RAZORPAY_KEY_ID);
-console.log("RAZORPAY_KEY_SECRET:", process.env.RAZORPAY_KEY_SECRET);
+console.log("RAZORPAY_KEY_ID:", process.env.RAZORPAY_KEY_ID ? "✅ Loaded" : "❌ Missing");
+console.log("RAZORPAY_KEY_SECRET:", process.env.RAZORPAY_KEY_SECRET ? "✅ Loaded" : "❌ Missing");
 
-console.log("EMAIL_HOST:", process.env.EMAIL_HOST);
-console.log("EMAIL_PORT:", process.env.EMAIL_PORT);
-console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_HOST:", process.env.EMAIL_HOST ? "✅ Loaded" : "❌ Missing");
+console.log("EMAIL_PORT:", process.env.EMAIL_PORT ? "✅ Loaded" : "❌ Missing");
+console.log("EMAIL_USER:", process.env.EMAIL_USER ? "✅ Loaded" : "❌ Missing");
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Loaded" : "❌ Missing");
-console.log("EMAIL_FROM:", process.env.EMAIL_FROM);
+console.log("EMAIL_FROM:", process.env.EMAIL_FROM ? "✅ Loaded" : "❌ Missing");
 
-console.log("SMS_PROVIDER:", process.env.SMS_PROVIDER);
+console.log("SMS_PROVIDER:", process.env.SMS_PROVIDER ? "✅ Loaded" : "❌ Missing");
 
-console.log("BRAVO_MOCK_MODE:", process.env.BRAVO_MOCK_MODE);
-console.log(
-  "BRAVO_API_KEY:",
-  process.env.BRAVO_API_KEY ? "✅ Loaded" : "❌ Missing",
-);
-console.log("BRAVO_SENDER_ID:", process.env.BRAVO_SENDER_ID);
-console.log("BRAVO_BASE_URL:", process.env.BRAVO_BASE_URL);
+console.log("BRAVO_MOCK_MODE:", process.env.BRAVO_MOCK_MODE ? "✅ Loaded" : "❌ Missing");
+console.log("BRAVO_API_KEY:", process.env.BRAVO_API_KEY ? "✅ Loaded" : "❌ Missing");
+console.log("BRAVO_SENDER_ID:", process.env.BRAVO_SENDER_ID ? "✅ Loaded" : "❌ Missing");
+console.log("BRAVO_BASE_URL:", process.env.BRAVO_BASE_URL ? "✅ Loaded" : "❌ Missing");
 
-console.log("CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
-console.log("CLOUDINARY_API_KEY:", process.env.CLOUDINARY_API_KEY);
-console.log(
-  "CLOUDINARY_API_SECRET:",
-  process.env.CLOUDINARY_API_SECRET ? "✅ Loaded" : "❌ Missing",
-);
+console.log("CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME ? "✅ Loaded" : "❌ Missing");
+console.log("CLOUDINARY_API_KEY:", process.env.CLOUDINARY_API_KEY ? "✅ Loaded" : "❌ Missing");
+console.log("CLOUDINARY_API_SECRET:", process.env.CLOUDINARY_API_SECRET ? "✅ Loaded" : "❌ Missing");
 
-console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
-console.log(
-  "GOOGLE_CLIENT_SECRET:",
-  process.env.GOOGLE_CLIENT_SECRET ? "✅ Loaded" : "❌ Missing",
-);
-console.log("GOOGLE_CALLBACK_URL:", process.env.GOOGLE_CALLBACK_URL);
+console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID ? "✅ Loaded" : "❌ Missing");
+console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET ? "✅ Loaded" : "❌ Missing");
+console.log("GOOGLE_CALLBACK_URL:", process.env.GOOGLE_CALLBACK_URL ? "✅ Loaded" : "❌ Missing");
 
 console.log("🔍 ENV CHECK END ------------------");
 
@@ -140,6 +132,11 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URL,
+      collectionName: "sessions",
+      ttl: 7 * 24 * 60 * 60, // 7 days in seconds
+    }),
     cookie: {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       httpOnly: true,
