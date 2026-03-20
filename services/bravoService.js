@@ -11,7 +11,7 @@ const BRAVO_CONFIG = {
   apiKey: process.env.BRAVO_API_KEY,
   senderId: process.env.BRAVO_SENDER_ID || "SGPHAR",
   baseUrl: process.env.BRAVO_BASE_URL || "https://api.bravo-sms.com",
-  mockMode: process.env.BRAVO_MOCK_MODE === "true" || process.env.NODE_ENV === "test",
+  mockMode: process.env.BRAVO_MOCK_MODE === "true",
 };
 
 /**
@@ -70,6 +70,7 @@ async function sendOTPViaBravo(phone, otp, purpose = "verification") {
     // Validate phone number
     const validation = validatePhone(phone);
     if (!validation.isValid) {
+      console.log("❌ Bravo SMS: Phone validation failed:", validation.error);
       return {
         success: false,
         error: validation.error,
@@ -81,6 +82,8 @@ async function sendOTPViaBravo(phone, otp, purpose = "verification") {
     // Check if mock mode is enabled
     if (BRAVO_CONFIG.mockMode) {
       console.log("🧪 Bravo SMS Mock Mode - OTP would be:", otp);
+      console.log("   Phone: +91" + cleanedPhone);
+      console.log("   Mock mode is enabled via BRAVO_MOCK_MODE env variable");
       return {
         success: true,
         messageId: "mock-" + Date.now(),
@@ -90,13 +93,12 @@ async function sendOTPViaBravo(phone, otp, purpose = "verification") {
     }
 
     // Check if Bravo SMS is configured
-    if (!BRAVO_CONFIG.apiKey || BRAVO_CONFIG.apiKey === "your-bravo-api-key-here") {
-      console.log("⚠️ Bravo SMS not configured - OTP would be:", otp);
+    if (!BRAVO_CONFIG.apiKey || BRAVO_CONFIG.apiKey === "your-bravo-api-key-here" || BRAVO_CONFIG.apiKey === "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") {
+      console.log("⚠️ Bravo SMS API key not properly configured");
+      console.log("   Current API key (first 20 chars):", BRAVO_CONFIG.apiKey ? BRAVO_CONFIG.apiKey.substring(0, 20) + "..." : "MISSING");
       return {
-        success: true,
-        messageId: "mock-" + Date.now(),
-        mock: true,
-        message: "Bravo SMS not configured - OTP generated but not sent",
+        success: false,
+        error: "Bravo SMS API key not configured. Please check your BRAVO_API_KEY environment variable.",
       };
     }
 

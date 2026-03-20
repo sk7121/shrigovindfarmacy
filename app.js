@@ -1115,7 +1115,10 @@ app.post("/signIn", async (req, res) => {
       10,
     );
     console.log("[Registration] Generated OTP:", otp);
+    console.log("[Registration] OTP expires at:", expiresAt);
+    
     // Send OTP via email
+    console.log("[Registration] Sending OTP email to:", normalizedEmail);
     const emailResult = await sendOTPEmail(
       normalizedEmail,
       otp,
@@ -1125,7 +1128,8 @@ app.post("/signIn", async (req, res) => {
 
     if (!emailResult.success) {
       console.log("[Registration] Failed to send email:", emailResult.message);
-      req.flash("error", "Failed to send OTP email. Please try again.");
+      console.log("[Registration] Email error code:", emailResult.code);
+      req.flash("error", "Failed to send OTP email. Please try again. Error: " + emailResult.message);
       return res.redirect("/login");
     }
 
@@ -1395,6 +1399,24 @@ app.post("/api/otp/check", otpController.checkOTP);
 
 // Bravo SMS Configuration Status
 app.get("/api/otp/bravo-status", otpController.getBravoStatus);
+
+// OTP System Diagnostic Page
+app.get("/test-otp-system", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "test-otp-system.html"));
+});
+
+// System Status API
+app.get("/api/system-status", (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      NODE_ENV: process.env.NODE_ENV || "not set",
+      EMAIL_CONFIGURED: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS && process.env.EMAIL_USER !== "your-email@gmail.com"),
+      BRAVO_MOCK_MODE: process.env.BRAVO_MOCK_MODE || "false",
+      BRAVO_API_KEY_CONFIGURED: !!(process.env.BRAVO_API_KEY && process.env.BRAVO_API_KEY !== "your-bravo-api-key-here"),
+    }
+  });
+});
 
 // ================== LOYALTY POINTS ROUTES ==================
 

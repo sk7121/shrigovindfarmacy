@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OTP System Diagnostic - Shri Govind Pharmacy</title>
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --success: #22c55e;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { color: var(--primary); margin-bottom: 10px; }
+    h2 { color: var(--primary-dark); margin: 30px 0 15px; border-bottom: 2px solid var(--primary); padding-bottom: 8px; }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .status-row:last-child { border-bottom: none; }
+    .status-label { font-weight: 500; }
+    .status-value { font-family: monospace; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; }
+    .status-ok { color: var(--success); font-weight: bold; }
+    .status-error { color: var(--error); font-weight: bold; }
+    .status-warning { color: var(--warning); font-weight: bold; }
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      margin: 5px;
+    }
+    .btn:hover { background: var(--primary-dark); }
+    .btn:disabled { background: var(--text-muted); cursor: not-allowed; }
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+    }
+    .btn-outline:hover { background: var(--primary); color: white; }
+    input, select {
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      margin: 5px 0;
+      width: 100%;
+      max-width: 350px;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .form-group { margin: 15px 0; }
+    .form-label { display: block; margin-bottom: 6px; font-weight: 500; }
+    .result-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 15px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .result-success { background: #f0fdf4; border-color: var(--success); }
+    .result-error { background: #fef2f2; border-color: var(--error); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .info-box {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .warning-box {
+      background: #fffbeb;
+      border-left: 4px solid var(--warning);
+      padding: 16px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
+    code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 OTP System Diagnostic</h1>
+    <p style="color: var(--text-muted);">Test and diagnose OTP sending functionality</p>
+
+    <!-- System Status -->
+    <h2>📊 System Status</h2>
+    <div class="card">
+      <div id="systemStatus">Loading...</div>
+    </div>
+
+    <!-- Email Configuration -->
+    <h2>📧 Email OTP Test</h2>
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="testEmail" placeholder="test@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Purpose</label>
+        <select id="emailPurpose">
+          <option value="email_verification">Email Verification (Registration)</option>
+          <option value="password_reset">Password Reset</option>
+          <option value="phone_verification">Phone Verification</option>
+        </select>
+      </div>
+      <button class="btn" onclick="sendEmailOTP()">📧 Send Email OTP</button>
+      <div id="emailResult"></div>
+    </div>
+
+    <!-- SMS OTP Test -->
+    <h2>📱 SMS OTP Test (Bravo)</h2>
+    <div class="card">
+      <div class="info-box">
+        <strong>ℹ️ Note:</strong> SMS OTP requires a valid Indian phone number (10 digits starting with 6-9)
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" id="testPhone" placeholder="9876543210" maxlength="10">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Purpose</label>
+        <select id="smsPurpose">
+          <option value="phone_verification">Phone Verification</option>
+          <option value="password_reset">Password Reset</option>
+          <option value="delivery_otp">Delivery OTP</option>
+        </select>
+      </div>
+      <button class="btn" onclick="sendSMSOTP()">📱 Send SMS OTP</button>
+      <div id="smsResult"></div>
+    </div>
+
+    <!-- Manual OTP Verification Test -->
+    <h2>✅ Verify OTP Test</h2>
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">Email or Phone</label>
+        <input type="text" id="verifyIdentifier" placeholder="email@example.com or 9876543210">
+      </div>
+      <div class="form-group">
+        <label class="form-label">OTP</label>
+        <input type="text" id="verifyOtp" placeholder="Enter 6-digit OTP" maxlength="6">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Purpose</label>
+        <select id="verifyPurpose">
+          <option value="email_verification">Email Verification</option>
+          <option value="password_reset">Password Reset</option>
+          <option value="phone_verification">Phone Verification</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Provider</label>
+        <select id="verifyProvider">
+          <option value="email">Email</option>
+          <option value="bravo">Bravo SMS</option>
+        </select>
+      </div>
+      <button class="btn" onclick="verifyOTP()">✅ Verify OTP</button>
+      <div id="verifyResult"></div>
+    </div>
+  </div>
+
+  <script>
+    // Load system status on page load
+    document.addEventListener('DOMContentLoaded', loadSystemStatus);
+
+    async function loadSystemStatus() {
+      const statusEl = document.getElementById('systemStatus');
+      statusEl.innerHTML = '<p>Loading system status...</p>';
+
+      try {
+        const [bravoRes, envRes] = await Promise.all([
+          fetch('/api/otp/bravo-status').then(r => r.json()),
+          fetch('/api/system-status').then(r => r.json()).catch(() => ({ success: false }))
+        ]);
+
+        let html = '';
+
+        // Bravo SMS Status
+        if (bravoRes.success) {
+          const cfg = bravoRes.config;
+          html += `
+            <div class="status-row">
+              <span class="status-label">Bravo SMS Configured</span>
+              <span class="badge ${cfg.configured ? 'badge-success' : 'badge-error'}">${cfg.configured ? '✅ Yes' : '❌ No'}</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Bravo Sender ID</span>
+              <span class="status-value">${cfg.senderId || 'Not set'}</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Bravo Base URL</span>
+              <span class="status-value">${cfg.baseUrl || 'Not set'}</span>
+            </div>
+          `;
+        }
+
+        // Environment Status
+        if (envRes.success) {
+          const env = envRes.data;
+          html += `
+            <div class="status-row">
+              <span class="status-label">NODE_ENV</span>
+              <span class="status-value">${env.NODE_ENV || 'Not set'}</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Email Configured</span>
+              <span class="badge ${env.EMAIL_CONFIGURED ? 'badge-success' : 'badge-error'}">${env.EMAIL_CONFIGURED ? '✅ Yes' : '❌ No'}</span>
+            </div>
+            <div class="status-row">
+              <span class="status-label">BRAVO_MOCK_MODE</span>
+              <span class="badge ${env.BRAVO_MOCK_MODE === 'true' ? 'badge-warning' : 'badge-info'}">${env.BRAVO_MOCK_MODE || 'false'}</span>
+            </div>
+          `;
+        }
+
+        statusEl.innerHTML = html;
+      } catch (error) {
+        statusEl.innerHTML = `<p class="status-error">Error loading status: ${error.message}</p>`;
+      }
+    }
+
+    async function sendEmailOTP() {
+      const email = document.getElementById('testEmail').value.trim();
+      const purpose = document.getElementById('emailPurpose').value;
+      const resultEl = document.getElementById('emailResult');
+
+      if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        resultEl.innerHTML = '<div class="result-box result-error">❌ Please enter a valid email address</div>';
+        return;
+      }
+
+      resultEl.innerHTML = '<div class="result-box">⏳ Sending email OTP...</div>';
+
+      try {
+        const res = await fetch('/api/otp/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, purpose, provider: 'email' })
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          resultEl.innerHTML = `
+            <div class="result-box result-success">
+              ✅ ${result.message}
+              <br><br>
+              <strong>Details:</strong><br>
+              Provider: ${result.provider || 'Email'}<br>
+              Expires: ${new Date(result.expiresAt).toLocaleString()}<br>
+              ${result.maskedPhone ? `Phone: ${result.maskedPhone}` : ''}
+            </div>
+          `;
+        } else {
+          resultEl.innerHTML = `<div class="result-box result-error">❌ ${result.message}</div>`;
+        }
+      } catch (error) {
+        resultEl.innerHTML = `<div class="result-box result-error">❌ Network error: ${error.message}</div>`;
+      }
+    }
+
+    async function sendSMSOTP() {
+      const phone = document.getElementById('testPhone').value.trim();
+      const purpose = document.getElementById('smsPurpose').value;
+      const resultEl = document.getElementById('smsResult');
+
+      if (!phone || !/^[6-9]\d{9}$/.test(phone)) {
+        resultEl.innerHTML = '<div class="result-box result-error">❌ Please enter a valid 10-digit Indian mobile number</div>';
+        return;
+      }
+
+      resultEl.innerHTML = '<div class="result-box">⏳ Sending SMS OTP...</div>';
+
+      try {
+        const res = await fetch('/api/otp/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, purpose, provider: 'bravo' })
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          resultEl.innerHTML = `
+            <div class="result-box result-success">
+              ✅ ${result.message}
+              <br><br>
+              <strong>Details:</strong><br>
+              Provider: ${result.provider || 'Bravo SMS'}<br>
+              Expires: ${new Date(result.expiresAt).toLocaleString()}<br>
+              ${result.maskedPhone ? `Phone: ${result.maskedPhone}` : ''}
+              ${result.mock ? '<br><span class="badge badge-warning">⚠️ MOCK MODE - OTP not actually sent</span>' : ''}
+            </div>
+          `;
+        } else {
+          resultEl.innerHTML = `<div class="result-box result-error">❌ ${result.message}</div>`;
+        }
+      } catch (error) {
+        resultEl.innerHTML = `<div class="result-box result-error">❌ Network error: ${error.message}</div>`;
+      }
+    }
+
+    async function verifyOTP() {
+      const identifier = document.getElementById('verifyIdentifier').value.trim();
+      const otp = document.getElementById('verifyOtp').value.trim();
+      const purpose = document.getElementById('verifyPurpose').value;
+      const provider = document.getElementById('verifyProvider').value;
+      const resultEl = document.getElementById('verifyResult');
+
+      if (!identifier || !otp) {
+        resultEl.innerHTML = '<div class="result-box result-error">❌ Please provide both identifier and OTP</div>';
+        return;
+      }
+
+      resultEl.innerHTML = '<div class="result-box">⏳ Verifying OTP...</div>';
+
+      try {
+        const body = { otp, purpose, provider };
+        if (provider === 'bravo' || /^[6-9]\d{9}$/.test(identifier)) {
+          body.phone = identifier;
+          body.provider = 'bravo';
+        } else {
+          body.email = identifier;
+        }
+
+        const res = await fetch('/api/otp/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          resultEl.innerHTML = `
+            <div class="result-box result-success">
+              ✅ ${result.message}
+              ${result.redirect ? `<br><br><strong>Redirect:</strong> ${result.redirect}` : ''}
+            </div>
+          `;
+        } else {
+          resultEl.innerHTML = `<div class="result-box result-error">❌ ${result.message}</div>`;
+        }
+      } catch (error) {
+        resultEl.innerHTML = `<div class="result-box result-error">❌ Network error: ${error.message}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>
