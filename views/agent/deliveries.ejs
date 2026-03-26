@@ -329,9 +329,14 @@
                 <h1><i class="fas fa-shipping-fast"></i> My Deliveries</h1>
                 <p style="color: var(--text-muted);">Manage and track your delivery assignments</p>
             </div>
-            <a href="/agent/dashboard" class="btn btn-outline">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
-            </a>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a href="/agent/scan-qr" class="btn btn-primary">
+                    <i class="fas fa-qrcode"></i> Scan QR
+                </a>
+                <a href="/agent/dashboard" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
         </div>
     </div>
 
@@ -613,7 +618,21 @@
                                         class="btn btn-success btn-sm" id="start-btn-<%= delivery._id %>">
                                     <i class="fas fa-play"></i> Start Delivery
                                 </button>
-                            <% } else if (delivery.status === 'out_for_delivery' || delivery.status === 'picked_up') { %>
+                            <% } else if (delivery.status === 'out_for_delivery') { %>
+                                <!-- Out for delivery - waiting for pickup confirmation -->
+                                <div style="margin-top: 10px; padding: 10px; background: rgba(255, 193, 7, 0.1); border: 2px solid var(--warning); border-radius: 8px; text-align: center;">
+                                    <div style="color: var(--warning); font-weight: 600; font-size: 0.875rem;">
+                                        <i class="fas fa-truck"></i> Out for Delivery - Awaiting Pickup
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
+                                        Items are being picked up from store. Complete button will be enabled after pickup.
+                                    </div>
+                                </div>
+                                <button disabled class="btn btn-outline btn-sm" style="margin-top: 10px; opacity: 0.6; cursor: not-allowed;">
+                                    <i class="fas fa-lock"></i> Complete Delivery (Locked)
+                                </button>
+                            <% } else if (delivery.status === 'picked_up') { %>
+                                <!-- Picked up - can complete delivery -->
                                 <a href="/agent/delivery/<%= delivery._id %>" class="btn btn-primary btn-sm">
                                     <i class="fas fa-shipping-fast"></i> Complete Delivery
                                 </a>
@@ -633,16 +652,14 @@
                                 </div>
                                 <% } %>
 
-                                <% if (delivery.status === 'picked_up') { %>
-                                    <div style="margin-top: 10px; padding: 10px; background: rgba(209, 236, 241, 0.5); border: 2px solid var(--info); border-radius: 8px; text-align: center;">
-                                        <div style="color: var(--info); font-weight: 600; font-size: 0.875rem;">
-                                            <i class="fas fa-box-open"></i> Order Picked Up - Ready for Delivery
-                                        </div>
-                                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
-                                            This order has been picked up from the store. Complete the delivery to the customer.
-                                        </div>
+                                <div style="margin-top: 10px; padding: 10px; background: rgba(40, 167, 69, 0.1); border: 2px solid var(--success); border-radius: 8px; text-align: center;">
+                                    <div style="color: var(--success); font-weight: 600; font-size: 0.875rem;">
+                                        <i class="fas fa-check-circle"></i> Ready to Complete!
                                     </div>
-                                <% } %>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
+                                        Items picked up from store. Click button above to complete delivery.
+                                    </div>
+                                </div>
                             <% } else if (delivery.status === 'delivered') { %>
                                 <div style="margin-top: 10px; padding: 10px; background: rgba(40, 167, 69, 0.1); border: 1px solid var(--success); border-radius: 8px; text-align: center;">
                                     <div style="color: var(--success); font-weight: 600; font-size: 0.875rem;">

@@ -1483,6 +1483,212 @@ app.post("/api/otp/check", otpController.checkOTP);
 // Bravo SMS Configuration Status
 app.get("/api/otp/bravo-status", otpController.getBravoStatus);
 
+// ================== OTP LOGIN ROUTES (Passwordless Login) ==================
+
+// Send OTP for login
+app.post("/api/auth/otp-login/send", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address",
+      });
+    }
+
+    // Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found with this email address. Please register first.",
+      });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Store OTP in database
+    await OTP.create({
+      email,
+      otp,
+      purpose: "login_otp",
+      expiresAt,
+    });
+
+    // Send OTP via email
+    const { sendOTPEmail } = require("../services/emailService");
+    const emailContent = {
+      subject: "Your Login OTP - Shri Govind Pharmacy",
+      otp,
+      purpose: "login_otp",
+    };
+    
+    await sendOTPEmail(email, otp, "login_otp", emailContent);
+
+    res.json({
+      success: true,
+      message: "OTP sent successfully to your email",
+      expiresAt,
+    });
+  } catch (error) {
+    console.error("OTP login send error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to send OTP. Please try again.",
+    });
+  }
+});
+
+// Verify OTP and login
+app.post("/api/auth/otp-login/verify", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required",
+      });
+    }
+
+    // Find valid OTP
+    const otpRecord = await OTP.findOne({
+      email,
+      otp,
+      purpose: "login_otp",
+      expiresAt: { $gt: new Date() },
+    }).sort({ createdAt: -1 });
+
+    if (!otpRecord) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Mark OTP as verified
+    otpRecord.verifiedAt = new Date();
+    await otpRecord.save();
+
+    // Generate JWT tokens
+    const jwt = require("jsonwebtoken");
+    const accessToken = jwt.sign(
+      { userId: user._id, email: user.email, role: user.role },
+      process.env.ACCESS_SECRET,
+      { expiresIn: "15m" },
+    );
+
+    const refreshToken = jwt.sign(
+      { userId: user._id },
+      process.env.REFRESH_SECRET,
+      { expiresIn: "7d" },
+    );
+
+    // Save refresh token
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    // Set cookies
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({
+      success: true,
+      message: "Login successful!",
+      redirect: "/home",
+    });
+  } catch (error) {
+    console.error("OTP login verify error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to verify OTP. Please try again.",
+    });
+  }
+});
+
+// Resend OTP for login
+app.post("/api/auth/otp-login/resend", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    // Check rate limiting
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const recentOTPs = await OTP.countDocuments({
+      email,
+      purpose: "login_otp",
+      createdAt: { $gte: oneHourAgo },
+    });
+
+    if (recentOTPs >= 3) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many OTP requests. Please wait 1 hour.",
+      });
+    }
+
+    // Generate new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await OTP.create({
+      email,
+      otp,
+      purpose: "login_otp",
+      expiresAt,
+    });
+
+    // Send OTP
+    const { sendOTPEmail } = require("../services/emailService");
+    await sendOTPEmail(email, otp, "login_otp", {
+      subject: "Your New Login OTP - Shri Govind Pharmacy",
+      otp,
+      purpose: "login_otp",
+    });
+
+    res.json({
+      success: true,
+      message: "OTP resent successfully",
+      expiresAt,
+    });
+  } catch (error) {
+    console.error("OTP login resend error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to resend OTP. Please try again.",
+    });
+  }
+});
+
 // OTP System Diagnostic Page
 app.get("/test-otp-system", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "test-otp-system.html"));
@@ -6903,10 +7109,30 @@ app.get("/agent/dashboard", authenticateAgent, async (req, res) => {
       .populate("user", "name email phone")
       .sort({ createdAt: -1 });
 
-    // Get out for delivery orders (including picked_up)
+    // Get processing orders
+    const processingOrders = await Order.find({
+      deliveryAgent: agent._id,
+      status: "processing",
+    })
+      .select("+deliveryOTP")
+      .populate("items.product")
+      .populate("user", "name email phone")
+      .sort({ createdAt: -1 });
+
+    // Get out for delivery orders (not yet picked up)
     const outForDeliveryOrders = await Order.find({
       deliveryAgent: agent._id,
-      status: { $in: ["out_for_delivery", "picked_up"] },
+      status: "out_for_delivery",
+    })
+      .select("+deliveryOTP")
+      .populate("items.product")
+      .populate("user", "name email phone")
+      .sort({ createdAt: -1 });
+
+    // Get picked up orders (ready for completion)
+    const pickedUpOrders = await Order.find({
+      deliveryAgent: agent._id,
+      status: "picked_up",
     })
       .select("+deliveryOTP")
       .populate("items.product")
@@ -6992,7 +7218,9 @@ app.get("/agent/dashboard", authenticateAgent, async (req, res) => {
     res.render("agent/dashboard.ejs", {
       agent,
       assignedOrders,
+      processingOrders,
       outForDeliveryOrders,
+      pickedUpOrders,
       completedOrders,
       todayStats: {
         deliveries: todayDeliveries.length,
@@ -7476,6 +7704,26 @@ app.get("/agent/deliveries", authenticateAgent, async (req, res) => {
   }
 });
 
+// Agent: QR Scanner page
+app.get("/agent/scan-qr", authenticateAgent, async (req, res) => {
+  try {
+    const agent = await DeliveryAgent.findOne({
+      $or: [{ email: req.user.email }, { phone: req.user.phone }],
+    });
+
+    if (!agent) {
+      return res.status(403).send("Access denied");
+    }
+
+    res.render("agent/scan-qr.ejs", {
+      agent,
+    });
+  } catch (err) {
+    console.log("Agent scan QR error:", err);
+    res.status(500).send("Error loading QR scanner");
+  }
+});
+
 // Agent: Start delivery (update status to out_for_delivery + generate OTP)
 app.post("/agent/delivery/:id/start", authenticateAgent, async (req, res) => {
   try {
@@ -7625,7 +7873,7 @@ app.post("/agent/delivery/:id/start", authenticateAgent, async (req, res) => {
       // === CREATE STORE PICKUP RECORD ===
       // Verification code = Last 4 digits of Order ID
       try {
-        const StorePickup = require("../models/storePickup");
+        const StorePickup = require("../models/storePickup.js");
         const mongoose = require('mongoose');
         
         // Check if pickup record already exists
@@ -7662,7 +7910,8 @@ app.post("/agent/delivery/:id/start", authenticateAgent, async (req, res) => {
       
       try {
         // Send status update SMS without OTP (OTP is only for agent/admin)
-        const message = `Shri Govind Pharmacy: Your order ${delivery.order.tracking.orderId} is out for delivery. Our delivery partner will reach you soon. Please keep the delivery OTP ready for verification.`;
+        const orderId = delivery.order?.tracking?.orderId || delivery.order?._id?.toString?.().slice(-4).toUpperCase() || 'N/A';
+        const message = `Shri Govind Pharmacy: Your order ${orderId} is out for delivery. Our delivery partner will reach you soon. Please keep the delivery OTP ready for verification.`;
         await sendSMS(customerPhone, message);
         console.log("Delivery status SMS sent to customer:", customerPhone);
       } catch (smsError) {
@@ -7788,6 +8037,14 @@ app.get("/agent/delivery/:id", authenticateAgent, async (req, res) => {
       return res.redirect("/agent/deliveries");
     }
 
+    // STRICT BLOCK: Only allow access if delivery is in 'picked_up' status
+    if (delivery.status !== 'picked_up') {
+      const errorMsg = `ACCESS DENIED: Cannot access delivery completion page. Current status is '${delivery.status.replace('_', ' ')}'. Delivery must be marked as 'Picked Up' before you can complete it.`;
+      console.error(`❌ ${errorMsg} - Agent: ${agent.email}, Delivery: ${delivery._id}`);
+      req.flash("error", errorMsg);
+      return res.redirect("/agent/deliveries");
+    }
+
     // Ensure delivery address is populated from order if not set
     if (!delivery.deliveryAddress.fullName && delivery.order) {
       // Try multiple possible address field names
@@ -7810,82 +8067,77 @@ app.get("/agent/delivery/:id", authenticateAgent, async (req, res) => {
       }
     }
 
-    const qrLabel = QRCodeService.generateDeliveryLabel(
-      delivery,
-      delivery.order,
-    );
-
-    // Check if delivery is ready for completion (out for delivery, assigned, or processing)
-    if (
-      ["out_for_delivery", "assigned", "processing"].includes(delivery.status)
-    ) {
-      // Auto-generate OTP if not already generated or if expired
-      if (
-        (delivery.order && !delivery.order.deliveryOTP?.code) ||
-        (delivery.order?.deliveryOTP?.code &&
-          new Date() > new Date(delivery.order.deliveryOTP.expiresAt))
-      ) {
-        try {
-          const otpCode = QRCodeService.generateOTP();
-          const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
-
-          // Update order with OTP (explicitly unset verifiedAt)
-          await Order.findByIdAndUpdate(delivery.order._id, {
-            $set: {
-              'deliveryOTP.code': otpCode,
-              'deliveryOTP.expiresAt': expiresAt,
-              'deliveryOTP.generatedAt': new Date()
-            },
-            $unset: {
-              'deliveryOTP.verifiedAt': 1  // Remove any existing verifiedAt
-            }
-          });
-
-          // Send OTP to customer via SMS
-          const customerName =
-            delivery.deliveryAddress?.fullName ||
-            delivery.order.address?.fullName;
-          const customerPhone =
-            delivery.deliveryAddress?.phone || delivery.order.address?.phone;
-          const trackingId = delivery.order.tracking?.orderId || "N/A";
-
-          try {
-            await sendOrderStatusSMS(
-              delivery.order,
-              customerPhone,
-              "assigned",
-              otpCode,
-            );
-            console.log(
-              "Auto-generated OTP SMS sent to customer:",
-              customerPhone,
-            );
-          } catch (smsError) {
-            console.error("Failed to send OTP SMS:", smsError);
-          }
-
-          req.flash(
-            "info",
-            `OTP generated and sent to customer's phone (${customerPhone})`,
-          );
-        } catch (otpError) {
-          console.error("Auto OTP generation error:", otpError);
-        }
-      }
-
-      // Render the new delivery complete page
-      return res.render("agent/delivery-complete.ejs", {
-        agent,
+    // Generate QR label asynchronously
+    let qrLabel = null;
+    try {
+      qrLabel = await QRCodeService.generateDeliveryLabel(
         delivery,
-      });
+        delivery.order,
+      );
+    } catch (qrError) {
+      console.error("QR Code generation failed:", qrError.message);
+      // Continue without QR code - it's not critical
     }
 
-    // Otherwise render the old detail page
-    res.render("agent/delivery-detail.ejs", {
+    // Status check already passed at top - only 'out_for_delivery' can reach here
+    // Auto-generate OTP if not already generated or if expired
+    if (
+      (delivery.order && !delivery.order.deliveryOTP?.code) ||
+      (delivery.order?.deliveryOTP?.code &&
+        new Date() > new Date(delivery.order.deliveryOTP.expiresAt))
+    ) {
+      try {
+        const otpCode = QRCodeService.generateOTP();
+        const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+        // Update order with OTP (explicitly unset verifiedAt)
+        await Order.findByIdAndUpdate(delivery.order._id, {
+          $set: {
+            'deliveryOTP.code': otpCode,
+            'deliveryOTP.expiresAt': expiresAt,
+            'deliveryOTP.generatedAt': new Date()
+          },
+          $unset: {
+            'deliveryOTP.verifiedAt': 1  // Remove any existing verifiedAt
+          }
+        });
+
+        // Send OTP to customer via SMS
+        const customerName =
+          delivery.deliveryAddress?.fullName ||
+          delivery.order.address?.fullName;
+        const customerPhone =
+          delivery.deliveryAddress?.phone || delivery.order.address?.phone;
+        const trackingId = delivery.order.tracking?.orderId || "N/A";
+
+        try {
+          await sendOrderStatusSMS(
+            delivery.order,
+            customerPhone,
+            "assigned",
+            otpCode,
+          );
+          console.log(
+            "Auto-generated OTP SMS sent to customer:",
+            customerPhone,
+          );
+        } catch (smsError) {
+          console.error("Failed to send OTP SMS:", smsError);
+        }
+
+        req.flash(
+          "info",
+          `OTP generated and sent to customer's phone (${customerPhone})`,
+        );
+      } catch (otpError) {
+        console.error("Auto OTP generation error:", otpError);
+      }
+    }
+
+    // Render the complete delivery page
+    return res.render("agent/delivery-complete.ejs", {
       agent,
       delivery,
-      qrLabel,
-      OTP: QRCodeService.generateOTP(),
     });
   } catch (err) {
     console.log("Agent delivery detail error:", err);
@@ -8496,7 +8748,7 @@ app.get("/track-order", async (req, res) => {
   }
 });
 
-// Public: Verify delivery QR code
+// Public: Verify delivery QR code (with optional user authentication)
 app.post("/api/verify-qr", async (req, res) => {
   try {
     const { qrCode } = req.body;
@@ -8505,15 +8757,35 @@ app.post("/api/verify-qr", async (req, res) => {
       return res.json({ valid: false, message: "QR code required" });
     }
 
-    const result = await QRCodeService.validateDeliveryQRCode(qrCode, Delivery);
+    // Get scanning user if authenticated (optional - for authorization check)
+    let scanningUser = null;
+    if (req.user && req.user._id) {
+      // Try to find the full user document with role, phone, email
+      const User = require('../models/user');
+      const DeliveryAgent = require('../models/deliveryAgent');
+      
+      // Check if it's a delivery agent
+      scanningUser = await DeliveryAgent.findOne({
+        $or: [{ email: req.user.email }, { phone: req.user.phone }]
+      });
+      
+      // If not a delivery agent, check if it's a regular user
+      if (!scanningUser) {
+        scanningUser = await User.findById(req.user._id);
+      }
+    }
+
+    const result = await QRCodeService.validateDeliveryQRCode(qrCode, Delivery, scanningUser);
 
     if (result.valid) {
       res.json({
         valid: true,
         message: "QR code verified successfully",
+        authorizationReason: result.step === 'verified' ? 
+          (scanningUser ? 'authorized_user' : 'valid_qr') : 'valid_qr_no_auth_check',
         delivery: {
           id: result.delivery._id,
-          orderId: result.delivery.order,
+          orderId: result.delivery.order?.tracking?.orderId || result.delivery.order?._id?.toString?.().slice(-4).toUpperCase() || 'N/A',
           status: result.delivery.status,
           customerName: result.delivery.deliveryAddress?.fullName,
           address: result.delivery.deliveryAddress?.address,
@@ -8525,6 +8797,7 @@ app.post("/api/verify-qr", async (req, res) => {
         valid: false,
         message: result.error || "Invalid QR code",
         alreadyDelivered: result.alreadyDelivered,
+        step: result.step,
       });
     }
   } catch (err) {

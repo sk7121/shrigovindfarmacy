@@ -345,6 +345,13 @@ async function sendOTPEmail(
       message: "Please use the following OTP to verify your phone number:",
       action: "Verify Phone",
     },
+    login_otp: {
+      subject: "Login OTP - Shri Govind Pharmacy",
+      title: "🔐 Your Login OTP",
+      message:
+        "You requested to login. Please use the following OTP to complete your login:",
+      action: "Login",
+    },
   };
 
   const config = purposeConfig[purpose] || purposeConfig.email_verification;

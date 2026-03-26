@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Delivery QR Code</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #1c8125;
+            --primary-dark: #145a1a;
+            --secondary: #e67e22;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #2d2d2d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        .header {
+            background: var(--surface);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { color: var(--primary); font-size: 24px; }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { border: 2px solid var(--border); background: transparent; color: var(--text); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-block { width: 100%; justify-content: center; }
+
+        .scanner-container {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        #reader {
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .flash {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .flash.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .flash.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .flash.warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .flash.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+        .delivery-info {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--text-muted); font-weight: 500; }
+        .info-value { font-weight: 600; }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        .status-badge.out_for_delivery { background: #e2e3e5; color: #383d41; }
+        .status-badge.delivered { background: #d4edda; color: #155724; }
+        .status-badge.assigned { background: #d1ecf1; color: #0c5460; }
+
+        .verification-steps {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            background: var(--bg);
+        }
+        .step.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        .step.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+        }
+        .step.completed .step-icon {
+            background: var(--success);
+        }
+        .step.failed .step-icon {
+            background: var(--danger);
+        }
+
+        .scanner-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .security-info {
+            background: var(--info);
+            background: #d1ecf1;
+            border-left: 4px solid var(--info);
+            border-color: var(--info);
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1><i class="fas fa-qrcode"></i> Scan Delivery QR Code</h1>
+            <a href="/agent/deliveries" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="security-info">
+            <strong><i class="fas fa-shield-alt"></i> Security Verification:</strong>
+            <p style="margin-top: 8px; font-size: 13px;">
+                Only authorized users can verify this delivery:
+                <br>✓ Assigned delivery agent &nbsp; ✓ Customer (phone/email) &nbsp; ✓ Admin
+            </p>
+        </div>
+
+        <div class="scanner-container">
+            <h3 style="margin-bottom: 15px;"><i class="fas fa-camera"></i> Camera Scanner</h3>
+            <div id="reader"></div>
+            <div class="scanner-controls">
+                <button type="button" id="start-scan" class="btn btn-primary btn-block">
+                    <i class="fas fa-play"></i> Start Scanning
+                </button>
+                <button type="button" id="stop-scan" class="btn btn-danger btn-block" style="display: none;">
+                    <i class="fas fa-stop"></i> Stop Scanning
+                </button>
+            </div>
+        </div>
+
+        <div id="verification-result" style="display: none;">
+            <div class="verification-steps">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-check-square"></i> Verification Steps</h3>
+                <div class="step" id="step-1">
+                    <div class="step-icon">1</div>
+                    <div>
+                        <strong>QR Code Format & Signature</strong>
+                        <p style="font-size: 12px; color: var(--text-muted);">Verifying QR code authenticity</p>
+                    </div>
+                </div>
+                <div class="step" id="step-2">
+                    <div class="step-icon">2</div>
+                    <div>
+                        <strong>Database Lookup</strong>
+                        <p style="font-size: 12px; color: var(--text-muted);">Finding delivery record</p>
+                    </div>
+                </div>
+                <div class="step" id="step-3">
+                    <div class="step-icon">3</div>
+                    <div>
+                        <strong>Secret Verification</strong>
+                        <p style="font-size: 12px; color: var(--text-muted);">Validating delivery credentials</p>
+                    </div>
+                </div>
+                <div class="step" id="step-4">
+                    <div class="step-icon">4</div>
+                    <div>
+                        <strong>Status Check</strong>
+                        <p style="font-size: 12px; color: var(--text-muted);">Checking delivery status</p>
+                    </div>
+                </div>
+                <div class="step" id="step-5">
+                    <div class="step-icon">5</div>
+                    <div>
+                        <strong>User Authorization</strong>
+                        <p style="font-size: 12px; color: var(--text-muted);">Verifying your access rights</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="delivery-details" class="delivery-info" style="display: none;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-box"></i> Delivery Details</h3>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-hashtag"></i> Order ID</span>
+                    <span class="info-value" id="detail-order-id">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-circle-notch"></i> Status</span>
+                    <span class="status-badge" id="detail-status">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-user"></i> Customer</span>
+                    <span class="info-value" id="detail-customer">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-map-marker-alt"></i> Address</span>
+                    <span class="info-value" id="detail-address">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-money-bill-wave"></i> COD Amount</span>
+                    <span class="info-value" id="detail-cod">-</span>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a id="btn-complete-delivery" href="#" class="btn btn-success">
+                        <i class="fas fa-check-circle"></i> Complete Delivery
+                    </a>
+                    <a id="btn-navigate" href="#" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-map-marked-alt"></i> Navigate
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="manual-entry" class="scanner-container" style="margin-top: 20px;">
+            <h3 style="margin-bottom: 15px;"><i class="fas fa-keyboard"></i> Manual Entry</h3>
+            <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 14px;">
+                Can't scan the QR code? Enter the delivery QR code manually:
+            </p>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="manual-qr-code" placeholder="Enter QR Code (e.g., DLV...)" 
+                       style="flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px;">
+                <button type="button" id="verify-manual" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Verify
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let html5QrcodeScanner = null;
+        let isScanning = false;
+
+        // DOM elements
+        const startScanBtn = document.getElementById('start-scan');
+        const stopScanBtn = document.getElementById('stop-scan');
+        const verificationResult = document.getElementById('verification-result');
+        const deliveryDetails = document.getElementById('delivery-details');
+        const manualQrInput = document.getElementById('manual-qr-code');
+        const verifyManualBtn = document.getElementById('verify-manual');
+
+        // Step elements
+        const steps = {
+            1: document.getElementById('step-1'),
+            2: document.getElementById('step-2'),
+            3: document.getElementById('step-3'),
+            4: document.getElementById('step-4'),
+            5: document.getElementById('step-5')
+        };
+
+        // Start scanning
+        startScanBtn.addEventListener('click', () => {
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            
+            html5QrcodeScanner.start(
+                { facingMode: "environment" }, // Use back camera
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                onScanSuccess,
+                onScanFailure
+            ).then(() => {
+                isScanning = true;
+                startScanBtn.style.display = 'none';
+                stopScanBtn.style.display = 'inline-flex';
+            }).catch(err => {
+                console.error('Failed to start scanner:', err);
+                alert('Failed to start camera. Please ensure camera permissions are granted.');
+            });
+        });
+
+        // Stop scanning
+        stopScanBtn.addEventListener('click', () => {
+            if (html5QrcodeScanner && isScanning) {
+                html5QrcodeScanner.stop().then(() => {
+                    isScanning = false;
+                    startScanBtn.style.display = 'inline-flex';
+                    stopScanBtn.style.display = 'none';
+                });
+            }
+        });
+
+        // On scan success
+        function onScanSuccess(decodedText, decodedResult) {
+            console.log('QR Code detected:', decodedText);
+            
+            // Stop scanning after successful detection
+            if (html5QrcodeScanner && isScanning) {
+                html5QrcodeScanner.stop().then(() => {
+                    isScanning = false;
+                    startScanBtn.style.display = 'inline-flex';
+                    stopScanBtn.style.display = 'none';
+                });
+            }
+            
+            // Verify the QR code
+            verifyQRCode(decodedText);
+        }
+
+        // On scan failure (no QR code detected)
+        function onScanFailure(error) {
+            // This is called repeatedly when no QR code is detected - ignore
+            // console.warn('Scan failure:', error);
+        }
+
+        // Verify QR code
+        async function verifyQRCode(qrCode) {
+            // Reset steps
+            resetSteps();
+
+            try {
+                const response = await fetch('/api/verify-qr', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ qrCode })
+                });
+
+                const result = await response.json();
+
+                if (result.valid) {
+                    showVerificationSuccess(result);
+                } else {
+                    showVerificationFailure(result);
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                alert('Verification failed. Please try again.');
+            }
+        }
+
+        // Reset verification steps
+        function resetSteps() {
+            Object.values(steps).forEach(step => {
+                step.classList.remove('completed', 'failed');
+                step.querySelector('.step-icon').innerHTML = step.id.replace('step-', '');
+            });
+            verificationResult.style.display = 'none';
+            deliveryDetails.style.display = 'none';
+        }
+
+        // Update step status
+        function updateStep(stepNumber, status) {
+            const step = steps[stepNumber];
+            if (status === 'completed') {
+                step.classList.add('completed');
+                step.querySelector('.step-icon').innerHTML = '<i class="fas fa-check"></i>';
+            } else if (status === 'failed') {
+                step.classList.add('failed');
+                step.querySelector('.step-icon').innerHTML = '<i class="fas fa-times"></i>';
+            }
+        }
+
+        // Show verification success
+        function showVerificationSuccess(result) {
+            verificationResult.style.display = 'block';
+
+            // Show all steps as completed
+            updateStep(1, 'completed');
+            updateStep(2, 'completed');
+            updateStep(3, 'completed');
+            updateStep(4, 'completed');
+            updateStep(5, 'completed');
+
+            // Show delivery details
+            const delivery = result.delivery;
+            document.getElementById('detail-order-id').textContent = delivery.orderId;
+            document.getElementById('detail-status').textContent = delivery.status.replace('_', ' ');
+            document.getElementById('detail-status').className = `status-badge ${delivery.status}`;
+            document.getElementById('detail-customer').textContent = delivery.customerName || 'N/A';
+            document.getElementById('detail-address').textContent = delivery.address || 'N/A';
+            document.getElementById('detail-cod').textContent = delivery.codAmount > 0 ? `₹${delivery.codAmount}` : 'Not applicable';
+
+            const completeDeliveryBtn = document.getElementById('btn-complete-delivery');
+            const navigateBtn = document.getElementById('btn-navigate');
+
+            // CHECK: Only allow completion if delivery is picked_up
+            if (delivery.status === 'picked_up') {
+                completeDeliveryBtn.href = `/agent/delivery/${delivery.id}/complete`;
+                completeDeliveryBtn.style.pointerEvents = 'auto';
+                completeDeliveryBtn.style.opacity = '1';
+                completeDeliveryBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Delivery';
+            } else {
+                // Block completion - not picked up yet
+                completeDeliveryBtn.href = '#';
+                completeDeliveryBtn.style.pointerEvents = 'none';
+                completeDeliveryBtn.style.opacity = '0.5';
+                
+                let statusMessage = 'Start Delivery First';
+                if (delivery.status === 'out_for_delivery') {
+                    statusMessage = 'Confirm Pickup First';
+                }
+                completeDeliveryBtn.innerHTML = `<i class="fas fa-lock"></i> ${statusMessage}`;
+                
+                // Add a warning message
+                const warningMsg = document.createElement('div');
+                warningMsg.className = 'flash warning';
+                warningMsg.style.marginTop = '10px';
+                
+                let warningText = 'You must start the delivery (mark as "Out for Delivery") before you can complete it.';
+                if (delivery.status === 'out_for_delivery') {
+                    warningText = 'Cannot complete yet! Items are out for delivery but not yet picked up. You must confirm pickup before completing the delivery.';
+                }
+                
+                warningMsg.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <strong>Cannot complete yet!</strong> ${warningText}`;
+                
+                // Remove existing warning if any
+                const existingWarning = document.querySelector('.flash.warning');
+                if (existingWarning) existingWarning.remove();
+                
+                completeDeliveryBtn.parentNode.insertBefore(warningMsg, completeDeliveryBtn.nextSibling);
+            }
+
+            const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(delivery.address)}`;
+            document.getElementById('btn-navigate').href = googleMapsUrl;
+
+            deliveryDetails.style.display = 'block';
+
+            // Play success sound
+            playSound('success');
+        }
+
+        // Show verification failure
+        function showVerificationFailure(result) {
+            verificationResult.style.display = 'block';
+
+            // Determine which step failed
+            const stepMap = {
+                'signature_verification': 1,
+                'database_lookup': 2,
+                'secret_verification': 3,
+                'status_check': 4,
+                'user_authorization': 5
+            };
+
+            const failedStep = stepMap[result.step] || 5;
+
+            // Mark previous steps as completed
+            for (let i = 1; i < failedStep; i++) {
+                updateStep(i, 'completed');
+            }
+
+            // Mark failed step
+            updateStep(failedStep, 'failed');
+
+            // Show error message
+            const errorStep = steps[failedStep];
+            errorStep.innerHTML = `
+                <div class="step-icon"><i class="fas fa-times"></i></div>
+                <div>
+                    <strong style="color: var(--danger);">Verification Failed</strong>
+                    <p style="font-size: 12px; color: var(--danger);">${result.message}</p>
+                </div>
+            `;
+            errorStep.classList.add('failed');
+
+            // Play error sound
+            playSound('error');
+        }
+
+        // Manual verification
+        verifyManualBtn.addEventListener('click', () => {
+            const qrCode = manualQrInput.value.trim();
+            if (!qrCode) {
+                alert('Please enter a QR code');
+                return;
+            }
+            verifyQRCode(qrCode);
+        });
+
+        // Play sound
+        function playSound(type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            if (type === 'success') {
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+            } else {
+                oscillator.frequency.setValueAtTime(156, audioContext.currentTime); // D3
+                oscillator.frequency.setValueAtTime(147, audioContext.currentTime + 0.1); // D3
+            }
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+    </script>
+</body>
+</html>

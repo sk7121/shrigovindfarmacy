@@ -13,13 +13,12 @@ class QRCodeService {
      * @returns {Object} QR code data and URL
      */
     static async generateDeliveryQRCode(delivery) {
+        // Simplified QR data - only essential info to avoid "data too big" error
         const qrData = {
-            deliveryId: delivery._id.toString(),
-            qrCode: delivery.qrCode,
-            secret: delivery.qrCodeSecret,
-            orderId: delivery.order.toString(),
-            timestamp: Date.now(),
-            type: 'delivery_verification'
+            d: delivery._id.toString(), // deliveryId
+            q: delivery.qrCode,         // qrCode
+            s: delivery.qrCodeSecret,   // secret
+            t: Date.now()               // timestamp
         };
 
         // Create signed payload
@@ -31,8 +30,12 @@ class QRCodeService {
 
         const qrString = `${payload}.${signature}`;
 
-        // Use async toDataURL instead of deprecated toDataURLSync
-        const qrCodeUrl = await QRCode.toDataURL(qrString);
+        // Use async toDataURL with error correction for larger data
+        const qrCodeUrl = await QRCode.toDataURL(qrString, {
+            errorCorrectionLevel: 'M',
+            width: 300,
+            margin: 2
+        });
 
         return {
             qrData,
@@ -239,26 +242,31 @@ class QRCodeService {
     static async generateDeliveryLabel(delivery, order) {
         const qrData = await this.generateDeliveryQRCode(delivery);
 
+        // Safely extract order data with fallbacks to delivery data
+        const orderData = order || {};
+        const orderAddress = orderData.address || orderData.shippingAddress || delivery.deliveryAddress || {};
+        const deliveryAddress = delivery.deliveryAddress || orderAddress;
+
         const labelData = {
             deliveryId: delivery._id,
-            orderId: delivery.tracking?.orderId || order.tracking?.orderId,
+            orderId: delivery.tracking?.orderId || orderData.tracking?.orderId || delivery.order?.toString?.().slice(-4).toUpperCase() || 'N/A',
             qrCode: qrData.qrCode,
             qrCodeUrl: qrData.qrCodeUrl,
             shippingAddress: {
-                fullName: order.address?.fullName || delivery.deliveryAddress?.fullName,
-                address: order.address?.address || delivery.deliveryAddress?.address,
-                city: order.address?.city || delivery.deliveryAddress?.city,
-                state: order.address?.state || delivery.deliveryAddress?.state,
-                pincode: order.address?.pincode || delivery.deliveryAddress?.pincode,
-                phone: order.address?.phone || delivery.deliveryAddress?.phone
+                fullName: orderAddress.fullName || orderAddress.name || deliveryAddress.fullName || deliveryAddress.name || 'N/A',
+                address: orderAddress.address || deliveryAddress.address || 'N/A',
+                city: orderAddress.city || deliveryAddress.city || 'N/A',
+                state: orderAddress.state || deliveryAddress.state || 'N/A',
+                pincode: orderAddress.pincode || deliveryAddress.pincode || 'N/A',
+                phone: orderAddress.phone || deliveryAddress.phone || 'N/A'
             },
-            items: order.items?.map(item => ({
+            items: Array.isArray(orderData.items) ? orderData.items.map(item => ({
                 name: item.name,
                 quantity: item.quantity
-            })) || [],
-            codAmount: delivery.codAmount,
-            priority: delivery.priority,
-            instructions: delivery.instructions,
+            })) : [],
+            codAmount: delivery.codAmount || 0,
+            priority: delivery.priority || 'standard',
+            instructions: delivery.instructions || '',
             generatedAt: new Date()
         };
 
@@ -269,62 +277,137 @@ class QRCodeService {
      * Validate delivery QR code against database
      * @param {string} qrCode - QR code string
      * @param {mongoose.Model} DeliveryModel - Delivery mongoose model
+     * @param {Object} scanningUser - User who is scanning (for authorization check)
      * @returns {Object} Validation result
      */
-    static async validateDeliveryQRCode(qrCode, DeliveryModel) {
+    static async validateDeliveryQRCode(qrCode, DeliveryModel, scanningUser = null) {
         try {
-            // First verify the QR code format and signature
+            // Step 1: Verify the QR code format and signature
             const verification = this.verifyQRCode(qrCode);
-            
+
             if (!verification.valid) {
                 return {
                     valid: false,
-                    error: verification.error
+                    error: verification.error,
+                    step: 'signature_verification'
                 };
             }
 
-            // Find delivery in database
+            // Step 2: Find delivery in database
             const delivery = await DeliveryModel.findOne({
-                qrCode: verification.payload.qrCode
-            }).populate('order assignedTo');
+                qrCode: verification.payload.q
+            })
+            .populate('order')
+            .populate('assignedTo');
 
             if (!delivery) {
                 return {
                     valid: false,
-                    error: 'Delivery not found'
+                    error: 'Delivery not found',
+                    step: 'database_lookup'
                 };
             }
 
-            // Verify secret matches
-            if (delivery.qrCodeSecret !== verification.payload.secret) {
+            // Step 3: Verify secret matches (prevent QR code tampering)
+            if (delivery.qrCodeSecret !== verification.payload.s) {
                 return {
                     valid: false,
-                    error: 'Invalid delivery credentials'
+                    error: 'Invalid delivery credentials',
+                    step: 'secret_verification'
                 };
             }
 
-            // Check if delivery is already completed
+            // Step 4: Check if delivery is already completed
             if (delivery.status === 'delivered') {
                 return {
                     valid: false,
                     error: 'Delivery already completed',
                     delivery,
-                    alreadyDelivered: true
+                    alreadyDelivered: true,
+                    step: 'status_check'
                 };
             }
 
+            // Step 5: User Authorization Check (if scanning user provided)
+            if (scanningUser) {
+                const isAuthorized = await this._authorizeUserForDelivery(scanningUser, delivery);
+                
+                if (!isAuthorized.authorized) {
+                    return {
+                        valid: false,
+                        error: isAuthorized.error,
+                        delivery,
+                        step: 'user_authorization'
+                    };
+                }
+            }
+
+            // All checks passed
             return {
                 valid: true,
                 delivery,
-                payload: verification.payload
+                payload: verification.payload,
+                step: 'verified'
             };
         } catch (error) {
             console.error('Delivery QR validation error:', error);
             return {
                 valid: false,
-                error: 'Validation failed'
+                error: 'Validation failed',
+                step: 'unknown_error'
             };
         }
+    }
+
+    /**
+     * Check if a user is authorized to scan/verify a delivery
+     * @param {Object} user - User document (with _id, role, phone, email)
+     * @param {Object} delivery - Delivery document
+     * @returns {Object} Authorization result
+     */
+    static async _authorizeUserForDelivery(user, delivery) {
+        const userId = user._id.toString();
+        const userPhone = user.phone;
+        const userEmail = user.email;
+
+        // Check 1: Is the user the assigned delivery agent?
+        if (delivery.assignedTo && delivery.assignedTo._id.toString() === userId) {
+            return { authorized: true, reason: 'assigned_agent' };
+        }
+
+        // Check 2: Is the user the customer (by phone or email)?
+        const customerPhone = delivery.deliveryAddress?.phone || 
+                             delivery.order?.address?.phone || 
+                             delivery.order?.shippingAddress?.phone;
+        const customerEmail = delivery.deliveryAddress?.email || 
+                             delivery.order?.address?.email || 
+                             delivery.order?.shippingAddress?.email;
+
+        if (customerPhone && userPhone && customerPhone === userPhone) {
+            return { authorized: true, reason: 'customer_phone' };
+        }
+
+        if (customerEmail && userEmail && customerEmail === userEmail) {
+            return { authorized: true, reason: 'customer_email' };
+        }
+
+        // Check 3: Is the user an admin? (allow admins to scan any delivery)
+        if (user.role === 'admin' || user.role === 'superadmin') {
+            return { authorized: true, reason: 'admin' };
+        }
+
+        // Check 4: Is the user a delivery agent assigned to the order?
+        if (delivery.order && delivery.order.deliveryAgent) {
+            if (delivery.order.deliveryAgent.toString() === userId) {
+                return { authorized: true, reason: 'order_assigned_agent' };
+            }
+        }
+
+        // Not authorized
+        return {
+            authorized: false,
+            error: 'You are not authorized to verify this delivery. Only assigned delivery agents, the customer, or admins can scan this QR code.'
+        };
     }
 }
 
