@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipping Partners - Admin | Shri Govind Pharmacy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1c8125;
+            --primary-dark: #145a1a;
+            --secondary: #e67e22;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #2d2d2d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .admin-header h1 {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .admin-nav a {
+            color: var(--text);
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .admin-nav a:hover {
+            background: var(--bg);
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .partners-header {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .partners-header h2 {
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .partners-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .partner-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .partner-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .partner-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .partner-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .partner-info h3 {
+            color: var(--text);
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .partner-info p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .partner-details {
+            margin-bottom: 1rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.875rem;
+        }
+
+        .detail-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .partner-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .partner-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .status-badge.active {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+        }
+
+        .status-badge.inactive {
+            background: rgba(108, 117, 125, 0.1);
+            color: var(--text-muted);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--text-muted);
+            opacity: 0.3;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .partners-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .partners-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="admin-header">
+        <h1><i class="fas fa-shield-alt"></i> Admin Dashboard</h1>
+        <nav class="admin-nav">
+            <a href="/admin/home"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/admin/delivery"><i class="fas fa-shipping-fast"></i> Delivery</a>
+            <a href="/admin/delivery-agents"><i class="fas fa-motorcycle"></i> Agents</a>
+            <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="partners-header">
+            <div>
+                <h2><i class="fas fa-handshake"></i> Shipping Partners</h2>
+                <p style="color: var(--text-muted); margin-top: 0.25rem;">Manage third-party logistics partners</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <a href="/admin/delivery" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Back to Delivery
+                </a>
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i> Add Partner
+                </button>
+            </div>
+        </div>
+
+        <!-- Partners Grid -->
+        <div class="partners-grid">
+            <% if (partners && partners.length > 0) { %>
+                <% partners.forEach(partner => { %>
+                    <div class="partner-card">
+                        <div class="partner-header">
+                            <div class="partner-logo">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="partner-info">
+                                <h3><%= partner.name %></h3>
+                                <p><%= partner.serviceType || 'Logistics Partner' %></p>
+                            </div>
+                            <span class="status-badge <%= partner.isActive ? 'active' : 'inactive' %>">
+                                <i class="fas fa-circle"></i> <%= partner.isActive ? 'Active' : 'Inactive' %>
+                            </span>
+                        </div>
+
+                        <div class="partner-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Contact</span>
+                                <span class="detail-value"><%= partner.contactEmail || 'N/A' %></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Phone</span>
+                                <span class="detail-value"><%= partner.contactPhone || 'N/A' %></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Service Areas</span>
+                                <span class="detail-value"><%= (partner.serviceAreas || []).length || 0 %> cities</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Priority</span>
+                                <span class="detail-value"><%= partner.priority || 0 %></span>
+                            </div>
+                        </div>
+
+                        <div class="partner-stats">
+                            <div class="stat-item">
+                                <div class="stat-value"><%= partner.stats?.totalDeliveries || 0 %></div>
+                                <div class="stat-label">Deliveries</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value"><%= partner.stats?.successRate || 100 %>%</div>
+                                <div class="stat-label">Success Rate</div>
+                            </div>
+                        </div>
+
+                        <div class="partner-actions">
+                            <button class="btn btn-outline" style="flex: 1;" onclick="editPartner('<%= partner._id %>')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-outline" style="flex: 1;" onclick="togglePartnerStatus('<%= partner._id %>', <%= partner.isActive %>)">
+                                <i class="fas fa-<%= partner.isActive ? 'ban' : 'check' %>"></i> <%= partner.isActive ? 'Deactivate' : 'Activate' %>
+                            </button>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-truck"></i>
+                    <h3>No Shipping Partners</h3>
+                    <p style="color: var(--text-muted);">Add your first shipping partner to expand delivery options.</p>
+                    <button class="btn btn-primary" onclick="openAddModal()" style="margin-top: 1rem;">
+                        <i class="fas fa-plus"></i> Add Partner
+                    </button>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Add/Edit Partner Modal -->
+    <div class="modal" id="partnerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle"><i class="fas fa-plus"></i> Add Shipping Partner</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="partnerForm" onsubmit="submitPartner(event)">
+                <input type="hidden" id="partnerId">
+                
+                <div class="form-group">
+                    <label>Partner Name *</label>
+                    <input type="text" id="partnerName" name="name" required placeholder="e.g., Delhivery, BlueDart">
+                </div>
+
+                <div class="form-group">
+                    <label>Service Type</label>
+                    <select id="serviceType" name="serviceType">
+                        <option value="express">Express Delivery</option>
+                        <option value="standard">Standard Delivery</option>
+                        <option value="same-day">Same Day Delivery</option>
+                        <option value="logistics">Logistics Partner</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Contact Email</label>
+                        <input type="email" id="contactEmail" name="contactEmail" placeholder="partner@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Phone</label>
+                        <input type="tel" id="contactPhone" name="contactPhone" placeholder="+91 9876543210">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>API Endpoint (Optional)</label>
+                    <input type="url" id="apiEndpoint" name="apiEndpoint" placeholder="https://api.partner.com/webhook">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <input type="number" id="priority" name="priority" value="0" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isActive" name="isActive" checked> Active
+                        </label>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Partner
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openAddModal() {
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> Add Shipping Partner';
+            document.getElementById('partnerForm').reset();
+            document.getElementById('partnerId').value = '';
+            document.getElementById('partnerModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('partnerModal').classList.remove('active');
+        }
+
+        async function editPartner(partnerId) {
+            try {
+                const response = await fetch(`/api/admin/partners/${partnerId}`);
+                const partner = await response.json();
+
+                document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Shipping Partner';
+                document.getElementById('partnerId').value = partner._id;
+                document.getElementById('partnerName').value = partner.name;
+                document.getElementById('serviceType').value = partner.serviceType || 'standard';
+                document.getElementById('contactEmail').value = partner.contactEmail || '';
+                document.getElementById('contactPhone').value = partner.contactPhone || '';
+                document.getElementById('apiEndpoint').value = partner.apiEndpoint || '';
+                document.getElementById('priority').value = partner.priority || 0;
+                document.getElementById('isActive').checked = partner.isActive;
+
+                document.getElementById('partnerModal').classList.add('active');
+            } catch (error) {
+                alert('Error loading partner details');
+                console.error(error);
+            }
+        }
+
+        async function submitPartner(event) {
+            event.preventDefault();
+
+            const partnerId = document.getElementById('partnerId').value;
+            const formData = {
+                name: document.getElementById('partnerName').value,
+                serviceType: document.getElementById('serviceType').value,
+                contactEmail: document.getElementById('contactEmail').value,
+                contactPhone: document.getElementById('contactPhone').value,
+                apiEndpoint: document.getElementById('apiEndpoint').value,
+                priority: parseInt(document.getElementById('priority').value),
+                isActive: document.getElementById('isActive').checked,
+            };
+
+            try {
+                const url = partnerId ? `/admin/shipping-partners/${partnerId}` : '/admin/shipping-partners';
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Partner saved successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + result.message);
+                    }
+                }
+            } catch (error) {
+                alert('Error saving partner. Please try again.');
+                console.error(error);
+            }
+        }
+
+        async function togglePartnerStatus(partnerId, currentStatus) {
+            if (!confirm(`Are you sure you want to ${currentStatus ? 'deactivate' : 'activate'} this partner?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/shipping-partners/${partnerId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ isActive: !currentStatus }),
+                });
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    location.reload();
+                }
+            } catch (error) {
+                alert('Error updating partner status');
+                console.error(error);
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('partnerModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

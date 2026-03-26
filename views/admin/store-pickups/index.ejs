@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Store Pickup Verification — Admin Panel</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --secondary: #e67e22;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --info: #17a2b8;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .admin-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .admin-header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .admin-logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .admin-logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-logo-main {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    .admin-logo-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-view-store {
+      padding: 0.5rem 1.25rem;
+      background: var(--secondary);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-view-store:hover {
+      background: #d35400;
+      transform: translateY(-1px);
+    }
+
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: var(--bg);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+    }
+
+    /* Main Content */
+    .main-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-icon.pending { background: #fff3cd; color: #856404; }
+    .stat-icon.picked { background: #d4edda; color: #155724; }
+    .stat-icon.cancelled { background: #f8d7da; color: #721c24; }
+    .stat-icon.today { background: #d1ecf1; color: #0c5460; }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+
+    /* Orders List */
+    .orders-list {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .order-item {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr 1fr auto;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    .order-item:hover {
+      background: var(--bg);
+    }
+
+    .order-info h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .order-info p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .customer-info {
+      font-size: 0.875rem;
+    }
+
+    .customer-info p {
+      margin-bottom: 0.25rem;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-badge.pending_pickup { background: #fff3cd; color: #856404; }
+    .status-badge.otp_generated { background: #d1ecf1; color: #0c5460; }
+    .status-badge.picked_up { background: #d4edda; color: #155724; }
+
+    .action-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 16px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      padding: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .otp-display {
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 1.5rem;
+      background: var(--bg);
+      border-radius: 12px;
+      letter-spacing: 0.5rem;
+      margin: 1rem 0;
+      font-family: monospace;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .alert-info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .alert-warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 768px) {
+      .admin-header-inner,
+      .main-content {
+        padding: 0 1rem;
+      }
+
+      .order-item {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <a href="/admin/home" class="admin-logo">
+        <div class="admin-logo-icon"><i class="fas fa-mortar-pestle"></i></div>
+        <div class="admin-logo-text">
+          <span class="admin-logo-main">Shri Govind</span>
+          <span class="admin-logo-sub">Admin Panel</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <a href="/home" class="btn-view-store">
+          <i class="fas fa-store"></i>
+          <span class="desktop-only">View Store</span>
+        </a>
+        <button class="theme-toggle" id="theme-toggle">
+          <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="page-header">
+      <h1><i class="fas fa-box-open"></i> Store Pickup Verification</h1>
+      <p>Verify delivery agent has picked up items from store</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div style="margin-bottom: 1.5rem;">
+      <div style="background: var(--surface); padding: 1rem; border-radius: 12px; box-shadow: var(--shadow);">
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 250px;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem;">
+              <i class="fas fa-search"></i> Search Orders
+            </label>
+            <input 
+              type="text" 
+              id="searchInput" 
+              placeholder="Search by Order ID, Customer Name, or Phone..." 
+              style="width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: 8px; font-size: 0.9rem; font-family: inherit;"
+              onkeyup="filterOrders()"
+            >
+          </div>
+          <div style="min-width: 150px;">
+            <label style="display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem;">
+              <i class="fas fa-filter"></i> Filter by Status
+            </label>
+            <select 
+              id="statusFilter" 
+              style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 8px; font-size: 0.9rem; font-family: inherit; background: var(--surface); color: var(--text);"
+              onchange="filterOrders()"
+            >
+              <option value="">All Status</option>
+              <option value="pending_pickup">Pending Pickup</option>
+              <option value="otp_generated">Ready for Verification</option>
+              <option value="picked_up">Picked Up</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="pending">Pending Pickups</button>
+      <button class="tab-btn" data-tab="all">All Records</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon pending">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-label">Pending Pickup</div>
+        <div class="stat-value" id="stat-pending">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon picked">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-label">Picked Up Today</div>
+        <div class="stat-value" id="stat-today">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon picked">
+          <i class="fas fa-box"></i>
+        </div>
+        <div class="stat-label">Total Picked Up</div>
+        <div class="stat-value" id="stat-picked">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon cancelled">
+          <i class="fas fa-times-circle"></i>
+        </div>
+        <div class="stat-label">Cancelled</div>
+        <div class="stat-value" id="stat-cancelled">0</div>
+      </div>
+    </div>
+
+    <!-- Pending Orders List -->
+    <div class="orders-list" id="pending-list">
+      <% if (typeof pendingOrders !== 'undefined' && pendingOrders.length > 0) { %>
+        <% pendingOrders.forEach(order => { %>
+          <div class="order-item">
+            <div class="order-info">
+              <h3><%= order.tracking.orderId %></h3>
+              <p><%= new Date(order.createdAt).toLocaleDateString('en-IN') %></p>
+            </div>
+            <div class="customer-info">
+              <p><i class="fas fa-user"></i> <%= order.user.name %></p>
+              <p><i class="fas fa-phone"></i> <%= order.user.phone %></p>
+              <p><i class="fas fa-envelope"></i> <%= order.user.email %></p>
+            </div>
+            <div>
+              <span class="status-badge out_for_delivery">Out for Delivery</span>
+            </div>
+            <div>
+              <p><strong>₹<%= order.pricing.total %></strong></p>
+            </div>
+            <div>
+              <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                <i class="fas fa-info-circle"></i> OTP will be verified with customer during final delivery
+              </p>
+              <button onclick="assignPickup('<%= order._id %>')"
+                      class="btn btn-success btn-sm"
+                      style="padding: 8px 16px; font-weight: 600;"
+                      id="assign-btn-<%= order._id %>">
+                <i class="fas fa-box"></i> Mark as Picked Up from Store
+              </button>
+              <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.5rem;">
+                <i class="fas fa-check-circle"></i> Customer OTP will be verified at delivery time
+              </p>
+            </div>
+          </div>
+        <% }) %>
+      <% } else if (typeof pickupRecords !== 'undefined' && pickupRecords.length > 0) { %>
+        <% pickupRecords.forEach(pickup => { %>
+          <div class="order-item">
+            <div class="order-info">
+              <h3><%= pickup.order.tracking.orderId %></h3>
+              <p><%= new Date(pickup.createdAt).toLocaleDateString('en-IN') %></p>
+            </div>
+            <div class="customer-info">
+              <p><i class="fas fa-user"></i> <%= pickup.order.user.name %></p>
+              <p><i class="fas fa-phone"></i> <%= pickup.order.user.phone %></p>
+            </div>
+            <div>
+              <span class="status-badge <%= pickup.status %>">
+                <%= pickup.status.replace('_', ' ') %>
+              </span>
+            </div>
+            <div>
+              <% if (pickup.verificationCode) { %>
+                <div style="text-align: center; margin: 0.5rem 0;">
+                  <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">Verification Code (Last 4 digits of Order ID):</p>
+                  <div style="font-size: 2rem; font-weight: 700; color: var(--primary); font-family: monospace; letter-spacing: 0.5rem; background: rgba(28, 129, 37, 0.1); padding: 0.75rem 1.5rem; border-radius: 8px; display: inline-block;">
+                    <%= pickup.verificationCode %>
+                  </div>
+                  <% if (pickup.codeExpiresAt) { %>
+                    <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem;">
+                      <i class="fas fa-clock"></i> Expires: <%= new Date(pickup.codeExpiresAt).toLocaleString('en-IN') %>
+                    </p>
+                  <% } %>
+                  <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.5rem;">
+                    <i class="fas fa-info-circle"></i> Agent will show this code at store
+                  </p>
+                  <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    <i class="fas fa-check-circle"></i> Verify to confirm items collected
+                  </p>
+                </div>
+              <% } else { %>
+                <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+                  <i class="fas fa-clock"></i> Code will be generated when agent starts delivery
+                </p>
+              <% } %>
+            </div>
+            <div>
+              <% if (pickup.status === 'otp_generated') { %>
+                <button class="action-btn btn-primary" onclick="openVerifyOTPModal('<%= pickup.order._id %>')">
+                  <i class="fas fa-check"></i> Verify OTP
+                </button>
+                <button class="action-btn btn-secondary" onclick="openManualPickupModal('<%= pickup.order._id %>')">
+                  <i class="fas fa-user-check"></i> Manual Pickup
+                </button>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <h3>No Pending Pickups</h3>
+          <p>All orders have been picked up or there are no orders out for delivery</p>
+        </div>
+      <% } %>
+    </div>
+  </main>
+
+  <!-- Verify OTP Modal -->
+  <div class="modal-overlay" id="verifyOTPModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-check-circle"></i> Verify Store Pickup</h2>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle"></i> Enter the verification code (last 4 digits of Order ID) shown by the delivery agent.
+        </div>
+        <div class="form-group">
+          <label class="form-label">Enter Verification Code (4 digits):</label>
+          <input type="text" id="verifyOTPInput" class="form-input" maxlength="4" pattern="[A-Za-z0-9]*" inputmode="text" placeholder="ABCD" style="text-transform: uppercase; letter-spacing: 0.5rem; font-size: 1.5rem; text-align: center;">
+        </div>
+        <div id="verifyResult"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn btn-secondary" onclick="closeModal('verifyOTPModal')">Cancel</button>
+        <button class="action-btn btn-primary" onclick="verifyOTP()">
+          <i class="fas fa-check"></i> Verify & Confirm Pickup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual Pickup Modal -->
+  <div class="modal-overlay" id="manualPickupModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-user-check"></i> Manual Pickup</h2>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle"></i> Use this only when OTP verification is not possible.
+        </div>
+        <div class="form-group">
+          <label class="form-label">Staff Name *</label>
+          <input type="text" id="manualStaffName" class="form-input" placeholder="Enter staff name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Staff Phone *</label>
+          <input type="tel" id="manualStaffPhone" class="form-input" placeholder="Enter staff phone">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason (Optional)</label>
+          <textarea id="manualReason" class="form-input" rows="2" placeholder="Reason for manual pickup"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn btn-secondary" onclick="closeModal('manualPickupModal')">Cancel</button>
+        <button class="action-btn btn-primary" onclick="manualPickup()">
+          <i class="fas fa-check"></i> Confirm Pickup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentOrderId = null;
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        filterOrders();
+      });
+    });
+
+    // Filter orders function
+    function filterOrders() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const statusFilter = document.getElementById('statusFilter').value;
+      const orderItems = document.querySelectorAll('.order-item');
+
+      orderItems.forEach(item => {
+        const orderId = item.querySelector('h3').textContent.toLowerCase();
+        const customerInfo = item.querySelector('.customer-info').textContent.toLowerCase();
+        const statusBadge = item.querySelector('.status-badge');
+        const status = statusBadge ? statusBadge.textContent.toLowerCase().replace(' ', '_') : '';
+
+        // Check search match
+        const matchesSearch = !searchTerm || orderId.includes(searchTerm) || customerInfo.includes(searchTerm);
+        
+        // Check status match
+        const matchesStatus = !statusFilter || status === statusFilter;
+
+        // Show/hide based on filters
+        if (matchesSearch && matchesStatus) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Load stats
+    async function loadStats() {
+      try {
+        const res = await fetch('/admin/store-pickups/api/stats');
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('stat-pending').textContent = data.stats.pending;
+          document.getElementById('stat-today').textContent = data.stats.todaysPickups;
+          document.getElementById('stat-picked').textContent = data.stats.pickedUp;
+          document.getElementById('stat-cancelled').textContent = data.stats.cancelled;
+        }
+      } catch (err) {
+        console.error('Error loading stats:', err);
+      }
+    }
+
+    // Modal functions
+    function openVerifyOTPModal(orderId) {
+      currentOrderId = orderId;
+      document.getElementById('verifyOTPModal').classList.add('active');
+      document.getElementById('verifyOTPInput').value = '';
+      document.getElementById('verifyResult').innerHTML = '';
+      document.getElementById('verifyOTPInput').focus();
+    }
+
+    function openManualPickupModal(orderId) {
+      currentOrderId = orderId;
+      document.getElementById('manualPickupModal').classList.add('active');
+      document.getElementById('manualStaffName').value = '';
+      document.getElementById('manualStaffPhone').value = '';
+      document.getElementById('manualReason').value = '';
+    }
+
+    // Assign Pickup (mark as picked up from store - OTP will be verified during delivery)
+    async function assignPickup(orderId) {
+      if (!orderId) return;
+
+      if (!confirm(`Are you sure you want to mark this order as picked up from store?\n\nThe customer OTP will be verified during final delivery.`)) {
+        return;
+      }
+
+      const assignBtn = document.getElementById(`assign-btn-${orderId}`);
+      if (assignBtn) {
+        assignBtn.disabled = true;
+        assignBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+      }
+
+      try {
+        const res = await fetch(`/admin/store-pickups/${orderId}/assign`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          alert('Order marked as picked up successfully!');
+          location.reload();
+        } else {
+          alert('Error: ' + data.message);
+          if (assignBtn) {
+            assignBtn.disabled = false;
+            assignBtn.innerHTML = '<i class="fas fa-box"></i> Mark as Picked Up from Store';
+          }
+        }
+      } catch (err) {
+        console.error('Error assigning pickup:', err);
+        alert('Failed to assign pickup');
+        if (assignBtn) {
+          assignBtn.disabled = false;
+          assignBtn.innerHTML = '<i class="fas fa-box"></i> Mark as Picked Up from Store';
+        }
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+      currentOrderId = null;
+    }
+
+    // Verify OTP (now verification code)
+    async function verifyOTP() {
+      if (!currentOrderId) return;
+
+      const code = document.getElementById('verifyOTPInput').value.trim();
+      if (!code || code.length !== 4) {
+        document.getElementById('verifyResult').innerHTML = '<div class="alert alert-warning">Please enter a valid 4-digit verification code</div>';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/admin/store-pickups/${currentOrderId}/verify-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ otp: code }) // Still use 'otp' key for backward compatibility
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById('verifyResult').innerHTML = '<div class="alert alert-info"><i class="fas fa-check-circle"></i> Pickup verified successfully!</div>';
+          setTimeout(() => {
+            closeModal('verifyOTPModal');
+            location.reload();
+          }, 1500);
+        } else {
+          document.getElementById('verifyResult').innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-circle"></i> ${data.message}</div>`;
+        }
+      } catch (err) {
+        console.error('Error verifying OTP:', err);
+        document.getElementById('verifyResult').innerHTML = '<div class="alert alert-warning">Failed to verify OTP</div>';
+      }
+    }
+
+    // Manual Pickup
+    async function manualPickup() {
+      if (!currentOrderId) return;
+
+      const staffName = document.getElementById('manualStaffName').value.trim();
+      const staffPhone = document.getElementById('manualStaffPhone').value.trim();
+      const reason = document.getElementById('manualReason').value.trim();
+
+      if (!staffName || !staffPhone) {
+        alert('Please enter staff name and phone number');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/admin/store-pickups/${currentOrderId}/manual-pickup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ staffName, staffPhone, reason })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          alert('Pickup recorded successfully!');
+          closeModal('manualPickupModal');
+          location.reload();
+        } else {
+          alert('Error: ' + data.message);
+        }
+      } catch (err) {
+        console.error('Error in manual pickup:', err);
+        alert('Failed to record pickup');
+      }
+    }
+
+    // Initialize
+    loadStats();
+  </script>
+</body>
+</html>

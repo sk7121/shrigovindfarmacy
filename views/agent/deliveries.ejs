@@ -402,13 +402,14 @@
                         <label><i class="fas fa-filter"></i> Status</label>
                         <select id="statusFilter">
                             <option value="">All Status</option>
+                            <option value="pending" <%= currentStatus === 'pending' ? 'selected' : '' %>>Pending</option>
                             <option value="assigned" <%= currentStatus === 'assigned' ? 'selected' : '' %>>Assigned</option>
                             <option value="picked_up" <%= currentStatus === 'picked_up' ? 'selected' : '' %>>Picked Up</option>
                             <option value="in_transit" <%= currentStatus === 'in_transit' ? 'selected' : '' %>>In Transit</option>
                             <option value="out_for_delivery" <%= currentStatus === 'out_for_delivery' ? 'selected' : '' %>>Out for Delivery</option>
                             <option value="delivered" <%= currentStatus === 'delivered' ? 'selected' : '' %>>Delivered</option>
-                            <option value="failed">Failed</option>
-                            <option value="cancelled">Cancelled</option>
+                            <option value="failed" <%= currentStatus === 'failed' ? 'selected' : '' %>>Failed</option>
+                            <option value="cancelled" <%= currentStatus === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -432,6 +433,76 @@
         </div>
 
         <!-- Deliveries/Cancellations List -->
+        
+        <!-- Assigned Orders (orders with deliveryAgent but no Delivery document) -->
+        <% if (assignedOrders && assignedOrders.length > 0 && currentType !== 'cancellations' && (!currentStatus || currentStatus === 'assigned')) { %>
+            <div class="deliveries-list">
+                <h3 style="margin-bottom: 1rem; color: var(--primary);">
+                    <i class="fas fa-inbox"></i> Assigned Orders (<%= assignedOrders.length %>)
+                </h3>
+                <% assignedOrders.forEach(order => { %>
+                    <div class="delivery-card">
+                        <div class="delivery-header">
+                            <div class="delivery-id">
+                                <i class="fas fa-box"></i> <%= order.tracking?.orderId || 'N/A' %>
+                                <small>Assigned Order</small>
+                            </div>
+                            <span class="status-badge assigned">
+                                Assigned
+                            </span>
+                        </div>
+
+                        <div class="delivery-grid">
+                            <div class="delivery-info">
+                                <label><i class="fas fa-user"></i> Customer</label>
+                                <strong><%= order.address?.fullName || order.user?.name || 'N/A' %></strong>
+                            </div>
+                            <div class="delivery-info">
+                                <label><i class="fas fa-phone"></i> Phone</label>
+                                <strong><%= order.address?.phone || order.user?.phone || 'N/A' %></strong>
+                            </div>
+                            <div class="delivery-info">
+                                <label><i class="fas fa-map-marker-alt"></i> Address</label>
+                                <strong><%= order.address?.address || 'N/A' %></strong><br>
+                                <%= order.address?.city || '' %>, <%= order.address?.pincode || '' %>
+                            </div>
+                            <div class="delivery-info">
+                                <label><i class="fas fa-money-bill-wave"></i> Payment</label>
+                                <strong style="color: <%= order.payment?.method === 'cod' ? 'var(--warning)' : 'var(--success)' %>;">
+                                    <%= order.payment?.method === 'cod' ? 'COD' : 'Paid Online' %>
+                                </strong>
+                            </div>
+                            <% if (order.items && order.items.length > 0) { %>
+                                <div class="delivery-info">
+                                    <label><i class="fas fa-boxes"></i> Items</label>
+                                    <strong><%= order.items.length %> product(s)</strong>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <div class="delivery-actions">
+                            <button onclick="startDelivery('<%= order._id %>', '<%= order.tracking?.orderId || '' %>')"
+                                    class="btn btn-success btn-sm" id="start-btn-<%= order._id %>">
+                                <i class="fas fa-play"></i> Start Delivery
+                            </button>
+                            <% if (order.address?.phone) { %>
+                                <a href="tel:<%= order.address.phone %>" class="btn btn-outline btn-sm">
+                                    <i class="fas fa-phone"></i> Call Customer
+                                </a>
+                            <% } %>
+                            <% if (order.address?.address) { %>
+                                <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(order.address.address + ', ' + order.address.city + ', ' + order.address.pincode) %>"
+                                   target="_blank"
+                                   class="btn btn-outline btn-sm">
+                                    <i class="fas fa-map-marked-alt"></i> Navigate
+                                </a>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+
         <% if (currentType === 'cancellations' && cancellationRequests && cancellationRequests.length > 0) { %>
             <div class="deliveries-list">
                 <% cancellationRequests.forEach(request => { %>
@@ -501,7 +572,7 @@
                         <div class="delivery-header">
                             <div class="delivery-id">
                                 <i class="fas fa-qrcode"></i> <%= delivery.qrCode %>
-                                <small>Order: <%= delivery.order?.orderId || delivery.order?._id || 'N/A' %></small>
+                                <small>Order: <%= delivery.order?.tracking?.orderId || 'N/A' %></small>
                             </div>
                             <span class="status-badge <%= delivery.status %>">
                                 <%= delivery.status.replace(/_/g, ' ') %>
@@ -511,16 +582,16 @@
                         <div class="delivery-grid">
                             <div class="delivery-info">
                                 <label><i class="fas fa-user"></i> Customer</label>
-                                <strong><%= delivery.deliveryAddress?.fullName || delivery.order?.shippingInfo?.name || 'N/A' %></strong>
+                                <strong><%= delivery.deliveryAddress?.fullName || delivery.order?.address?.fullName || delivery.order?.user?.name || 'N/A' %></strong>
                             </div>
                             <div class="delivery-info">
                                 <label><i class="fas fa-phone"></i> Phone</label>
-                                <strong><%= delivery.deliveryAddress?.phone || delivery.order?.shippingInfo?.phone || 'N/A' %></strong>
+                                <strong><%= delivery.deliveryAddress?.phone || delivery.order?.address?.phone || delivery.order?.user?.phone || 'N/A' %></strong>
                             </div>
                             <div class="delivery-info">
                                 <label><i class="fas fa-map-marker-alt"></i> Address</label>
-                                <strong><%= delivery.deliveryAddress?.address || delivery.order?.shippingInfo?.address || 'N/A' %></strong><br>
-                                <%= delivery.deliveryAddress?.city || '' %>, <%= delivery.deliveryAddress?.pincode || '' %>
+                                <strong><%= delivery.deliveryAddress?.address || delivery.order?.address?.address || 'N/A' %></strong><br>
+                                <%= delivery.deliveryAddress?.city || delivery.order?.address?.city || '' %>, <%= delivery.deliveryAddress?.pincode || delivery.order?.address?.pincode || '' %>
                             </div>
                             <div class="delivery-info">
                                 <label><i class="fas fa-money-bill-wave"></i> COD Amount</label>
@@ -538,22 +609,52 @@
 
                         <div class="delivery-actions">
                             <% if (delivery.status === 'assigned' || delivery.status === 'processing') { %>
-                                <button onclick="startDelivery('<%= delivery._id %>', '<%= delivery.qrCode %>')" 
+                                <button onclick="startDelivery('<%= delivery._id %>', '<%= delivery.qrCode %>')"
                                         class="btn btn-success btn-sm" id="start-btn-<%= delivery._id %>">
                                     <i class="fas fa-play"></i> Start Delivery
                                 </button>
-                            <% } else if (delivery.status === 'out_for_delivery') { %>
+                            <% } else if (delivery.status === 'out_for_delivery' || delivery.status === 'picked_up') { %>
                                 <a href="/agent/delivery/<%= delivery._id %>" class="btn btn-primary btn-sm">
                                     <i class="fas fa-shipping-fast"></i> Complete Delivery
                                 </a>
-                                <% if (delivery.order?.deliveryOTP?.code) { %>
-                                    <div class="otp-info-box" style="background: #e7f3ff; border: 2px dashed var(--info); padding: 10px; border-radius: 8px; margin-top: 10px; text-align: center; width: 100%;">
-                                        <small style="color: var(--text-muted); display: block;">
-                                            <i class="fas fa-info-circle"></i> OTP sent to customer's phone<br>
-                                            <strong>Ask the customer for the 6-digit OTP</strong>
-                                        </small>
+
+                                <% const customerOTP = delivery.order?.deliveryOTP?.code || delivery.deliveryOTP?.code; %>
+                                <% if (customerOTP) { %>
+                                <div class="delivery-code-box" style="background: rgba(28, 129, 37, 0.1); border: 2px solid var(--primary); padding: 12px; border-radius: 8px; margin-top: 10px; text-align: center;">
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">
+                                        <i class="fas fa-shield-alt"></i> Customer OTP for Verification
+                                    </div>
+                                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary); letter-spacing: 1px; font-family: monospace;">
+                                        <%= customerOTP %>
+                                    </div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">
+                                        <i class="fas fa-user-check"></i> Verify this OTP with customer at delivery
+                                    </div>
+                                </div>
+                                <% } %>
+
+                                <% if (delivery.status === 'picked_up') { %>
+                                    <div style="margin-top: 10px; padding: 10px; background: rgba(209, 236, 241, 0.5); border: 2px solid var(--info); border-radius: 8px; text-align: center;">
+                                        <div style="color: var(--info); font-weight: 600; font-size: 0.875rem;">
+                                            <i class="fas fa-box-open"></i> Order Picked Up - Ready for Delivery
+                                        </div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
+                                            This order has been picked up from the store. Complete the delivery to the customer.
+                                        </div>
                                     </div>
                                 <% } %>
+                            <% } else if (delivery.status === 'delivered') { %>
+                                <div style="margin-top: 10px; padding: 10px; background: rgba(40, 167, 69, 0.1); border: 1px solid var(--success); border-radius: 8px; text-align: center;">
+                                    <div style="color: var(--success); font-weight: 600; font-size: 0.875rem;">
+                                        <i class="fas fa-check-circle"></i> Delivered Successfully
+                                    </div>
+                                    <div style="margin-top: 8px; font-size: 0.75rem; color: var(--text-muted);">
+                                        <i class="fas fa-shield-alt"></i> Customer OTP was verified at delivery
+                                    </div>
+                                </div>
+                                <a href="/agent/delivery/<%= delivery._id %>" class="btn btn-outline btn-sm" style="margin-top: 10px;">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
                             <% } else { %>
                                 <a href="/agent/delivery/<%= delivery._id %>" class="btn btn-primary btn-sm">
                                     <i class="fas fa-arrow-right"></i> View Details
@@ -575,12 +676,16 @@
                     </div>
                 <% }) %>
             </div>
+        <% } else if (assignedOrders && assignedOrders.length > 0 && currentType !== 'cancellations' && (!currentStatus || currentStatus === 'assigned')) { %>
+            <!-- Assigned orders are shown above -->
         <% } else { %>
             <div class="empty-state">
                 <i class="fas fa-inbox"></i>
                 <h3>
                     <% if (currentType === 'cancellations') { %>
                         No Cancellation Pickups
+                    <% } else if (currentStatus === 'assigned') { %>
+                        No Assigned Orders
                     <% } else { %>
                         No Deliveries Found
                     <% } %>
@@ -588,6 +693,8 @@
                 <p>
                     <% if (currentType === 'cancellations') { %>
                         You don't have any cancellation pickups assigned. Check back later!
+                    <% } else if (currentStatus === 'assigned') { %>
+                        You don't have any assigned orders. New orders will appear here when assigned to you.
                     <% } else if (currentStatus) { %>
                         No deliveries with this status. Try selecting a different filter.
                     <% } else { %>
@@ -627,7 +734,7 @@
     <script>
         // Start delivery function
         async function startDelivery(deliveryId, deliveryDisplayId) {
-            if (!confirm(`Start delivery for ${deliveryDisplayId}? This will mark the delivery as "Out for Delivery" and generate an OTP for the customer.`)) {
+            if (!confirm(`Start delivery for ${deliveryDisplayId}? This will mark the delivery as "Out for Delivery" and generate OTPs.`)) {
                 return;
             }
 
@@ -649,18 +756,45 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    alert(`Delivery started successfully!\n\nOTP: ${result.data.otp}\nValid until: ${new Date(result.data.expiresAt).toLocaleTimeString('en-IN')}\n\nThis OTP has been sent to the customer's phone. Please collect it upon delivery.`);
+                    // Show verification code with clear instructions
+                    let message = `✅ Delivery Started Successfully!\n\n`;
+                    message += `━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                    message += `🏪 VERIFICATION CODE: ${result.data.verificationCode}\n`;
+                    message += `   (Last 4 digits of Order ID)\n`;
+                    message += `   Show this at the store to collect items\n`;
+                    message += `   (Valid for 24 hours)\n`;
+                    message += `━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+                    message += `📦 DELIVERY OTP:\n`;
+                    message += `   An OTP has been sent to the customer's phone\n`;
+                    message += `   Ask the customer for the 6-digit OTP\n`;
+                    message += `   (Valid for 30 minutes)\n`;
+                    message += `━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+                    message += `📍 Next Steps:\n`;
+                    message += `1. Go to store & show VERIFICATION CODE\n`;
+                    message += `2. Store staff will verify the code\n`;
+                    message += `3. Collect the items from store\n`;
+                    message += `4. Deliver to customer\n`;
+                    message += `5. Get DELIVERY OTP from customer\n`;
+                    message += `6. Mark as delivered using their OTP`;
+
+                    alert(message);
                     location.reload();
                 } else {
-                    alert('Error: ' + result.message);
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-play"></i> Start Delivery';
+                    // Check if it's a "already started" error
+                    if (result.message && result.message.includes('already')) {
+                        alert('ℹ️ ' + result.message + '\n\nRefreshing the page...');
+                        location.reload();
+                    } else {
+                        alert('❌ Error: ' + result.message);
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-play"></i> Start Delivery';
+                        }
                     }
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while starting delivery.');
+                alert('❌ An error occurred while starting delivery. Please refresh and try again.');
                 if (btn) {
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-play"></i> Start Delivery';
@@ -673,6 +807,9 @@
         const searchInput = document.getElementById('searchInput');
         const statusFilter = document.getElementById('statusFilter');
         const sortFilter = document.getElementById('sortFilter');
+        
+        // Get current type from page (passed from server)
+        const currentType = "<%= currentType || '' %>";
 
         // Load saved filters from localStorage
         window.addEventListener('load', () => {
@@ -687,18 +824,20 @@
 
         filterForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            
+
             const search = searchInput.value.trim();
             const status = statusFilter.value;
             const sort = sortFilter.value;
-            
-            // Save to localStorage
-            localStorage.setItem('deliverySearch', search);
-            localStorage.setItem('deliveryStatus', status);
-            localStorage.setItem('deliverySort', sort);
-            
-            // Apply filters
-            applyFilters(search, status, sort);
+
+            // Build query parameters
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (status) params.append('status', status);
+            if (sort) params.append('sort', sort);
+            if (currentType) params.append('type', currentType);
+
+            // Redirect to server with filters
+            window.location.href = '/agent/deliveries?' + params.toString();
         });
 
         function applyFilters(search, status, sort) {
@@ -743,12 +882,17 @@
             searchInput.value = '';
             statusFilter.value = '';
             sortFilter.value = 'newest';
-            
+
             localStorage.removeItem('deliverySearch');
             localStorage.removeItem('deliveryStatus');
             localStorage.removeItem('deliverySort');
-            
-            window.location.href = '/agent/deliveries';
+
+            // Redirect to base URL with type if cancellations
+            if (currentType === 'cancellations') {
+                window.location.href = '/agent/deliveries?type=cancellations';
+            } else {
+                window.location.href = '/agent/deliveries';
+            }
         }
 
         // Auto-hide flash messages

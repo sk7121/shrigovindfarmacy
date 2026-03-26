@@ -421,7 +421,242 @@
     .btn-secondary:hover {
       opacity: 0.9;
     }
-  </style>
+
+    /* Cancellation Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-container {
+      background: var(--surface);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 550px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+      animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-light);
+      border-radius: 16px 16px 0 0;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-header h3 i {
+      color: var(--warning);
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.75rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .modal-close-btn:hover {
+      background: var(--border);
+      color: var(--text-dark);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      font-size: 0.9rem;
+    }
+
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: var(--bg);
+      color: var(--text-dark);
+      font-family: inherit;
+    }
+
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(28, 129, 37, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .items-list {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .item-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-light);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .item-checkbox:last-child {
+      border-bottom: none;
+    }
+
+    .item-checkbox:hover {
+      background: var(--bg);
+    }
+
+    .item-checkbox input[type="checkbox"] {
+      margin: 0;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .item-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1;
+    }
+
+    .item-info img {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    .item-info .item-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-dark);
+    }
+
+    .item-info .item-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .address-box {
+      padding: 1rem;
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text-dark);
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--border);
+      background: var(--bg-light);
+      border-radius: 0 0 16px 16px;
+    }
+
+    .btn-modal-secondary {
+      background: var(--bg);
+      color: var(--text-dark);
+      border: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+      transition: all 0.2s;
+    }
+
+    .btn-modal-secondary:hover {
+      background: var(--border);
+    }
+
+    .btn-modal-primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+      transition: all 0.2s;
+    }
+
+    .btn-modal-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-modal-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   </style>
   <script src="/js/theme.js"></script>
 
@@ -679,9 +914,11 @@
 
             <div class="order-header">
               <h1 class="order-title">Order Details</h1>
-              <a href="/user/orders/<%= order._id %>/invoice" class="btn-download" target="_blank">
-                <i class="fas fa-download"></i> Download Invoice
-              </a>
+              <% if (order.status === 'delivered') { %>
+                <a href="/user/orders/<%= order._id %>/invoice" class="btn-download" target="_blank">
+                  <i class="fas fa-download"></i> Download Invoice
+                </a>
+              <% } %>
             </div>
 
             <div class="order-grid">
@@ -747,8 +984,36 @@
                     </div>
                   </div>
 
-                  <% if ((order.status === 'assigned' || order.status === 'out_for_delivery' || order.status === 'processing') && 
-                      order.deliveryOTP && 
+                  <% 
+                    // Debug logging for OTP status
+                    const otpDebug = {
+                      orderId: order._id.toString(),
+                      status: order.status,
+                      hasDeliveryOTP: !!order.deliveryOTP,
+                      otpCode: order.deliveryOTP?.code || 'NONE',
+                      otpGeneratedAt: order.deliveryOTP?.generatedAt || 'NOT SET',
+                      otpExpiresAt: order.deliveryOTP?.expiresAt || 'NOT SET',
+                      otpVerifiedAt: order.deliveryOTP?.verifiedAt || 'NOT SET',
+                      isPickedUp: order.status === 'picked_up',
+                      shouldShowOTP: (order.status === 'picked_up' || order.status === 'out_for_delivery' || order.status === 'assigned') &&
+                                    order.deliveryOTP &&
+                                    order.deliveryOTP.code &&
+                                    !order.deliveryOTP.verifiedAt
+                    };
+                    console.log('\n========== CUSTOMER ORDER DETAIL PAGE ==========');
+                    console.log('Order ID:', otpDebug.orderId);
+                    console.log('Order Status:', otpDebug.status);
+                    console.log('Has Delivery OTP:', otpDebug.hasDeliveryOTP);
+                    console.log('OTP Code:', otpDebug.otpCode);
+                    console.log('OTP Generated At:', otpDebug.otpGeneratedAt);
+                    console.log('OTP Expires At:', otpDebug.otpExpiresAt);
+                    console.log('OTP Verified At:', otpDebug.otpVerifiedAt);
+                    console.log('Is Picked Up:', otpDebug.isPickedUp);
+                    console.log('Should Show OTP:', otpDebug.shouldShowOTP);
+                    console.log('=================================================\n');
+                  %>
+                  <% if ((order.status === 'picked_up' || order.status === 'out_for_delivery' || order.status === 'assigned') &&
+                      order.deliveryOTP &&
                       order.deliveryOTP.code &&
                       !order.deliveryOTP.verifiedAt) { %>
                     <div
@@ -768,7 +1033,26 @@
                         style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 0.25rem;">
                         <i class="fas fa-clock"></i> Valid until <%= new Date(order.deliveryOTP.expiresAt).toLocaleString('en-IN') %>
                       </div>
+                      <div style="font-size: 0.75rem; color: var(--warning); margin-top: 0.5rem; text-align: center; font-weight: 600;">
+                        <i class="fas fa-shield-alt"></i> Status: <%= order.status.replace(/_/g, ' ') %>
+                      </div>
                     </div>
+                    <% } else { %>
+                      <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(220, 53, 69, 0.1); border: 1px solid rgba(220, 53, 69, 0.3); border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.875rem; color: var(--danger); font-weight: 600;">
+                          <i class="fas fa-exclamation-circle"></i> OTP Not Available
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                          Order Status: <%= order.status %><br>
+                          <% if (order.deliveryOTP && order.deliveryOTP.verifiedAt) { %>
+                            OTP has been verified on <%= new Date(order.deliveryOTP.verifiedAt).toLocaleString('en-IN') %>
+                          <% } else if (!order.deliveryOTP || !order.deliveryOTP.code) { %>
+                            OTP has not been generated yet. It will be generated when the order is picked up.
+                          <% } else if (order.deliveryOTP && new Date() > new Date(order.deliveryOTP.expiresAt)) { %>
+                            OTP has expired
+                          <% } %>
+                        </div>
+                      </div>
                     <% } %>
 
                       <% if (order.deliveryAgent) { %>
@@ -812,9 +1096,44 @@
                           <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Print
                             Invoice</button>
 
-                          <% if ((order.status==='confirmed' || order.status==='processing' || order.status==='assigned' || order.status==='shipped') && !order.tracking.cancelledAt) { %>
-                            <button class="btn-cancel" onclick="openCancellationModal()"><i class="fas fa-times"></i> Request Cancellation</button>
-                            <% } %>
+                          <%
+                            // Check if cancellation is allowed
+                            var cancellationAllowed = false;
+                            var cancellationDisabledReason = '';
+                            var isAlreadyCancelled = order.tracking && order.tracking.cancelledAt;
+                            var nonCancellableStatuses = ['delivered', 'cancelled', 'refunded', 'picked_up'];
+                            var cancellableStatuses = ['pending', 'confirmed', 'processing', 'assigned', 'shipped', 'out_for_delivery'];
+
+                            if (isAlreadyCancelled) {
+                              cancellationDisabledReason = 'Order already cancelled';
+                            } else if (nonCancellableStatuses.indexOf(order.status) !== -1) {
+                              cancellationDisabledReason = 'Cancellation not allowed for ' + order.status + ' orders';
+                            } else if (cancellableStatuses.indexOf(order.status) !== -1) {
+                              cancellationAllowed = true;
+                            } else {
+                              cancellationDisabledReason = 'Cancellation not allowed for this order status (' + order.status + ')';
+                            }
+
+                            // Console log for debugging
+                            console.log('=== Cancellation Check ===');
+                            console.log('Order ID:', order._id);
+                            console.log('Order Status:', order.status);
+                            console.log('Is Already Cancelled:', isAlreadyCancelled);
+                            console.log('Cancellation Allowed:', cancellationAllowed);
+                            console.log('Disabled Reason:', cancellationDisabledReason);
+                          %>
+
+                          <% if (cancellationAllowed) { %>
+                            <button class="btn-cancel" id="cancelOrderBtn"><i class="fas fa-times"></i> Request Cancellation</button>
+                          <% } else { %>
+                            <div style="font-size: 12px; color: var(--danger); padding: 10px; text-align: center; margin-top: 10px; background: rgba(220, 53, 69, 0.1); border-radius: 8px;">
+                              <i class="fas fa-exclamation-circle"></i>
+                              <%= cancellationDisabledReason %>
+                              <% if (order.tracking && order.tracking.cancelledAt) { %>
+                                <br><small>(Cancelled on <%= new Date(order.tracking.cancelledAt).toLocaleDateString('en-IN') %>)</small>
+                              <% } %>
+                            </div>
+                          <% } %>
                 </div>
 
                 <div class="card">
@@ -879,157 +1198,287 @@
             </div>
           </main>
 
-          <!-- Cancellation Request Modal -->
-          <div id="cancellationModal" class="modal" style="display: none;">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h3>Request Order Cancellation</h3>
-                <button class="modal-close" onclick="closeCancellationModal()">&times;</button>
-              </div>
-              <form id="cancellationForm">
-                <input type="hidden" name="orderId" value="<%= order._id %>">
+<!-- Cancellation Request Modal -->
+<div id="cancellationModal" class="modal-overlay" style="display: none;">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3><i class="fas fa-exclamation-triangle"></i> Request Order Cancellation</h3>
+      <button type="button" class="modal-close-btn" id="closeModalBtn">&times;</button>
+    </div>
+    <form id="cancellationForm">
+      <input type="hidden" id="orderId" value="<%= order._id %>">
 
-                <div class="form-group">
-                  <label for="cancellationReason">Reason for Cancellation *</label>
-                  <select id="cancellationReason" name="reason" required>
-                    <option value="">Select a reason</option>
-                    <option value="wrong_item">Wrong item ordered</option>
-                    <option value="damaged_product">Product damaged</option>
-                    <option value="expired_product">Product expired</option>
-                    <option value="not_as_described">Not as described</option>
-                    <option value="duplicate_order">Duplicate order</option>
-                    <option value="changed_mind">Changed my mind</option>
-                    <option value="delivery_delay">Delivery delay</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="reason">Reason for Cancellation *</label>
+          <select id="reason" required>
+            <option value="">Select a reason</option>
+            <option value="wrong_item">Wrong item ordered</option>
+            <option value="damaged_product">Product damaged</option>
+            <option value="expired_product">Product expired</option>
+            <option value="not_as_described">Not as described</option>
+            <option value="duplicate_order">Duplicate order</option>
+            <option value="changed_mind">Changed my mind</option>
+            <option value="delivery_delay">Delivery delay</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
 
-                <div class="form-group">
-                  <label for="cancellationDescription">Description *</label>
-                  <textarea id="cancellationDescription" name="description" rows="4" placeholder="Please provide detailed reason for cancellation..." required></textarea>
-                </div>
+        <div class="form-group">
+          <label for="description">Additional Details *</label>
+          <textarea id="description" rows="4" placeholder="Please provide more details about your cancellation request..." required></textarea>
+        </div>
 
-                <div class="form-group">
-                  <label>Select Items to Cancel</label>
-                  <div class="items-selection">
-                    <% order.items.forEach((item, index)=> { %>
-                      <div class="item-checkbox">
-                        <input type="checkbox" id="item_<%= index %>" name="items[<%= index %>][productId]" value="<%= item.product._id || item.product %>" checked>
-                        <label for="item_<%= index %>">
-                          <img src="<%= item.image || 'https://via.placeholder.com/40' %>" alt="<%= item.name %>">
-                          <div class="item-info">
-                            <div class="item-name"><%= item.name %></div>
-                            <div class="item-meta">Qty: <%= item.quantity %> × ₹<%= item.price %></div>
-                          </div>
-                        </label>
-                        <input type="number" name="items[<%= index %>][quantity]" value="<%= item.quantity %>" min="1" max="<%= item.quantity %>" style="width: 60px;">
-                      </div>
-                      <% }) %>
+        <div class="form-group">
+          <label>Items to Cancel</label>
+          <div class="items-list">
+            <% order.items.forEach((item, idx) => { %>
+              <label class="item-checkbox">
+                <input type="checkbox" name="items" value="<%= item.product._id || item.product %>" data-idx="<%= idx %>" checked>
+                <div class="item-info">
+                  <img src="<%= item.image || 'https://via.placeholder.com/40' %>" alt="<%= item.name %>">
+                  <div>
+                    <div class="item-name"><%= item.name %></div>
+                    <div class="item-meta">Qty: <%= item.quantity %> × ₹<%= item.price %></div>
                   </div>
                 </div>
-
-                <div class="form-group">
-                  <label>Pickup Address</label>
-                  <div class="address-display">
-                    <strong><%= order.address.fullName %></strong><br>
-                    <%= order.address.address %><br>
-                    <%= order.address.city %>, <%= order.address.state %> - <%= order.address.pincode %><br>
-                    Phone: <%= order.address.phone %>
-                  </div>
-                  <input type="hidden" name="pickupAddress[fullName]" value="<%= order.address.fullName %>">
-                  <input type="hidden" name="pickupAddress[phone]" value="<%= order.address.phone %>">
-                  <input type="hidden" name="pickupAddress[address]" value="<%= order.address.address %>">
-                  <input type="hidden" name="pickupAddress[city]" value="<%= order.address.city %>">
-                  <input type="hidden" name="pickupAddress[state]" value="<%= order.address.state %>">
-                  <input type="hidden" name="pickupAddress[pincode]" value="<%= order.address.pincode %>">
-                  <input type="hidden" name="pickupAddress[landmark]" value="<%= order.address.landmark || '' %>">
-                </div>
-
-                <div class="modal-actions">
-                  <button type="button" class="btn-secondary" onclick="closeCancellationModal()">Cancel</button>
-                  <button type="submit" class="btn-primary">Submit Request</button>
-                </div>
-              </form>
-            </div>
+              </label>
+            <% }) %>
           </div>
+        </div>
 
-          <script>
-            function openCancellationModal() {
-              document.getElementById('cancellationModal').style.display = 'flex';
-              document.body.style.overflow = 'hidden';
-            }
+        <div class="form-group">
+          <label>Pickup Address</label>
+          <div class="address-box">
+            <strong><%= order.address.fullName %></strong><br>
+            <%= order.address.address %><br>
+            <%= order.address.city %>, <%= order.address.state %> - <%= order.address.pincode %><br>
+            Phone: <%= order.address.phone %>
+          </div>
+        </div>
+      </div>
 
-            function closeCancellationModal() {
-              document.getElementById('cancellationModal').style.display = 'none';
-              document.body.style.overflow = 'auto';
-            }
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-secondary" id="cancelModalBtn">Cancel</button>
+        <button type="submit" class="btn-modal-primary">Submit Request</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-            // Close modal when clicking outside
-            document.getElementById('cancellationModal').addEventListener('click', function(e) {
-              if (e.target === this) {
-                closeCancellationModal();
-              }
-            });
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('=== Order Detail Page Loaded ===');
+  console.log('DOM fully loaded and parsed');
+  
+  // Get elements
+  const modal = document.getElementById('cancellationModal');
+  const cancelBtn = document.getElementById('cancelOrderBtn');
+  const closeBtn = document.getElementById('closeModalBtn');
+  const cancelModalBtn = document.getElementById('cancelModalBtn');
+  const form = document.getElementById('cancellationForm');
 
-            // Handle form submission
-            document.getElementById('cancellationForm').addEventListener('submit', async function(e) {
-              e.preventDefault();
+  console.log('Modal element:', modal);
+  console.log('Cancel button:', cancelBtn);
+  console.log('Close button:', closeBtn);
+  console.log('Cancel modal button:', cancelModalBtn);
+  console.log('Form:', form);
 
-              const formData = new FormData(this);
-              const data = {
-                orderId: formData.get('orderId'),
-                reason: formData.get('reason'),
-                description: formData.get('description'),
-                items: [],
-                pickupAddress: {
-                  fullName: formData.get('pickupAddress[fullName]'),
-                  phone: formData.get('pickupAddress[phone]'),
-                  address: formData.get('pickupAddress[address]'),
-                  city: formData.get('pickupAddress[city]'),
-                  state: formData.get('pickupAddress[state]'),
-                  pincode: formData.get('pickupAddress[pincode]'),
-                  landmark: formData.get('pickupAddress[landmark]')
-                }
-              };
+  // Store order items data for form submission
+  const orderItemsData = <%= JSON.stringify(order.items) %>;
+  console.log('Order items data loaded:', orderItemsData.length, 'items');
 
-              // Collect selected items
-              const itemCheckboxes = document.querySelectorAll('.item-checkbox input[type="checkbox"]:checked');
-              itemCheckboxes.forEach((checkbox, index) => {
-                const quantityInput = checkbox.closest('.item-checkbox').querySelector('input[type="number"]');
-                data.items.push({
-                  productId: checkbox.value,
-                  quantity: parseInt(quantityInput.value)
-                });
-              });
+  // Debug: Check if button exists and attach click handler
+  if (cancelBtn) {
+    console.log('✅ Cancel button found in DOM with ID:', cancelBtn.id);
+    console.log('Button classes:', cancelBtn.className);
+    console.log('Button text:', cancelBtn.innerText);
+    console.log('Button computed styles:', window.getComputedStyle(cancelBtn).display);
+    
+    // Remove any existing listeners and add new one
+    cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+    const newCancelBtn = document.getElementById('cancelOrderBtn');
+    
+    newCancelBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('🔔 Cancel button clicked!');
+      console.log('Event:', e);
+      
+      if (!modal) {
+        console.error('❌ Modal element not found!');
+        alert('Error: Modal not found');
+        return;
+      }
+      
+      console.log('Modal before:', modal.style.display);
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      console.log('Modal after:', modal.style.display);
+      
+      // Verify modal is visible
+      const modalVisible = window.getComputedStyle(modal).display !== 'none';
+      console.log('Modal is visible:', modalVisible);
+      
+      if (modalVisible) {
+        console.log('✅ Modal opened successfully');
+      } else {
+        console.error('❌ Modal failed to open');
+        alert('Modal display issue - check CSS');
+      }
+    });
+    
+    console.log('✅ Click listener attached to cancel button');
+  } else {
+    console.error('❌ Cancel button NOT found in DOM!');
+    console.log('Searching for any button with class btn-cancel...');
+    const allCancelButtons = document.querySelectorAll('.btn-cancel');
+    console.log('Found', allCancelButtons.length, 'buttons with class btn-cancel');
+    allCancelButtons.forEach((btn, idx) => {
+      console.log('Button', idx, ':', btn);
+    });
+  }
 
-              if (data.items.length === 0) {
-                alert('Please select at least one item to cancel');
-                return;
-              }
+  // Close modal functions
+  function closeModal() {
+    console.log('🔄 Closing modal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+    document.body.style.overflow = 'auto';
+    if (form) {
+      form.reset();
+    }
+  }
 
-              try {
-                const response = await fetch('/api/cancellations', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(data)
-                });
+  // Close on X button
+  if (closeBtn) {
+    console.log('✅ Close button found');
+    closeBtn.addEventListener('click', closeModal);
+  }
 
-                const result = await response.json();
-                if (result.success) {
-                  alert('Cancellation request submitted successfully! You will be notified once it\'s processed.');
-                  closeCancellationModal();
-                  location.reload();
-                } else {
-                  alert(result.message || 'Error submitting cancellation request');
-                }
-              } catch (err) {
-                console.error('Error:', err);
-                alert('Error submitting cancellation request');
-              }
-            });
-          </script>
+  // Close on Cancel button
+  if (cancelModalBtn) {
+    console.log('✅ Cancel modal button found');
+    cancelModalBtn.addEventListener('click', closeModal);
+  }
+
+  // Close on overlay click
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        console.log('🔄 Overlay clicked, closing modal');
+        closeModal();
+      }
+    });
+  }
+
+  // Form submit handler
+  if (form) {
+    console.log('✅ Cancellation form found');
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      console.log('📝 Form submitted');
+
+      const orderId = document.getElementById('orderId').value;
+      const reason = document.getElementById('reason').value;
+      const description = document.getElementById('description').value;
+
+      console.log('Order ID:', orderId);
+      console.log('Reason:', reason);
+      console.log('Description:', description);
+
+      // Get selected items
+      const selectedItems = [];
+      const checkboxes = form.querySelectorAll('input[name="items"]:checked');
+
+      console.log('Selected checkboxes:', checkboxes.length);
+      
+      checkboxes.forEach(cb => {
+        const idx = cb.getAttribute('data-idx');
+        const item = orderItemsData[idx];
+        console.log('Item selected:', item);
+        selectedItems.push({
+          productId: item.product._id || item.product,
+          quantity: item.quantity
+        });
+      });
+
+      if (selectedItems.length === 0) {
+        console.log('❌ No items selected');
+        alert('Please select at least one item to cancel');
+        return;
+      }
+
+      // Get pickup address from order data
+      const pickupAddress = {
+        fullName: '<%= order.address.fullName %>',
+        phone: '<%= order.address.phone %>',
+        address: '<%= order.address.address %>',
+        city: '<%= order.address.city %>',
+        state: '<%= order.address.state %>',
+        pincode: '<%= order.address.pincode %>',
+        landmark: '<%= order.address.landmark || "" %>'
+      };
+      
+      console.log('Pickup address:', pickupAddress);
+
+      // Disable submit button
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+      try {
+        console.log('📡 Sending cancellation request...');
+        const res = await fetch('/api/cancellations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId,
+            items: selectedItems,
+            reason,
+            description,
+            pickupAddress
+          })
+        });
+
+        const result = await res.json();
+        console.log('Response:', result);
+
+        if (result.success) {
+          console.log('✅ Cancellation successful');
+          alert('✅ Cancellation request submitted successfully!');
+          closeModal();
+          location.reload();
+        } else {
+          console.log('❌ Cancellation failed:', result.message);
+          alert('❌ ' + result.message);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Submit Request';
+        }
+
+      } catch (err) {
+        console.error('❌ Cancellation error:', err);
+        alert('❌ Server error. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Request';
+      }
+    });
+  } else {
+    console.log('❌ Cancellation form NOT found in DOM');
+  }
+
+  // Escape key to close modal
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+      console.log('🔑 Escape key pressed, closing modal');
+      closeModal();
+    }
+  });
+
+  console.log('=== Order Detail Page Initialization Complete ===');
+});
+</script>
           <script src="/js/script.js"></script>
 </body>
 

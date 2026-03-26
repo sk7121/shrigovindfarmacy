@@ -178,12 +178,20 @@ async function sendViaTextLocal(phone, message) {
 
 // Send Order Confirmation SMS
 async function sendOrderConfirmationSMS(order, phone) {
-  const message = `Shri Govind Pharmacy: Order ${order.tracking.orderId} confirmed! Total: ₹${Math.round(order.pricing.total)}. Track: ${process.env.BASE_URL || "http://localhost:3000"}/user/orders/${order._id}`;
+  if (!order || !order.tracking || !order.tracking.orderId) {
+    console.log("⚠️ Invalid order for SMS confirmation");
+    return { success: false, error: "Invalid order data" };
+  }
+  const message = `Shri Govind Pharmacy: Order ${order.tracking.orderId} confirmed! Total: ₹${Math.round(order.pricing?.total || 0)}. Track: ${process.env.BASE_URL || "http://localhost:3000"}/user/orders/${order._id}`;
   return await sendSMS(phone, message);
 }
 
 // Send Order Status Update SMS
 async function sendOrderStatusSMS(order, phone, status, otp = null) {
+  if (!order || !order.tracking || !order.tracking.orderId) {
+    console.log("⚠️ Invalid order for SMS status update");
+    return { success: false, error: "Invalid order data" };
+  }
   const statusText = status.replace(/_/g, " ").toUpperCase();
   let message = `Shri Govind Pharmacy: Order ${order.tracking.orderId} is now ${statusText}.`;
 
@@ -191,6 +199,10 @@ async function sendOrderStatusSMS(order, phone, status, otp = null) {
     message += ` Your delivery OTP is ${otp}. Please share this with the delivery agent.`;
   } else if (status === "out_for_delivery" && otp) {
     message += ` Your delivery OTP is ${otp}. Please share this with the delivery agent upon delivery.`;
+  } else if (status === "picked_up" && otp) {
+    message += ` Your delivery OTP is ${otp}. Please share this with the delivery agent when they arrive for delivery.`;
+  } else if (status === "store_pickup_otp" && otp) {
+    message = `Shri Govind Pharmacy: Store Pickup OTP for Order ${order.tracking.orderId} is ${otp}. Share this OTP with store staff to collect your order. Valid for 24 hours.`;
   } else if (status === "shipped") {
     message += ` Est. delivery: ${new Date(order.tracking.estimatedDelivery).toLocaleDateString("en-IN")}`;
   }

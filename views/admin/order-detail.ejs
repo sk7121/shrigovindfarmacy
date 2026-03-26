@@ -367,6 +367,7 @@
                       <option value="shipped" <%=order.status==='shipped' ? 'selected' : '' %>>Shipped</option>
                       <option value="out_for_delivery" <%=order.status==='out_for_delivery' ? 'selected' : '' %>>Out for
                         Delivery</option>
+                      <option value="picked_up" <%=order.status==='picked_up' ? 'selected' : '' %>>Picked Up</option>
                       <option value="delivered" <%=order.status==='delivered' ? 'selected' : '' %>>Delivered</option>
                       <option value="cancelled" <%=order.status==='cancelled' ? 'selected' : '' %>>Cancelled</option>
                     </select>
@@ -419,6 +420,34 @@
                         </div>
                       </div>
                       <% } %>
+                  </div>
+                  <% } %>
+
+                  <% if (order.status === 'out_for_delivery' && order.deliveryCode && order.deliveryCode.code) { %>
+                  <div class="card" style="border: 2px solid var(--primary);">
+                    <h2 class="card-title" style="color: var(--primary);">
+                      <i class="fas fa-barcode"></i> Delivery Code
+                    </h2>
+                    <div style="text-align: center; padding: 1.5rem; background: rgba(28, 129, 37, 0.05); border-radius: 8px;">
+                      <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                        <i class="fas fa-clipboard-check"></i> Unique Delivery Code
+                      </div>
+                      <div style="font-size: 2rem; font-weight: 800; color: var(--primary); letter-spacing: 2px; font-family: monospace;">
+                        <%= order.deliveryCode.code %>
+                      </div>
+                      <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem;">
+                        <i class="fas fa-clock"></i> 
+                        Generated: <%= new Date(order.deliveryCode.generatedAt).toLocaleString('en-IN') %>
+                      </div>
+                      <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                        <i class="fas fa-hourglass-end"></i> 
+                        Expires: <%= new Date(order.deliveryCode.expiresAt).toLocaleString('en-IN') %>
+                      </div>
+                    </div>
+                    <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(28, 129, 37, 0.1); border-radius: 6px; font-size: 0.875rem;">
+                      <i class="fas fa-info-circle"></i> 
+                      <strong>Note:</strong> This code is unique to this delivery and should be verified by the delivery agent.
+                    </div>
                   </div>
                   <% } %>
               </div>

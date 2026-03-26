@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Order = require('../models/order');
 const Delivery = require('../models/delivery');
 const OTP = require('../models/otp');
@@ -11,6 +12,14 @@ const { sendOrderStatusSMS } = require('../services/smsService');
 // @access  Private (Delivery Agent)
 const getDeliveryDetails = async (req, res) => {
     try {
+        // Validate delivery ID
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid delivery ID'
+            });
+        }
+
         const delivery = await Delivery.findById(req.params.id)
             .populate('order')
             .populate('assignedTo');
@@ -62,6 +71,14 @@ const getDeliveryDetails = async (req, res) => {
 // @access  Private (Delivery Agent)
 const generateDeliveryOTP = async (req, res) => {
     try {
+        // Validate order ID
+        if (!mongoose.Types.ObjectId.isValid(req.params.orderId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid order ID'
+            });
+        }
+
         const order = await Order.findById(req.params.orderId);
 
         if (!order) {
@@ -71,11 +88,11 @@ const generateDeliveryOTP = async (req, res) => {
             });
         }
 
-        // Check if order is out for delivery or assigned
-        if (!['out_for_delivery', 'assigned', 'processing'].includes(order.status)) {
+        // Check if order is picked up (OTP should be generated after agent picks up the order)
+        if (!['picked_up', 'out_for_delivery'].includes(order.status)) {
             return res.status(400).json({
                 success: false,
-                message: 'Order is not ready for delivery'
+                message: 'OTP can only be generated after order is picked up by the delivery agent'
             });
         }
 
@@ -148,6 +165,14 @@ const verifyDeliveryOTP = async (req, res) => {
             });
         }
 
+        // Validate order ID
+        if (!mongoose.Types.ObjectId.isValid(req.params.orderId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid order ID'
+            });
+        }
+
         const order = await Order.findById(req.params.orderId);
 
         if (!order) {
@@ -216,6 +241,14 @@ const completeDelivery = async (req, res) => {
         console.log('📦 Complete Delivery - Order ID:', req.params.orderId);
         console.log('📷 File received:', !!req.file);
         console.log('🔑 OTP provided:', !!otp);
+
+        // Validate order ID
+        if (!mongoose.Types.ObjectId.isValid(req.params.orderId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid order ID'
+            });
+        }
 
         if (!req.file) {
             console.error('❌ No file uploaded');
@@ -435,6 +468,14 @@ const completeDelivery = async (req, res) => {
 // @access  Private (Delivery Agent)
 const getDeliveryOTP = async (req, res) => {
     try {
+        // Validate order ID
+        if (!mongoose.Types.ObjectId.isValid(req.params.orderId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid order ID'
+            });
+        }
+
         const order = await Order.findById(req.params.orderId);
 
         if (!order) {

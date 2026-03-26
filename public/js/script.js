@@ -190,20 +190,31 @@ document.addEventListener('DOMContentLoaded', function () {
       // Show filtered products in place - no scrolling
       const visibleCount = document.querySelectorAll('.product-card:not(.hidden)').length;
       toast(`Found ${visibleCount} product${visibleCount !== 1 ? 's' : ''}`, 'success');
+      
+      // Scroll to the product grid smoothly
+      const productGrid = document.getElementById('product-grid') || document.querySelector('.product-grid');
+      if (productGrid) {
+        productGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   }
 
   if (searchBtn) searchBtn.addEventListener('click', handleSearch);
   if (searchInput) {
-    searchInput.addEventListener('keydown', e => { 
-      if (e.key === 'Enter') { 
-        e.preventDefault(); 
-        handleSearch(); 
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleSearch();
       }
     });
     searchInput.addEventListener('input', () => {
       if (!searchInput.value.trim()) {
         document.querySelectorAll('.product-card').forEach(c => c.classList.remove('hidden'));
+        // Scroll to product grid when clearing search
+        const productGrid = document.getElementById('product-grid') || document.querySelector('.product-grid');
+        if (productGrid) {
+          productGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }
     });
   }
@@ -629,16 +640,28 @@ document.addEventListener('DOMContentLoaded', function () {
   ══════════════════════════════════════ */
   const filterForm = document.getElementById('product-filter-form');
   const filterSubmitBtn = document.getElementById('filter-submit-btn');
-  
+  const clearFiltersBtn = document.getElementById('clear-filters-btn');
+
   if (filterForm && filterSubmitBtn) {
+    // Handle Enter key on filter inputs
+    const filterInputs = filterForm.querySelectorAll('input, select');
+    filterInputs.forEach(input => {
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          filterSubmitBtn.click();
+        }
+      });
+    });
+
     filterSubmitBtn.addEventListener('click', function(e) {
       e.preventDefault();
-      
+
       const searchInput = filterForm.querySelector('input[name="search"]');
       const categorySelect = filterForm.querySelector('select[name="category"]');
       const maxPriceInput = filterForm.querySelector('input[name="maxPrice"]');
       const sortBySelect = filterForm.querySelector('select[name="sortBy"]');
-      
+
       const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
       const category = categorySelect ? categorySelect.value : 'all';
       const maxPrice = maxPriceInput ? parseFloat(maxPriceInput.value) : null;
@@ -647,33 +670,33 @@ document.addEventListener('DOMContentLoaded', function () {
       // Sync with top search bar
       const topSearchInput = document.getElementById('searchInput');
       const topCategorySelect = document.getElementById('search-cat');
-      
+
       if (topSearchInput) topSearchInput.value = searchInput ? searchInput.value : '';
       if (topCategorySelect && category !== 'all') topCategorySelect.value = category;
-      
+
       const cards = document.querySelectorAll('.product-card');
       let found = false;
-      
+
       cards.forEach(card => {
         const productName = card.querySelector('.product-title') || card.querySelector('h4') || card;
         const productCategory = card.getAttribute('data-category') || '';
         const priceElement = card.querySelector('.current-price');
-        
+
         const nameText = productName.innerText.toLowerCase();
         const matchesSearch = !searchTerm || nameText.includes(searchTerm);
         const matchesCategory = category === 'all' || productCategory.includes(category);
-        
+
         let matchesPrice = true;
         if (maxPrice && priceElement) {
           const productPrice = parseFloat(priceElement.innerText.replace(/[^0-9.]/g, ''));
           matchesPrice = !isNaN(productPrice) && productPrice <= maxPrice;
         }
-        
+
         const show = matchesSearch && matchesCategory && matchesPrice;
         card.classList.toggle('hidden', !show);
         if (show) found = true;
       });
-      
+
       // Sort products if needed
       if (sortBy !== 'default' && found) {
         const productContainer = document.querySelector('.product-grid') || document.querySelector('#product .container');
@@ -686,7 +709,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const bPrice = parseFloat((bPriceEl ? bPriceEl.innerText : '0').replace(/[^0-9.]/g, '')) || 0;
             const aName = (a.querySelector('.product-title') || a).innerText.toLowerCase();
             const bName = (b.querySelector('.product-title') || b).innerText.toLowerCase();
-            
+
             switch(sortBy) {
               case 'price-low': return aPrice - bPrice;
               case 'price-high': return bPrice - aPrice;
@@ -695,7 +718,7 @@ document.addEventListener('DOMContentLoaded', function () {
               default: return 0;
             }
           });
-          
+
           productsArray.forEach(product => {
             if (!product.classList.contains('hidden')) {
               productContainer.appendChild(product);
@@ -703,14 +726,56 @@ document.addEventListener('DOMContentLoaded', function () {
           });
         }
       }
-      
+
       if (!found) {
         cards.forEach(c => c.classList.remove('hidden'));
         toast('No products found — showing all.', 'error');
       } else {
         const visibleCount = document.querySelectorAll('.product-card:not(.hidden)').length;
         toast(`Found ${visibleCount} product${visibleCount !== 1 ? 's' : ''}`, 'success');
+        
+        // Scroll to the product grid smoothly
+        const productGrid = document.getElementById('product-grid') || document.querySelector('.product-grid');
+        if (productGrid) {
+          productGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }
+    });
+  }
+
+  // Clear filters button handler
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // Clear all filter inputs
+      const searchInput = filterForm?.querySelector('input[name="search"]');
+      const categorySelect = filterForm?.querySelector('select[name="category"]');
+      const maxPriceInput = filterForm?.querySelector('input[name="maxPrice"]');
+      const sortBySelect = filterForm?.querySelector('select[name="sortBy"]');
+      
+      if (searchInput) searchInput.value = '';
+      if (categorySelect) categorySelect.value = 'all';
+      if (maxPriceInput) maxPriceInput.value = '';
+      if (sortBySelect) sortBySelect.value = 'default';
+      
+      // Clear top search bar too
+      const topSearchInput = document.getElementById('searchInput');
+      const topCategorySelect = document.getElementById('search-cat');
+      
+      if (topSearchInput) topSearchInput.value = '';
+      if (topCategorySelect) topCategorySelect.value = '';
+      
+      // Show all products
+      document.querySelectorAll('.product-card').forEach(c => c.classList.remove('hidden'));
+      
+      // Scroll to product grid smoothly
+      const productGrid = document.getElementById('product-grid') || document.querySelector('.product-grid');
+      if (productGrid) {
+        productGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      
+      toast('All filters cleared', 'info');
     });
   }
 

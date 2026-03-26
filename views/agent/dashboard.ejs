@@ -765,7 +765,7 @@
                                             <div class="section-header">
                                                 <h2 class="section-title"><i class="fas fa-clipboard-list"></i> Assigned
                                                     Orders</h2>
-                                                <a href="/agent/deliveries" class="btn btn-primary btn-sm">View All</a>
+                                                <a href="/agent/deliveries?status=assigned" class="btn btn-primary btn-sm">View All</a>
                                             </div>
 
                                             <% if (assignedOrders && assignedOrders.length> 0) { %>
@@ -773,69 +773,63 @@
                                                     <div class="delivery-card">
                                                         <div class="delivery-header">
                                                             <div class="delivery-id">
-                                                                <i class="fas fa-hashtag"></i>
-                                                                <%= order.tracking.orderId %>
+                                                                <i class="fas fa-box"></i>
+                                                                <%= order.tracking?.orderId || 'N/A' %>
+                                                                <small>Assigned Order</small>
                                                             </div>
-                                                            <span class="status-badge <%= order.status %>">
-                                                                <%= order.status.replace(/_/g, ' ' ) %>
+                                                            <span class="status-badge assigned">
+                                                                Assigned
                                                             </span>
                                                         </div>
-                                                        <div class="delivery-info">
-                                                            <div class="info-item">
+
+                                                        <div class="delivery-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                                                            <div class="delivery-info">
                                                                 <label><i class="fas fa-user"></i> Customer</label>
-                                                                <strong>
-                                                                    <%= order.shippingAddress?.name || 'N/A' %>
-                                                                </strong>
+                                                                <strong><%= order.address?.fullName || order.user?.name || 'N/A' %></strong>
                                                             </div>
-                                                            <div class="info-item">
-                                                                <label><i class="fas fa-map-marker-alt"></i>
-                                                                    Address</label>
-                                                                <%= order.shippingAddress?.address || 'N/A' %><br>
-                                                                    <%= order.shippingAddress?.city %>, <%=
-                                                                            order.shippingAddress?.pincode %>
-                                                            </div>
-                                                            <div class="info-item">
+                                                            <div class="delivery-info">
                                                                 <label><i class="fas fa-phone"></i> Phone</label>
-                                                                <strong>
-                                                                    <%= order.shippingAddress?.phone || 'N/A' %>
+                                                                <strong><%= order.address?.phone || order.user?.phone || 'N/A' %></strong>
+                                                            </div>
+                                                            <div class="delivery-info">
+                                                                <label><i class="fas fa-map-marker-alt"></i> Address</label>
+                                                                <strong><%= order.address?.address || 'N/A' %></strong><br>
+                                                                <%= order.address?.city || '' %>, <%= order.address?.pincode || '' %>
+                                                            </div>
+                                                            <div class="delivery-info">
+                                                                <label><i class="fas fa-money-bill-wave"></i> Payment</label>
+                                                                <strong style="color: <%= order.payment?.method === 'cod' ? 'var(--warning)' : 'var(--success)' %>;">
+                                                                    <%= order.payment?.method === 'cod' ? 'COD' : 'Paid Online' %>
                                                                 </strong>
                                                             </div>
-                                                            <div class="info-item">
-                                                                <label><i class="fas fa-money-bill-wave"></i>
-                                                                    Payment</label>
-                                                                <strong
-                                                                    style="color: <%= order.payment.method === 'cod' ? 'var(--warning)' : 'var(--success)' %>;">
-                                                                    <%= order.payment.method==='cod' ? '₹' +
-                                                                        order.pricing.total + ' (COD)' : 'Paid Online'
-                                                                        %>
-                                                                </strong>
-                                                            </div>
+                                                            <% if (order.items && order.items.length > 0) { %>
+                                                                <div class="delivery-info">
+                                                                    <label><i class="fas fa-boxes"></i> Items</label>
+                                                                    <strong><%= order.items.length %> product(s)</strong>
+                                                                </div>
+                                                            <% } %>
                                                         </div>
-                                                        <div class="delivery-actions">
+
+                                                        <div class="delivery-actions" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
                                                             <% if (order.status==='assigned' || order.status==='processing' ) { %>
-                                                                <button onclick="startDelivery('<%= order._id %>', '<%= order.tracking.orderId %>')" 
+                                                                <button onclick="startDelivery('<%= order._id %>', '<%= order.tracking?.orderId || '' %>')"
                                                                         class="btn btn-success btn-sm" id="start-btn-<%= order._id %>">
                                                                     <i class="fas fa-play"></i> Start Delivery
                                                                 </button>
-                                                                <% } else if (order.status === 'out_for_delivery') { %>
-                                                                    <a href="/agent/delivery/<%= order._id %>" class="btn btn-primary btn-sm">
-                                                                        <i class="fas fa-shipping-fast"></i> Complete Delivery
-                                                                    </a>
-                                                                    <% if (order.deliveryOTP?.code) { %>
-                                                                        <div class="otp-info-box" style="background: #e7f3ff; border: 2px dashed var(--info); padding: 10px; border-radius: 8px; margin-top: 10px; text-align: center;">
-                                                                            <small style="color: var(--text-muted); display: block;">
-                                                                                <i class="fas fa-info-circle"></i> OTP sent to customer's phone<br>
-                                                                                <strong>Ask the customer for the 6-digit OTP</strong>
-                                                                            </small>
-                                                                        </div>
-                                                                    <% } %>
-                                                                <% } %>
-                                                                    <% if (order.shippingAddress?.phone) { %>
-                                                                        <a href="tel:<%= order.shippingAddress.phone %>"
-                                                                            class="btn btn-outline btn-sm">
-                                                                            <i class="fas fa-phone"></i> Call
-                                                                        </a>
-                                                                        <% } %>
+                                                            <% } %>
+                                                            <% if (order.address?.phone) { %>
+                                                                <a href="tel:<%= order.address.phone %>"
+                                                                    class="btn btn-outline btn-sm">
+                                                                    <i class="fas fa-phone"></i> Call
+                                                                </a>
+                                                            <% } %>
+                                                            <% if (order.address?.address) { %>
+                                                                <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(order.address.address + ', ' + order.address.city + ', ' + order.address.pincode) %>"
+                                                                    target="_blank"
+                                                                    class="btn btn-outline btn-sm">
+                                                                    <i class="fas fa-map-marked-alt"></i> Navigate
+                                                                </a>
+                                                            <% } %>
                                                         </div>
                                                     </div>
                                                     <% }) %>
@@ -846,6 +840,98 @@
                                                                     style="font-size: 48px; margin-bottom: 10px; color: var(--success);"></i><br>
                                                                 <strong>No assigned orders!</strong><br>
                                                                 You're all caught up. New orders will be assigned soon.
+                                                            </p>
+                                                            <% } %>
+                                        </div>
+
+                                        <!-- Out for Delivery Orders -->
+                                        <div class="section">
+                                            <div class="section-header">
+                                                <h2 class="section-title"><i class="fas fa-shipping-fast"></i> Out for Delivery</h2>
+                                                <a href="/agent/deliveries?status=out_for_delivery" class="btn btn-primary btn-sm">View All</a>
+                                            </div>
+
+                                            <% if (outForDeliveryOrders && outForDeliveryOrders.length> 0) { %>
+                                                <% outForDeliveryOrders.slice(0, 5).forEach(order=> { %>
+                                                    <div class="delivery-card">
+                                                        <div class="delivery-header">
+                                                            <div class="delivery-id">
+                                                                <i class="fas fa-box"></i>
+                                                                <%= order.tracking?.orderId || 'N/A' %>
+                                                                <small><%= order.status === 'picked_up' ? 'Picked Up' : 'Out for Delivery' %></small>
+                                                            </div>
+                                                            <span class="status-badge <%= order.status === 'picked_up' ? 'picked_up' : 'out_for_delivery' %>">
+                                                                <%= order.status === 'picked_up' ? 'Picked Up' : 'Out for Delivery' %>
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="delivery-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                                                            <div class="delivery-info">
+                                                                <label><i class="fas fa-user"></i> Customer</label>
+                                                                <strong><%= order.address?.fullName || order.user?.name || 'N/A' %></strong>
+                                                            </div>
+                                                            <div class="delivery-info">
+                                                                <label><i class="fas fa-phone"></i> Phone</label>
+                                                                <strong><%= order.address?.phone || order.user?.phone || 'N/A' %></strong>
+                                                            </div>
+                                                            <div class="delivery-info">
+                                                                <label><i class="fas fa-map-marker-alt"></i> Address</label>
+                                                                <strong><%= order.address?.address || 'N/A' %></strong><br>
+                                                                <%= order.address?.city || '' %>, <%= order.address?.pincode || '' %>
+                                                            </div>
+                                                            <div class="delivery-info">
+                                                                <label><i class="fas fa-money-bill-wave"></i> Payment</label>
+                                                                <strong style="color: <%= order.payment?.method === 'cod' ? 'var(--warning)' : 'var(--success)' %>;">
+                                                                    <%= order.payment?.method === 'cod' ? 'COD' : 'Paid Online' %>
+                                                                </strong>
+                                                            </div>
+                                                            <% if (order.items && order.items.length > 0) { %>
+                                                                <div class="delivery-info">
+                                                                    <label><i class="fas fa-boxes"></i> Items</label>
+                                                                    <strong><%= order.items.length %> product(s)</strong>
+                                                                </div>
+                                                            <% } %>
+                                                            <% if (order.deliveryOTP?.code) { %>
+                                                                <div class="delivery-info" style="grid-column: span 2;">
+                                                                    <div class="delivery-code-box" style="background: rgba(28, 129, 37, 0.1); border: 2px solid var(--primary); padding: 12px; border-radius: 8px; text-align: center;">
+                                                                        <small style="color: var(--text-muted); display: block; margin-bottom: 5px;">
+                                                                            <i class="fas fa-shield-alt"></i> <strong>Customer OTP: <%= order.deliveryOTP.code %></strong>
+                                                                        </small>
+                                                                        <div style="font-size: 0.7rem; color: var(--text-muted);">
+                                                                            <i class="fas fa-user-check"></i> Verify with customer at delivery
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+
+                                                        <div class="delivery-actions" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                                            <a href="/agent/delivery/<%= order._id %>" class="btn btn-primary btn-sm">
+                                                                <i class="fas fa-shipping-fast"></i> Complete Delivery
+                                                            </a>
+                                                            <% if (order.address?.phone) { %>
+                                                                <a href="tel:<%= order.address.phone %>"
+                                                                    class="btn btn-outline btn-sm">
+                                                                    <i class="fas fa-phone"></i> Call
+                                                                </a>
+                                                            <% } %>
+                                                            <% if (order.address?.address) { %>
+                                                                <a href="https://www.google.com/maps/search/?api=1&query=<%= encodeURIComponent(order.address.address + ', ' + order.address.city + ', ' + order.address.pincode) %>"
+                                                                    target="_blank"
+                                                                    class="btn btn-outline btn-sm">
+                                                                    <i class="fas fa-map-marked-alt"></i> Navigate
+                                                                </a>
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                    <% }) %>
+                                                        <% } else { %>
+                                                            <p
+                                                                style="color: var(--text-muted); text-align: center; padding: 40px;">
+                                                                <i class="fas fa-truck"
+                                                                    style="font-size: 48px; margin-bottom: 10px; color: var(--info);"></i><br>
+                                                                <strong>No orders out for delivery!</strong><br>
+                                                                Orders will appear here when you start delivery.
                                                             </p>
                                                             <% } %>
                                         </div>
@@ -874,6 +960,10 @@
                                                             Delivered on: <%= order.tracking?.deliveredAt ? new
                                                                 Date(order.tracking.deliveredAt).toLocaleString('en-IN')
                                                                 : 'N/A' %>
+                                                        </div>
+                                                        <div style="margin-top: 10px; padding: 8px; background: rgba(40, 167, 69, 0.1); border-radius: 6px; font-size: 0.75rem;">
+                                                            <i class="fas fa-shield-alt"></i>
+                                                            <strong style="color: var(--text);">Customer OTP was verified at delivery</strong>
                                                         </div>
                                                     </div>
                                                     <% }) %>

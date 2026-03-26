@@ -19,12 +19,27 @@ console.log("MONGO_URL:", process.env.MONGO_URL ? "✅ Loaded" : "❌ Missing");
 console.log("PORT:", process.env.PORT || "❌ Missing");
 console.log("NODE_ENV:", process.env.NODE_ENV || "❌ Missing");
 
-console.log("SESSION_SECRET:", process.env.SESSION_SECRET ? "✅ Loaded" : "❌ Missing");
-console.log("ACCESS_SECRET:", process.env.ACCESS_SECRET ? "✅ Loaded" : "❌ Missing");
-console.log("REFRESH_SECRET:", process.env.REFRESH_SECRET ? "✅ Loaded" : "❌ Missing");
+console.log(
+  "SESSION_SECRET:",
+  process.env.SESSION_SECRET ? "✅ Loaded" : "❌ Missing",
+);
+console.log(
+  "ACCESS_SECRET:",
+  process.env.ACCESS_SECRET ? "✅ Loaded" : "❌ Missing",
+);
+console.log(
+  "REFRESH_SECRET:",
+  process.env.REFRESH_SECRET ? "✅ Loaded" : "❌ Missing",
+);
 
-console.log("RAZORPAY_KEY_ID:", process.env.RAZORPAY_KEY_ID ? "✅ Loaded" : "❌ Missing");
-console.log("RAZORPAY_KEY_SECRET:", process.env.RAZORPAY_KEY_SECRET ? "✅ Loaded" : "❌ Missing");
+console.log(
+  "RAZORPAY_KEY_ID:",
+  process.env.RAZORPAY_KEY_ID ? "✅ Loaded" : "❌ Missing",
+);
+console.log(
+  "RAZORPAY_KEY_SECRET:",
+  process.env.RAZORPAY_KEY_SECRET ? "✅ Loaded" : "❌ Missing",
+);
 
 console.log("EMAIL_HOST:", process.env.EMAIL_HOST ? "✅ Loaded" : "❌ Missing");
 console.log("EMAIL_PORT:", process.env.EMAIL_PORT ? "✅ Loaded" : "❌ Missing");
@@ -32,20 +47,53 @@ console.log("EMAIL_USER:", process.env.EMAIL_USER ? "✅ Loaded" : "❌ Missing"
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Loaded" : "❌ Missing");
 console.log("EMAIL_FROM:", process.env.EMAIL_FROM ? "✅ Loaded" : "❌ Missing");
 
-console.log("SMS_PROVIDER:", process.env.SMS_PROVIDER ? "✅ Loaded" : "❌ Missing");
+console.log(
+  "SMS_PROVIDER:",
+  process.env.SMS_PROVIDER ? "✅ Loaded" : "❌ Missing",
+);
 
-console.log("BRAVO_MOCK_MODE:", process.env.BRAVO_MOCK_MODE ? "✅ Loaded" : "❌ Missing");
-console.log("BRAVO_API_KEY:", process.env.BRAVO_API_KEY ? "✅ Loaded" : "❌ Missing");
-console.log("BRAVO_SENDER_ID:", process.env.BRAVO_SENDER_ID ? "✅ Loaded" : "❌ Missing");
-console.log("BRAVO_BASE_URL:", process.env.BRAVO_BASE_URL ? "✅ Loaded" : "❌ Missing");
+console.log(
+  "BRAVO_MOCK_MODE:",
+  process.env.BRAVO_MOCK_MODE ? "✅ Loaded" : "❌ Missing",
+);
+console.log(
+  "BRAVO_API_KEY:",
+  process.env.BRAVO_API_KEY ? "✅ Loaded" : "❌ Missing",
+);
+console.log(
+  "BRAVO_SENDER_ID:",
+  process.env.BRAVO_SENDER_ID ? "✅ Loaded" : "❌ Missing",
+);
+console.log(
+  "BRAVO_BASE_URL:",
+  process.env.BRAVO_BASE_URL ? "✅ Loaded" : "❌ Missing",
+);
 
-console.log("CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME ? "✅ Loaded" : "❌ Missing");
-console.log("CLOUDINARY_API_KEY:", process.env.CLOUDINARY_API_KEY ? "✅ Loaded" : "❌ Missing");
-console.log("CLOUDINARY_API_SECRET:", process.env.CLOUDINARY_API_SECRET ? "✅ Loaded" : "❌ Missing");
+console.log(
+  "CLOUDINARY_CLOUD_NAME:",
+  process.env.CLOUDINARY_CLOUD_NAME ? "✅ Loaded" : "❌ Missing",
+);
+console.log(
+  "CLOUDINARY_API_KEY:",
+  process.env.CLOUDINARY_API_KEY ? "✅ Loaded" : "❌ Missing",
+);
+console.log(
+  "CLOUDINARY_API_SECRET:",
+  process.env.CLOUDINARY_API_SECRET ? "✅ Loaded" : "❌ Missing",
+);
 
-console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID ? "✅ Loaded" : "❌ Missing");
-console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET ? "✅ Loaded" : "❌ Missing");
-console.log("GOOGLE_CALLBACK_URL:", process.env.GOOGLE_CALLBACK_URL ? "✅ Loaded" : "❌ Missing");
+console.log(
+  "GOOGLE_CLIENT_ID:",
+  process.env.GOOGLE_CLIENT_ID ? "✅ Loaded" : "❌ Missing",
+);
+console.log(
+  "GOOGLE_CLIENT_SECRET:",
+  process.env.GOOGLE_CLIENT_SECRET ? "✅ Loaded" : "❌ Missing",
+);
+console.log(
+  "GOOGLE_CALLBACK_URL:",
+  process.env.GOOGLE_CALLBACK_URL ? "✅ Loaded" : "❌ Missing",
+);
 
 console.log("🔍 ENV CHECK END ------------------");
 
@@ -64,6 +112,7 @@ const Appointment = require("./models/appointment");
 const Delivery = require("./models/delivery");
 const DeliveryAgent = require("./models/deliveryAgent");
 const ShippingPartner = require("./models/shippingPartner");
+const StorePickup = require("./models/storePickup");
 const OTP = require("./models/otp");
 const LoyaltyPoint = require("./models/loyaltyPoint");
 const {
@@ -89,6 +138,7 @@ const {
 } = require("./config/multer");
 const deliveryController = require("./controllers/deliveryController");
 const otpController = require("./controllers/otpController");
+const storePickupController = require("./controllers/storePickupController");
 
 const passport = require("./config/passport");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
@@ -140,7 +190,8 @@ app.use(
     cookie: {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" && process.env.HTTPS === "true",
+      secure:
+        process.env.NODE_ENV === "production" && process.env.HTTPS === "true",
       sameSite: "lax",
     },
   }),
@@ -630,6 +681,31 @@ app.get("/api/admin/analytics", authenticate, isAdmin, async (req, res) => {
   }
 });
 
+// ================== STORE PICKUP VERIFICATION ==================
+// Store Pickup Dashboard
+app.get("/admin/store-pickups", authenticate, isAdmin, storePickupController.getPendingStorePickups);
+
+// All Store Pickup Records
+app.get("/admin/store-pickups/all", authenticate, isAdmin, storePickupController.getAllStorePickups);
+
+// API: Get pickup statistics
+app.get("/admin/store-pickups/api/stats", authenticate, isAdmin, storePickupController.getPickupStats);
+
+// Generate OTP for store pickup
+app.post("/admin/store-pickups/:orderId/generate-otp", authenticate, isAdmin, storePickupController.generatePickupOTP);
+
+// Verify OTP for store pickup
+app.post("/admin/store-pickups/:orderId/verify-otp", authenticate, isAdmin, storePickupController.verifyPickupOTP);
+
+// Manual pickup (without OTP)
+app.post("/admin/store-pickups/:orderId/manual-pickup", authenticate, isAdmin, storePickupController.manualPickup);
+
+// Assign pickup (using delivery code)
+app.post("/admin/store-pickups/:orderId/assign", authenticate, isAdmin, storePickupController.assignPickup);
+
+// Cancel pickup
+app.post("/admin/store-pickups/:orderId/cancel", authenticate, isAdmin, storePickupController.cancelPickup);
+
 app.get(
   "/admin/products/edit/:productId",
   authenticate,
@@ -1116,7 +1192,7 @@ app.post("/signIn", async (req, res) => {
     );
     console.log("[Registration] Generated OTP:", otp);
     console.log("[Registration] OTP expires at:", expiresAt);
-    
+
     // Send OTP via email
     console.log("[Registration] Sending OTP email to:", normalizedEmail);
     const emailResult = await sendOTPEmail(
@@ -1129,7 +1205,11 @@ app.post("/signIn", async (req, res) => {
     if (!emailResult.success) {
       console.log("[Registration] Failed to send email:", emailResult.message);
       console.log("[Registration] Email error code:", emailResult.code);
-      req.flash("error", "Failed to send OTP email. Please try again. Error: " + emailResult.message);
+      req.flash(
+        "error",
+        "Failed to send OTP email. Please try again. Error: " +
+          emailResult.message,
+      );
       return res.redirect("/login");
     }
 
@@ -1144,8 +1224,11 @@ app.post("/signIn", async (req, res) => {
 
     console.log("[Registration] Redirect URL:", redirectUrl);
     console.log("[Registration] Session ID:", req.sessionID);
-    console.log("[Registration] pendingRegistration exists:", !!req.session.pendingRegistration);
-    
+    console.log(
+      "[Registration] pendingRegistration exists:",
+      !!req.session.pendingRegistration,
+    );
+
     // Save session explicitly before redirect
     return new Promise((resolve) => {
       req.session.save(() => {
@@ -1411,10 +1494,17 @@ app.get("/api/system-status", (req, res) => {
     success: true,
     data: {
       NODE_ENV: process.env.NODE_ENV || "not set",
-      EMAIL_CONFIGURED: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS && process.env.EMAIL_USER !== "your-email@gmail.com"),
+      EMAIL_CONFIGURED: !!(
+        process.env.EMAIL_USER &&
+        process.env.EMAIL_PASS &&
+        process.env.EMAIL_USER !== "your-email@gmail.com"
+      ),
       BRAVO_MOCK_MODE: process.env.BRAVO_MOCK_MODE || "false",
-      BRAVO_API_KEY_CONFIGURED: !!(process.env.BRAVO_API_KEY && process.env.BRAVO_API_KEY !== "your-bravo-api-key-here"),
-    }
+      BRAVO_API_KEY_CONFIGURED: !!(
+        process.env.BRAVO_API_KEY &&
+        process.env.BRAVO_API_KEY !== "your-bravo-api-key-here"
+      ),
+    },
   });
 });
 
@@ -2586,6 +2676,149 @@ app.post(
   },
 );
 
+// ================== PRESCRIPTION ROUTES ==================
+
+// Admin: View all prescriptions
+app.get("/admin/prescriptions", authenticate, isAdmin, async (req, res) => {
+  try {
+    const Prescription = require("./models/prescription");
+    const { status = "all", page = 1, limit = 20 } = req.query;
+
+    const query = {};
+    if (status !== "all") {
+      query.status = status;
+    }
+
+    const prescriptions = await Prescription.find(query)
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit))
+      .populate("user", "name email phone")
+      .populate("verifiedBy", "name email");
+
+    const total = await Prescription.countDocuments(query);
+
+    res.render("admin/prescriptions.ejs", {
+      prescriptions,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit)),
+      total,
+      currentStatus: status,
+    });
+  } catch (err) {
+    console.log("Admin prescriptions error:", err);
+    res.status(500).send("Error loading prescriptions");
+  }
+});
+
+// Admin: View prescription details
+app.get("/admin/prescription/:id", authenticate, isAdmin, async (req, res) => {
+  try {
+    const Prescription = require("./models/prescription");
+    const prescription = await Prescription.findById(req.params.id)
+      .populate("user", "name email phone")
+      .populate("verifiedBy", "name email")
+      .populate("orders");
+
+    if (!prescription) {
+      req.flash("error", "Prescription not found");
+      return res.redirect("/admin/prescriptions");
+    }
+
+    res.render("admin/prescription-detail.ejs", { prescription });
+  } catch (err) {
+    console.log("Prescription detail error:", err);
+    res.status(500).send("Error loading prescription");
+  }
+});
+
+// Admin: Verify prescription
+app.post(
+  "/admin/prescription/:id/verify",
+  authenticate,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const Prescription = require("./models/prescription");
+      const prescription = await Prescription.findById(req.params.id);
+
+      if (!prescription) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Prescription not found" });
+      }
+
+      const validDays = parseInt(req.body.validDays) || 365;
+      await prescription.verify(req.user._id, validDays);
+
+      req.flash("success", "Prescription verified successfully");
+      res.redirect("/admin/prescription/" + req.params.id);
+    } catch (err) {
+      console.log("Verify prescription error:", err);
+      req.flash("error", "Error verifying prescription");
+      res.redirect("/admin/prescriptions");
+    }
+  },
+);
+
+// Admin: Reject prescription
+app.post(
+  "/admin/prescription/:id/reject",
+  authenticate,
+  isAdmin,
+  async (req, res) => {
+    try {
+      const Prescription = require("./models/prescription");
+      const prescription = await Prescription.findById(req.params.id);
+
+      if (!prescription) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Prescription not found" });
+      }
+
+      const reason = req.body.reason || "No reason provided";
+      await prescription.reject(reason);
+
+      req.flash("success", "Prescription rejected");
+      res.redirect("/admin/prescription/" + req.params.id);
+    } catch (err) {
+      console.log("Reject prescription error:", err);
+      req.flash("error", "Error rejecting prescription");
+      res.redirect("/admin/prescriptions");
+    }
+  },
+);
+
+// User: View prescription details
+app.get("/prescription/:id", authenticate, async (req, res) => {
+  try {
+    const Prescription = require("./models/prescription");
+    const prescription = await Prescription.findById(req.params.id)
+      .populate("verifiedBy", "name email")
+      .populate("orders");
+
+    if (!prescription) {
+      req.flash("error", "Prescription not found");
+      return res.redirect("/account");
+    }
+
+    // Check if user owns this prescription
+    if (
+      prescription.user.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      req.flash("error", "Not authorized to view this prescription");
+      return res.redirect("/account");
+    }
+
+    res.render("user/prescription-detail.ejs", { prescription });
+  } catch (err) {
+    console.log("Prescription detail error:", err);
+    res.status(500).send("Error loading prescription");
+  }
+});
+
 app.get("/admin/products/new", authenticate, isAdmin, (req, res) => {
   res.render("forms/product.ejs");
 });
@@ -2600,40 +2833,109 @@ app.post(
     console.log("\n=== ADD PRODUCT ROUTE HIT ===");
     console.log("Request body:", req.body);
     console.log("Request file:", req.file);
-    console.log("User:", req.user?.email, "Role:", req.user?.role);
-    console.log("=============================\n");
+    console.log("req.fileValidationError:", req.fileValidationError);
+    console.log("User:", req.user ? req.user.email : "No user");
 
-    // Handle upload errors
+    // Log all file properties for debugging
+    if (req.file) {
+      console.log("\n=== FILE PROPERTIES ===");
+      console.log("filename:", req.file.filename);
+      console.log("path:", req.file.path);
+      console.log("url:", req.file.url);
+      console.log("secure_url:", req.file.secure_url);
+      console.log("cloudinary_id:", req.file.cloudinary_id);
+      console.log("All keys:", Object.keys(req.file));
+      console.log("Full file object:", JSON.stringify(req.file, null, 2));
+    } else {
+      console.log("❌ NO FILE UPLOADED - req.file is undefined");
+    }
+
+    // ✅ Validation
     if (req.fileValidationError) {
+      console.log("❌ File validation error:", req.fileValidationError);
       req.flash("error", req.fileValidationError);
-      return res.render("forms/product.ejs");
+      return res.redirect("/admin/products/new");
+    }
+
+    if (!req.file) {
+      console.log("❌ No file uploaded");
+      req.flash("error", "Product image is required");
+      return res.redirect("/admin/products/new");
     }
 
     try {
-      const productData = req.body;
+      const productData = { ...req.body };
 
-      // Handle image upload to Cloudinary
-      if (req.file) {
-        productData.image = req.file.secure_url || req.file.path;
-        console.log(
-          "✅ Product image uploaded to Cloudinary:",
-          productData.image,
-        );
-      } else {
-        console.log("⚠️ No image file uploaded");
-        req.flash("error", "Product image is required");
-        return res.render("forms/product.ejs");
+      // ✅ Get image URL from Cloudinary - try all possible properties
+      // multer-storage-cloudinary sets 'path' to the full URL
+      const imageUrl = req.file.secure_url || req.file.url || req.file.path;
+      
+      console.log("\n=== IMAGE URL CHECK ===");
+      console.log("secure_url:", req.file.secure_url);
+      console.log("url:", req.file.url);
+      console.log("path:", req.file.path);
+      console.log("Selected imageUrl:", imageUrl);
+      
+      if (!imageUrl) {
+        console.log("❌ No image URL found in file object");
+        req.flash("error", "Failed to get image URL from Cloudinary");
+        return res.redirect("/admin/products/new");
+      }
+      
+      productData.image = imageUrl;
+      console.log("✅ Product image URL:", productData.image);
+
+      // Ensure required fields exist
+      if (!productData.name || !productData.name.trim()) {
+        throw new Error("Product name is required");
+      }
+      if (!productData.price || isNaN(parseFloat(productData.price))) {
+        throw new Error("Valid product price is required");
+      }
+      if (!productData.stock || isNaN(parseInt(productData.stock))) {
+        productData.stock = 0;
+      }
+      
+      // Convert to proper types
+      productData.price = parseFloat(productData.price);
+      productData.stock = parseInt(productData.stock);
+      if (productData.oldPrice) {
+        productData.oldPrice = parseFloat(productData.oldPrice);
       }
 
+      console.log("\n=== FINAL PRODUCT DATA ===");
+      console.log(productData);
+
       const newProduct = new Product(productData);
+      console.log("Saving product to database...");
+      
       await newProduct.save();
+
       console.log("✅ Product added:", newProduct.name);
+      console.log("✅ Product ID:", newProduct._id);
+      console.log("✅ Product image:", newProduct.image);
+
       req.flash("success", "Product added successfully!");
+      console.log("Redirecting to /admin/home...");
       res.redirect("/admin/home");
     } catch (err) {
-      console.log("❌ Error adding product:", err);
-      req.flash("error", "Error adding product: " + err.message);
-      res.render("forms/product.ejs");
+      console.log("❌ Error adding product:", err.message);
+      console.log("Full error:", err);
+      console.log("Error name:", err.name);
+      console.log("Error stack:", err.stack);
+      
+      // Handle mongoose validation errors
+      let errorMessage = "Error adding product";
+      if (err.name === "ValidationError") {
+        const messages = Object.values(err.errors).map(e => e.message);
+        errorMessage = messages.join(", ");
+        console.log("❌ Validation errors:", messages);
+      } else if (err.name === "CastError") {
+        errorMessage = "Invalid data format";
+      }
+
+      req.flash("error", errorMessage);
+      return res.redirect("/admin/products/new");
     }
   },
 );
@@ -3313,6 +3615,38 @@ app.post("/checkout", authenticateVerified, isUser, async (req, res) => {
         order.status = "assigned";
         await order.save();
 
+        // Create Delivery document for the assigned order
+        const orderAddress =
+          order.address || order.shippingAddress || order.shippingInfo;
+        const timestamp = Date.now().toString(36).toUpperCase();
+        const random = require("crypto")
+          .randomBytes(4)
+          .toString("hex")
+          .toUpperCase();
+        const qrCode = `DLV${timestamp}${random}`;
+        const qrCodeSecret = require("crypto").randomBytes(32).toString("hex");
+
+        await Delivery.create({
+          order: order._id,
+          qrCode,
+          qrCodeSecret,
+          assignedTo: bestAgent._id,
+          assignedAt: new Date(),
+          assignmentMethod: "auto",
+          status: "assigned",
+          deliveryAddress: {
+            fullName: orderAddress.fullName,
+            phone: orderAddress.phone,
+            address: orderAddress.address,
+            city: orderAddress.city,
+            state: orderAddress.state,
+            pincode: orderAddress.pincode,
+            landmark: orderAddress.landmark,
+          },
+          codAmount: order.payment.method === "cod" ? order.pricing.total : 0,
+          priority: "normal",
+        });
+
         // Update agent's assigned orders
         await DeliveryAgent.findByIdAndUpdate(bestAgent._id, {
           $push: { assignedOrders: order._id },
@@ -3361,6 +3695,13 @@ app.get(
   isUser,
   async (req, res) => {
     try {
+      // Validate order ID
+      const mongoose = require("mongoose");
+      if (!mongoose.Types.ObjectId.isValid(req.params.orderId)) {
+        req.flash("error", "Invalid order ID");
+        return res.redirect("/user/orders");
+      }
+
       const order = await Order.findById(req.params.orderId).populate(
         "items.product",
       );
@@ -3415,6 +3756,13 @@ app.get("/user/orders", authenticateVerified, async (req, res) => {
 
 app.get("/user/orders/:orderId", authenticateVerified, async (req, res) => {
   try {
+    // Validate order ID
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(req.params.orderId)) {
+      req.flash("error", "Invalid order ID");
+      return res.redirect("/user/orders");
+    }
+
     const order = await Order.findOne({
       _id: req.params.orderId,
       user: req.user._id,
@@ -3461,6 +3809,13 @@ app.get(
   authenticateVerified,
   async (req, res) => {
     try {
+      // Validate order ID
+      const mongoose = require("mongoose");
+      if (!mongoose.Types.ObjectId.isValid(req.params.orderId)) {
+        req.flash("error", "Invalid order ID");
+        return res.redirect("/user/orders");
+      }
+
       const InvoiceGenerator = require("./services/invoiceService");
 
       const order = await Order.findOne({
@@ -3472,6 +3827,13 @@ app.get(
         return res.status(404).send("Order not found");
       }
 
+      // Update payment status to paid if it's pending (first time invoice download)
+      if (order.payment && order.payment.status === "pending") {
+        order.payment.status = "paid";
+        order.paymentStatus = "paid";
+        await order.save();
+      }
+
       // Generate invoice
       const invoiceResult = await InvoiceGenerator.generateInvoice(
         order,
@@ -3479,7 +3841,7 @@ app.get(
         [],
       );
 
-      if (invoiceResult.success) {
+      if (invoiceResult && invoiceResult.success) {
         // Download the invoice
         await InvoiceGenerator.downloadInvoice(
           res,
@@ -3487,11 +3849,16 @@ app.get(
           invoiceResult.fileName,
         );
       } else {
-        res.status(500).send("Failed to generate invoice");
+        console.error("Invoice generation failed:", invoiceResult);
+        res
+          .status(500)
+          .send(invoiceResult?.message || "Failed to generate invoice");
       }
     } catch (err) {
       console.log("Invoice error:", err);
-      res.status(500).send("Error generating invoice");
+      console.log("Invoice error details:", err.message);
+      console.log("Invoice error stack:", err.stack);
+      res.status(500).send("Error generating invoice: " + err.message);
     }
   },
 );
@@ -3501,6 +3868,15 @@ app.post(
   authenticateVerified,
   async (req, res) => {
     try {
+      // Validate order ID
+      const mongoose = require("mongoose");
+      if (!mongoose.Types.ObjectId.isValid(req.params.orderId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid order ID",
+        });
+      }
+
       const order = await Order.findOne({
         _id: req.params.orderId,
         user: req.user._id,
@@ -4097,6 +4473,11 @@ app.post(
       const oldStatus = order.status;
       await order.updateStatus(req.body.status, req.body.reason);
 
+      // Generate unique delivery code when status changes to out_for_delivery
+      if (req.body.status === 'out_for_delivery' && oldStatus !== 'out_for_delivery') {
+        await order.generateDeliveryCode();
+      }
+
       // Send email notification if status changed
       if (
         oldStatus !== req.body.status &&
@@ -4260,6 +4641,15 @@ app.get("/api/cancellations", authenticateVerified, async (req, res) => {
 // Get single cancellation request
 app.get("/api/cancellations/:id", authenticateVerified, async (req, res) => {
   try {
+    // Validate cancellation request ID
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid cancellation request ID",
+      });
+    }
+
     const CancellationRequest = require("./models/cancellationRequest");
     const request = await CancellationRequest.findById(req.params.id)
       .populate("order")
@@ -4351,6 +4741,15 @@ app.put(
   isAdmin,
   async (req, res) => {
     try {
+      // Validate cancellation request ID
+      const mongoose = require("mongoose");
+      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid cancellation request ID",
+        });
+      }
+
       const { status, adminNotes, rejectionReason, assignedAgent } = req.body;
       const CancellationRequest = require("./models/cancellationRequest");
 
@@ -4383,25 +4782,13 @@ app.put(
         };
         request.status = "otp_generated";
 
-        // If assigning agent, generate OTP
-        if (status === "assigned" && assignedAgent) {
-          const crypto = require("crypto");
-          const otp = crypto.randomInt(100000, 999999).toString();
-          request.cancellationOTP = {
-            code: otp,
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-            generatedAt: new Date(),
-          };
-          request.status = "otp_generated";
-
-          // Send OTP to assigned agent
-          const { sendCancellationOTP } = require("./services/smsService");
-          await sendCancellationOTP(
-            request.assignedAgent,
-            otp,
-            request.trackingId,
-          );
-        }
+        // Send OTP to assigned agent
+        const { sendCancellationOTP } = require("./services/smsService");
+        await sendCancellationOTP(
+          request.assignedAgent,
+          otp,
+          request.trackingId,
+        );
       }
 
       await request.save();
@@ -4428,6 +4815,15 @@ app.post(
   isDeliveryAgent,
   async (req, res) => {
     try {
+      // Validate cancellation request ID
+      const mongoose = require("mongoose");
+      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid cancellation request ID",
+        });
+      }
+
       const { otp, pickupProof } = req.body;
       const CancellationRequest = require("./models/cancellationRequest");
 
@@ -4502,6 +4898,15 @@ app.post(
   isAdmin,
   async (req, res) => {
     try {
+      // Validate cancellation request ID
+      const mongoose = require("mongoose");
+      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid cancellation request ID",
+        });
+      }
+
       const CancellationRequest = require("./models/cancellationRequest");
       const request = await CancellationRequest.findById(req.params.id)
         .populate("order")
@@ -4565,6 +4970,13 @@ app.get(
   isAdmin,
   async (req, res) => {
     try {
+      // Validate cancellation request ID
+      const mongoose = require("mongoose");
+      if (!mongoose.Types.ObjectId.isValid(req.params.requestId)) {
+        req.flash("error", "Invalid cancellation request ID");
+        return res.redirect("/admin/cancellations");
+      }
+
       const CancellationRequest = require("./models/cancellationRequest");
       const request = await CancellationRequest.findById(req.params.requestId)
         .populate("order")
@@ -4583,6 +4995,59 @@ app.get(
     }
   },
 );
+
+// ================== USER CANCELLATION ROUTES ==================
+// View all cancellation requests
+app.get("/user/cancellations", authenticateVerified, async (req, res) => {
+  try {
+    const CancellationRequest = require("./models/cancellationRequest");
+    const requests = await CancellationRequest.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
+      .populate("order", "tracking.orderId status")
+      .populate("assignedAgent", "name phone")
+      .populate("items.product");
+
+    res.render("user/cancellations", { requests });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error loading cancellation requests");
+  }
+});
+
+// View single cancellation request details
+app.get("/user/cancellations/:id", authenticateVerified, async (req, res) => {
+  try {
+    // Validate cancellation request ID
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      req.flash("error", "Invalid cancellation request ID");
+      return res.redirect("/user/cancellations");
+    }
+
+    const CancellationRequest = require("./models/cancellationRequest");
+    const request = await CancellationRequest.findById(req.params.id)
+      .populate("order")
+      .populate("user", "name email phone")
+      .populate("assignedAgent", "name phone vehicleType vehicleNumber")
+      .populate("items.product");
+
+    if (!request) {
+      req.flash("error", "Cancellation request not found");
+      return res.redirect("/user/cancellations");
+    }
+
+    // Check if user owns this request
+    if (request.user._id.toString() !== req.user._id.toString()) {
+      req.flash("error", "Not authorized to view this request");
+      return res.redirect("/user/cancellations");
+    }
+
+    res.render("user/cancellation-detail", { request });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error loading cancellation request");
+  }
+});
 
 // ================== REVIEW ROUTES ==================
 app.get("/api/products/:productId/reviews", async (req, res) => {
@@ -6428,13 +6893,24 @@ app.get("/agent/dashboard", authenticateAgent, async (req, res) => {
       return res.redirect("/agent/login");
     }
 
-    // Get agent's assigned orders
+    // Get agent's assigned orders (only status: assigned)
     const assignedOrders = await Order.find({
       deliveryAgent: agent._id,
-      status: { $in: ["assigned", "out_for_delivery", "processing"] },
+      status: "assigned",
     })
       .select("+deliveryOTP") // Include deliveryOTP if it exists
       .populate("items.product")
+      .populate("user", "name email phone")
+      .sort({ createdAt: -1 });
+
+    // Get out for delivery orders (including picked_up)
+    const outForDeliveryOrders = await Order.find({
+      deliveryAgent: agent._id,
+      status: { $in: ["out_for_delivery", "picked_up"] },
+    })
+      .select("+deliveryOTP")
+      .populate("items.product")
+      .populate("user", "name email phone")
       .sort({ createdAt: -1 });
 
     // Get completed deliveries (delivered orders)
@@ -6516,6 +6992,7 @@ app.get("/agent/dashboard", authenticateAgent, async (req, res) => {
     res.render("agent/dashboard.ejs", {
       agent,
       assignedOrders,
+      outForDeliveryOrders,
       completedOrders,
       todayStats: {
         deliveries: todayDeliveries.length,
@@ -6911,7 +7388,18 @@ app.get("/agent/deliveries", authenticateAgent, async (req, res) => {
         query.status = { $in: statuses };
       } else {
         // Default to active cancellation requests
-        query.status = { $in: ["otp_generated", "assigned"] };
+        query.status = {
+          $in: [
+            "pending",
+            "approved",
+            "assigned",
+            "otp_generated",
+            "picked_up",
+            "verified",
+            "refunded",
+            "rejected",
+          ],
+        };
       }
 
       const currentPage = parseInt(page);
@@ -6931,7 +7419,9 @@ app.get("/agent/deliveries", authenticateAgent, async (req, res) => {
     } else {
       // Load regular deliveries
       const query = { assignedTo: agent._id };
-      if (status) {
+
+      // Handle status filter - "All" means no status filter
+      if (status && status !== "all") {
         const statuses = status.split(",");
         query.status = { $in: statuses };
       }
@@ -6951,18 +7441,31 @@ app.get("/agent/deliveries", authenticateAgent, async (req, res) => {
         .sort(sortOptions)
         .skip(skip)
         .limit(pageSize)
-        .populate("order");
+        .populate({
+          path: "order",
+          select: "tracking.address user",
+          populate: {
+            path: "user",
+            select: "name email phone",
+          },
+        });
 
       totalDeliveries = await Delivery.countDocuments(query);
       totalPages = Math.ceil(totalDeliveries / pageSize);
     }
 
+    const assignedOrders = await Order.find({
+      deliveryAgent: agent._id,
+      status: "assigned",
+    });
+
     res.render("agent/deliveries.ejs", {
       agent,
+      assignedOrders,
       deliveries,
       cancellationRequests,
-      currentStatus: status,
-      currentType: type,
+      currentStatus: status || "",
+      currentType: type || "",
       currentPage: parseInt(page),
       totalPages,
       totalDeliveries,
@@ -6982,6 +7485,15 @@ app.post("/agent/delivery/:id/start", authenticateAgent, async (req, res) => {
 
     if (!agent) {
       return res.status(403).json({ success: false, message: "Access denied" });
+    }
+
+    // Validate delivery ID
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid delivery ID",
+      });
     }
 
     let delivery = await Delivery.findById(req.params.id).populate("order");
@@ -7058,53 +7570,112 @@ app.post("/agent/delivery/:id/start", authenticateAgent, async (req, res) => {
         .json({ success: false, message: "Delivery not assigned to you" });
     }
 
-    // Update delivery status to out_for_delivery
-    await delivery.updateStatus(
-      "out_for_delivery",
-      "Delivery started by agent",
-      "",
-      agent._id,
-    );
+    // Check if delivery is already out for delivery or delivered
+    if (['out_for_delivery', 'delivered', 'failed_attempt'].includes(delivery.status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Delivery is already ${delivery.status.replace('_', ' ')}`
+      });
+    }
 
-    // Generate OTP
-    const otpCode = QRCodeService.generateOTP();
+    // Update delivery status to out_for_delivery
+    try {
+      await delivery.updateStatus(
+        "out_for_delivery",
+        "Delivery started by agent - Items picked up from store",
+        "",
+        agent._id,
+      );
+    } catch (updateErr) {
+      console.error("Failed to update delivery status:", updateErr);
+    }
+
+    // Generate OTPs
+    const deliveryOTP = QRCodeService.generateOTP(); // For customer to verify delivery
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
-    // Update order with OTP
+    // Update order with delivery OTP (for customer verification later)
     if (delivery.order) {
-      await Order.findByIdAndUpdate(delivery.order._id, {
-        deliveryOTP: {
-          code: otpCode,
-          expiresAt,
-          generatedAt: new Date(),
-        },
-      });
-
-      // Send OTP to customer via SMS
-      const customerName =
-        delivery.deliveryAddress?.fullName || delivery.order.address?.fullName;
-      const customerPhone =
-        delivery.deliveryAddress?.phone || delivery.order.address?.phone;
-
       try {
-        await sendOrderStatusSMS(
-          delivery.order,
-          customerPhone,
-          "out_for_delivery",
-          otpCode,
-        );
-        console.log("OTP SMS sent to customer:", customerPhone);
+        // Use $set and $unset to explicitly control OTP fields
+        const orderUpdate = {
+          $set: {
+            'deliveryOTP.code': deliveryOTP,
+            'deliveryOTP.expiresAt': expiresAt,
+            'deliveryOTP.generatedAt': new Date(),
+            'status': 'out_for_delivery'
+          },
+          $unset: {
+            'deliveryOTP.verifiedAt': 1  // Remove any existing verifiedAt
+          }
+        };
+
+        // Generate unique delivery code if not already generated
+        const existingOrder = await Order.findById(delivery.order._id);
+        if (existingOrder && !existingOrder.deliveryCode?.code) {
+          await existingOrder.generateDeliveryCode();
+          orderUpdate.$set.deliveryCode = existingOrder.deliveryCode;
+        }
+
+        await Order.findByIdAndUpdate(delivery.order._id, orderUpdate);
+      } catch (orderUpdateErr) {
+        console.error("Failed to update order with OTP:", orderUpdateErr);
+      }
+
+      // === CREATE STORE PICKUP RECORD ===
+      // Verification code = Last 4 digits of Order ID
+      try {
+        const StorePickup = require("../models/storePickup");
+        const mongoose = require('mongoose');
+        
+        // Check if pickup record already exists
+        let pickup = await StorePickup.findOne({ order: delivery.order._id }).select('+verificationCode');
+        
+        if (!pickup) {
+          // Create new pickup record with verification code
+          pickup = new StorePickup({
+            order: delivery.order._id,
+            storeName: 'Shri Govind Pharmacy - Main Store',
+            status: 'otp_generated'
+          });
+          
+          // Generate verification code (last 4 digits of order ID)
+          const orderId = delivery.order._id.toString();
+          const verificationCode = orderId.slice(-4).toUpperCase();
+          pickup.verificationCode = verificationCode;
+          pickup.codeGeneratedAt = new Date();
+          pickup.codeExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+          
+          await pickup.save();
+          
+          console.log(`✅ Verification Code generated: ${verificationCode} for order ${orderId}`);
+        } else {
+          console.log(`ℹ️ Verification code already exists for order ${delivery.order._id}`);
+        }
+      } catch (pickupErr) {
+        console.error("Failed to create store pickup record:", pickupErr);
+      }
+      // === END STORE PICKUP RECORD ===
+
+      // Send notification to customer that order is out for delivery (NO OTP in this SMS)
+      const customerPhone = delivery.deliveryAddress?.phone || delivery.order.address?.phone;
+      
+      try {
+        // Send status update SMS without OTP (OTP is only for agent/admin)
+        const message = `Shri Govind Pharmacy: Your order ${delivery.order.tracking.orderId} is out for delivery. Our delivery partner will reach you soon. Please keep the delivery OTP ready for verification.`;
+        await sendSMS(customerPhone, message);
+        console.log("Delivery status SMS sent to customer:", customerPhone);
       } catch (smsError) {
-        console.error("Failed to send OTP SMS:", smsError);
+        console.error("Failed to send delivery SMS:", smsError);
       }
     }
 
     res.json({
       success: true,
-      message:
-        "Delivery started successfully. OTP generated and sent to customer.",
+      message: "Delivery started successfully. Show the verification code at the store.",
       data: {
-        otp: otpCode,
+        verificationCode: delivery.order._id.toString().slice(-4).toUpperCase(), // Last 4 digits of Order ID
+        deliveryOTP: deliveryOTP, // OTP to collect from customer
         expiresAt,
         status: "out_for_delivery",
       },
@@ -7126,6 +7697,13 @@ app.get("/agent/delivery/:id", authenticateAgent, async (req, res) => {
 
     if (!agent) {
       return res.status(403).send("Access denied");
+    }
+
+    // Validate delivery ID
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      req.flash("error", "Invalid delivery ID");
+      return res.redirect("/agent/deliveries");
     }
 
     let delivery = await Delivery.findById(req.params.id)
@@ -7251,13 +7829,16 @@ app.get("/agent/delivery/:id", authenticateAgent, async (req, res) => {
           const otpCode = QRCodeService.generateOTP();
           const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
-          // Update order with OTP
+          // Update order with OTP (explicitly unset verifiedAt)
           await Order.findByIdAndUpdate(delivery.order._id, {
-            deliveryOTP: {
-              code: otpCode,
-              expiresAt,
-              generatedAt: new Date(),
+            $set: {
+              'deliveryOTP.code': otpCode,
+              'deliveryOTP.expiresAt': expiresAt,
+              'deliveryOTP.generatedAt': new Date()
             },
+            $unset: {
+              'deliveryOTP.verifiedAt': 1  // Remove any existing verifiedAt
+            }
           });
 
           // Send OTP to customer via SMS
@@ -7326,6 +7907,15 @@ app.post(
         return res
           .status(404)
           .json({ success: false, message: "Agent not found" });
+      }
+
+      // Validate delivery ID
+      const mongoose = require("mongoose");
+      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid delivery ID",
+        });
       }
 
       // For delivered status, verify OTP
@@ -7521,6 +8111,13 @@ app.post("/agent/delivery/:id/status", authenticateAgent, async (req, res) => {
       return res.status(403).json({ success: false, message: "Access denied" });
     }
 
+    // Validate delivery ID
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      req.flash("error", "Invalid delivery ID");
+      return res.redirect("/agent/deliveries");
+    }
+
     const { status, notes, latitude, longitude, proof } = req.body;
     const location = latitude && longitude ? { latitude, longitude } : null;
 
@@ -7555,6 +8152,15 @@ app.post("/agent/delivery/:id/deliver", authenticateAgent, async (req, res) => {
     }
 
     const { qrCodeVerified, photo, signature, otp, codCollected } = req.body;
+
+    // Validate delivery ID
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid delivery ID",
+      });
+    }
 
     const delivery = await Delivery.findById(req.params.id).populate("order");
 
@@ -7930,6 +8536,13 @@ app.post("/api/verify-qr", async (req, res) => {
 // User: View order delivery status
 app.get("/user/order/:orderId/delivery", authenticate, async (req, res) => {
   try {
+    // Validate order ID
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(req.params.orderId)) {
+      req.flash("error", "Invalid order ID");
+      return res.redirect("/user/orders");
+    }
+
     const delivery = await Delivery.findOne({ order: req.params.orderId })
       .populate("order")
       .populate("assignedTo");

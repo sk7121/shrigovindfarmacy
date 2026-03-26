@@ -10,10 +10,8 @@ const productSchema = new mongoose.Schema(
 
         image: {
             type: String,
-            required: function() {
-                // Only required for new documents, not for updates
-                return this.isNew;
-            },
+            required: [true, "Product image is required"],
+            trim: true,
         },
 
         price: {
@@ -33,7 +31,11 @@ const productSchema = new mongoose.Schema(
         },
         category: {
             type: String,
-            enum: ["ayurvedic", "sashtri", "herbal-cosmetics", "fmcg"],
+            enum: {
+                values: ["ayurvedic", "sashtri", "herbal-cosmetics", "fmcg"],
+                message: "Category must be one of: ayurvedic, sashtri, herbal-cosmetics, fmcg"
+            },
+            default: "ayurvedic",
         },
         description: {
             type: String,

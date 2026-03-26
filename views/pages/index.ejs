@@ -148,17 +148,33 @@
       border-radius: 12px;
       margin-bottom: 30px;
       box-shadow: var(--shadow);
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
     }
 
     .product-filter-form {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr auto;
+      display: inline-grid;
+      grid-template-columns: repeat(5, auto);
       gap: 15px;
       align-items: end;
+      justify-content: center;
+      max-width: 100%;
     }
 
     .filter-field {
-      width: 100%;
+      min-width: 150px;
+    }
+
+    .filter-field:first-child {
+      min-width: 250px;
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
 
     .filter-field label {
@@ -186,17 +202,24 @@
     /* Tablet - 3 columns */
     @media (max-width: 1024px) {
       .product-filter-form {
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: repeat(3, auto);
         gap: 12px;
       }
 
+      .filter-field:first-child {
+        grid-column: span 3;
+        min-width: 100%;
+      }
+
+      .filter-field:nth-child(2),
+      .filter-field:nth-child(3),
       .filter-field:nth-child(4) {
-        grid-column: span 1;
+        min-width: 120px;
       }
 
       .filter-actions {
-        grid-column: span 2;
-        justify-content: flex-end;
+        grid-column: span 3;
+        justify-content: center;
       }
     }
 
@@ -207,26 +230,24 @@
       }
 
       .product-filter-form {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, auto);
         gap: 10px;
       }
 
       .filter-field:first-child {
         grid-column: span 2;
+        min-width: 100%;
       }
 
       .filter-field:nth-child(2),
-      .filter-field:nth-child(3) {
-        grid-column: span 1;
-      }
-
+      .filter-field:nth-child(3),
       .filter-field:nth-child(4) {
-        grid-column: span 1;
+        min-width: 120px;
       }
 
       .filter-actions {
         grid-column: span 2;
-        justify-content: stretch;
+        justify-content: center;
       }
 
       .filter-actions .btn {
@@ -255,13 +276,17 @@
         grid-column: span 1;
       }
 
+      .filter-field {
+        min-width: 100%;
+      }
+
       .filter-actions {
-        flex-direction: column;
-        gap: 10px;
+        justify-content: center;
       }
 
       .filter-actions .btn {
-        width: 100%;
+        flex: 1;
+        justify-content: center;
       }
     }
   </style>
@@ -416,6 +441,11 @@
                           <%= typeof wishCount !=='undefined' ? wishCount : 0 %>
                         </span>
                       </a>
+                      <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                        <a href="/admin/home" class="btn btn-admin" style="background: #7c3aed; color: white; margin-right: 0.5rem;">
+                          <i class="fas fa-shield-alt"></i> Admin Panel
+                        </a>
+                      <% } %>
                       <a href="/doctor" class="btn btn-primary consult-btn desktop-only">
                         <i class="fas fa-user-md"></i> Consult Doctor
                       </a>
@@ -501,6 +531,13 @@
                     <% } else { %>
                       <li><a href="/login"><i class="fas fa-user"></i> Login</a></li>
                       <% } %>
+                        <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                        <li>
+                          <a href="/admin/home" class="btn btn-admin" style="background: #7c3aed; color: white; display: block; margin: 0.5rem 1rem;">
+                            <i class="fas fa-shield-alt"></i> Admin Panel
+                          </a>
+                        </li>
+                        <% } %>
                         <li>
                           <a href="/doctor" class="btn btn-primary mob-consult">
                             <i class="fas fa-user-md"></i> Consult Doctor
@@ -763,52 +800,19 @@
                       </select>
                     </div>
 
-                    <!-- Price Range -->
-                    <div class="filter-field">
-                      <label>
-                        <i class="fas fa-rupee-sign"></i> Max Price
-                      </label>
-                      <input type="number" name="maxPrice" placeholder="₹ Max"
-                        value="<%= typeof filters !== 'undefined' && filters.maxPrice ? filters.maxPrice : '' %>">
-                    </div>
-
-                    <!-- Sort By -->
-                    <div class="filter-field">
-                      <label>
-                        <i class="fas fa-sort"></i> Sort By
-                      </label>
-                      <select name="sortBy">
-                        <option value="default" <%=typeof filters !=='undefined' && filters.sortBy==='default'
-                          ? 'selected' : '' %>>Default</option>
-                        <option value="price-low" <%=typeof filters !=='undefined' && filters.sortBy==='price-low'
-                          ? 'selected' : '' %>>Price: Low to High</option>
-                        <option value="price-high" <%=typeof filters !=='undefined' && filters.sortBy==='price-high'
-                          ? 'selected' : '' %>>Price: High to Low</option>
-                        <option value="name-asc" <%=typeof filters !=='undefined' && filters.sortBy==='name-asc'
-                          ? 'selected' : '' %>>Name: A to Z</option>
-                        <option value="name-desc" <%=typeof filters !=='undefined' && filters.sortBy==='name-desc'
-                          ? 'selected' : '' %>>Name: Z to A</option>
-                        <option value="newest" <%=typeof filters !=='undefined' && filters.sortBy==='newest'
-                          ? 'selected' : '' %>>Newest First</option>
-                        <option value="rating" <%=typeof filters !=='undefined' && filters.sortBy==='rating'
-                          ? 'selected' : '' %>>Highest Rated</option>
-                      </select>
-                    </div>
-
                     <!-- Submit Button -->
                     <div class="filter-actions">
                       <button type="button" id="filter-submit-btn" class="btn btn-primary">
                         <i class="fas fa-search"></i> Search
                       </button>
-                      <a href="/home" class="btn btn-outline" title="Clear filters">
+                      <button type="button" id="clear-filters-btn" class="btn btn-outline" title="Clear filters">
                         <i class="fas fa-times"></i>
-                      </a>
+                      </button>
                     </div>
                   </form>
 
                   <!-- Active Filters Display -->
-                  <% if (typeof filters !=='undefined' && (filters.search || filters.category !=='all' ||
-                    filters.maxPrice)) { %>
+                  <% if (typeof filters !=='undefined' && (filters.search || filters.category !=='all')) { %>
                     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border);">
                       <strong style="color: var(--text-muted); font-size: 13px;">Active Filters:</strong>
                       <% if (filters.search) { %>
@@ -823,12 +827,6 @@
                               Category: <%= filters.category %> <i class="fas fa-times"></i>
                             </span>
                             <% } %>
-                              <% if (filters.maxPrice) { %>
-                                <span class="filter-tag"
-                                  style="display: inline-block; background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin: 5px 5px 0 10px;">
-                                  Max Price: ₹<%= filters.maxPrice %> <i class="fas fa-times"></i>
-                                </span>
-                                <% } %>
                     </div>
                     <% } %>
                 </div>

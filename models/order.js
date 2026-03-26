@@ -53,7 +53,7 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'confirmed', 'processing', 'assigned', 'shipped', 'out_for_delivery', 'delivered', 'cancelled', 'refunded'],
+        enum: ['pending', 'confirmed', 'processing', 'assigned', 'shipped', 'out_for_delivery', 'picked_up', 'delivered', 'cancelled', 'refunded'],
         default: 'pending'
     },
     tracking: {
@@ -80,6 +80,11 @@ const orderSchema = new mongoose.Schema({
         expiresAt: Date,
         generatedAt: Date,
         verifiedAt: Date
+    },
+    deliveryCode: {
+        code: String,
+        generatedAt: Date,
+        expiresAt: Date
     },
     deliveryProof: {
         image: String,
@@ -112,7 +117,15 @@ orderSchema.statics.getOrdersByStatus = function (status) {
 };
 
 // Method to update order status
-orderSchema.methods.updateStatus = function (newStatus, reason = '') {
+orderSchema.methods.updateStatus = async function (newStatus, reason = '') {
+    console.log('\n========== ORDER STATUS UPDATE ==========');
+    console.log('Order ID:', this._id);
+    console.log('Old Status:', this.status);
+    console.log('New Status:', newStatus);
+    console.log('Current OTP Code:', this.deliveryOTP?.code || 'NONE');
+    console.log('Current OTP verifiedAt:', this.deliveryOTP?.verifiedAt || 'NOT SET');
+    console.log('=========================================\n');
+
     this.status = newStatus;
 
     if (newStatus === 'delivered') {
@@ -124,6 +137,61 @@ orderSchema.methods.updateStatus = function (newStatus, reason = '') {
             throw new Error('OTP verification is mandatory for marking order as delivered');
         }
         this.tracking.deliveredAt = new Date();
+    } else if (newStatus === 'picked_up') {
+        // Order picked up from store/warehouse
+        this.tracking.shippedAt = new Date();
+        // Set estimated delivery to 3 days from now
+        this.tracking.estimatedDelivery = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+
+        console.log('\n========== PICKED_UP: CHECKING OTP ==========');
+        console.log('Has existing OTP?', !!this.deliveryOTP?.code);
+        console.log('Existing OTP Code:', this.deliveryOTP?.code);
+        console.log('=============================================\n');
+
+        // Generate OTP when order is picked up (only if not already generated)
+        if (!this.deliveryOTP || !this.deliveryOTP.code) {
+            console.log('\n========== GENERATING NEW OTP ==========');
+            const OTP = require('./otp');
+            const otpCode = OTP.generateOTP(6);
+            const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+            console.log('Generated OTP Code:', otpCode);
+            console.log('Expires At:', expiresAt);
+            console.log('========================================\n');
+
+            // Use MongoDB update to explicitly set new OTP and unset verifiedAt
+            const OrderModel = mongoose.model('Order');
+            const updateResult = await OrderModel.findByIdAndUpdate(this._id, {
+                $set: {
+                    'deliveryOTP.code': otpCode,
+                    'deliveryOTP.expiresAt': expiresAt,
+                    'deliveryOTP.generatedAt': new Date()
+                },
+                $unset: {
+                    'deliveryOTP.verifiedAt': 1  // Remove any existing verifiedAt
+                }
+            });
+
+            console.log('\n========== OTP UPDATE RESULT ==========');
+            console.log('Update Result:', updateResult);
+            console.log('=======================================\n');
+
+            // Send OTP to customer via SMS
+            const { sendOrderStatusSMS } = require('../services/smsService');
+            if (this.address && this.address.phone) {
+                console.log('\n========== SENDING OTP SMS ==========');
+                console.log('Customer Phone:', this.address.phone);
+                console.log('OTP Code:', otpCode);
+                sendOrderStatusSMS(this, this.address.phone, 'picked_up', otpCode)
+                    .then(() => console.log('✅ OTP SMS sent successfully'))
+                    .catch(err => console.error('⚠️ Failed to send OTP SMS:', err));
+                console.log('=====================================\n');
+            }
+        } else {
+            console.log('\n========== OTP ALREADY EXISTS ==========');
+            console.log('Skipping OTP generation - OTP already exists');
+            console.log('========================================\n');
+        }
     } else if (newStatus === 'shipped') {
         this.tracking.shippedAt = new Date();
         // Set estimated delivery to 3 days from now
@@ -133,7 +201,15 @@ orderSchema.methods.updateStatus = function (newStatus, reason = '') {
         this.tracking.cancellationReason = reason;
     }
 
-    return this.save();
+    const savedOrder = await this.save();
+    
+    console.log('\n========== ORDER SAVED ==========');
+    console.log('Final Status:', savedOrder.status);
+    console.log('Final OTP Code:', savedOrder.deliveryOTP?.code || 'NONE');
+    console.log('Final OTP verifiedAt:', savedOrder.deliveryOTP?.verifiedAt || 'NOT SET');
+    console.log('=================================\n');
+
+    return savedOrder;
 };
 
 // Method to calculate totals
@@ -147,6 +223,22 @@ orderSchema.methods.calculateTotals = function () {
     this.pricing.subtotal = subtotal;
     this.pricing.gst = subtotal * 0.05; // 5% GST
     this.pricing.total = subtotal + this.pricing.gst - this.pricing.discount + this.pricing.delivery;
+};
+
+// Method to generate unique delivery code
+orderSchema.methods.generateDeliveryCode = function () {
+    const date = new Date();
+    const timestamp = date.getTime().toString(36).toUpperCase();
+    const random = Math.random().toString(36).substr(2, 4).toUpperCase();
+    const deliveryCode = `DLV${timestamp}${random}`;
+    
+    this.deliveryCode = {
+        code: deliveryCode,
+        generatedAt: new Date(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+    };
+    
+    return this.save();
 };
 
 module.exports = mongoose.model('Order', orderSchema);

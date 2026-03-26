@@ -148,12 +148,25 @@
       color: #b91c1c;
       background: rgba(254, 202, 202, 0.25);
     }
+    /* Hide empty flash messages */
+    .flash:empty, .flash:not(:has(:text)) { display: none !important; }
   </style>
-  <% if (success && success.length) { %>
-    <div class="flash success"><%= success[0] %></div>
+  <% 
+    // Safely check for flash messages - only show if there's actual content
+    var successMsg = (typeof success !== 'undefined' && success && Array.isArray(success) && success.length > 0) ? success[0] : '';
+    var errorMsg = (typeof error !== 'undefined' && error && Array.isArray(error) && error.length > 0) ? error[0] : '';
+    var hasSuccess = successMsg && successMsg.trim().length > 0;
+    var hasError = errorMsg && errorMsg.trim().length > 0;
+    
+    // Debug: Log what we're getting
+    console.log('Cart Flash - success:', success, 'hasSuccess:', hasSuccess, 'successMsg:', successMsg);
+    console.log('Cart Flash - error:', error, 'hasError:', hasError, 'errorMsg:', errorMsg);
+  %>
+  <% if (hasSuccess) { %>
+    <div class="flash success"><%= successMsg %></div>
   <% } %>
-  <% if (error && error.length) { %>
-    <div class="flash error"><%= error[0] %></div>
+  <% if (hasError) { %>
+    <div class="flash error"><%= errorMsg %></div>
   <% } %>
 
 

@@ -135,6 +135,24 @@
       background: var(--border);
     }
 
+    .btn-view-store {
+      padding: 0.5rem 1.25rem;
+      background: var(--secondary);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-view-store:hover {
+      background: #d35400;
+      transform: translateY(-1px);
+    }
+
     .btn-logout {
       padding: 0.5rem 1.25rem;
       background: var(--danger);
@@ -678,6 +696,10 @@
               </a>
 
               <div class="admin-header-actions">
+                <a href="/home" class="btn-view-store" title="View User Store">
+                  <i class="fas fa-store"></i>
+                  <span class="desktop-only">View Store</span>
+                </a>
                 <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
                   <i class="fas fa-moon" id="theme-icon"></i>
                 </button>
@@ -797,6 +819,10 @@
                         style="padding: 10px 18px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;">
                         <i class="fas fa-tachometer-alt"></i> Delivery Dashboard
                       </a>
+                      <a href="/admin/store-pickups" class="btn-primary"
+                        style="padding: 10px 18px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; background: var(--secondary);">
+                        <i class="fas fa-box-open"></i> Store Pickups
+                      </a>
                       <a href="/admin/delivery-agents" class="btn-outline"
                         style="padding: 10px 18px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border: 2px solid var(--border); background: transparent; color: var(--text); white-space: nowrap;">
                         <i class="fas fa-users"></i> Manage Agents
@@ -864,15 +890,6 @@
 
                   <!-- Actions Bar -->
                   <div class="actions-bar">
-                    <a href="/admin/store" class="btn-primary store-btn">
-                      <i class="fas fa-store"></i>
-                      Store Management
-                      <% if (analytics?.pendingOrders> 0) { %>
-                        <span class="notification-badge">
-                          <%= analytics.pendingOrders %>
-                        </span>
-                        <% } %>
-                    </a>
                     <a href="/admin/doctors" class="btn-primary">
                       <i class="fas fa-user-doctor"></i>
                       Manage Doctors
@@ -890,118 +907,6 @@
 
                   <!-- Analytics Sections -->
                   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-
-                    <!-- Revenue Chart -->
-                    <div class="products-card" style="grid-column: 1 / -1;">
-                      <div class="products-head">
-                        <h2><i class="fas fa-chart-line"></i> Revenue Trend (Last 14 Days)</h2>
-                      </div>
-                      <div class="products-body" style="padding: 1.5rem;">
-                        <div style="position: relative; height: 300px; width: 100%;">
-                          <canvas id="revenue-chart"></canvas>
-                        </div>
-                        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                        <script>
-                          const ctx = document.getElementById('revenue-chart').getContext('2d');
-                          const revenueData = <% - JSON.stringify(dailyRevenue || []) %>;
-
-                          // Only create chart if data exists
-                          if (revenueData && revenueData.length > 0) {
-                            new Chart(ctx, {
-                              type: 'line',
-                              data: {
-                                labels: revenueData.slice(-14).map(d => {
-                                  const date = new Date(d.date);
-                                  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-                                }),
-                                datasets: [{
-                                  label: 'Revenue (₹)',
-                                  data: revenueData.slice(-14).map(d => d.revenue),
-                                  borderColor: '#1c8125',
-                                  backgroundColor: 'rgba(28, 129, 37, 0.1)',
-                                  tension: 0.4,
-                                  fill: true,
-                                  pointBackgroundColor: '#1c8125',
-                                  pointBorderColor: '#fff',
-                                  pointBorderWidth: 2,
-                                  pointRadius: 5,
-                                  pointHoverRadius: 7
-                                }]
-                              },
-                              options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                  legend: {
-                                    display: true,
-                                    position: 'top',
-                                    labels: {
-                                      usePointStyle: true,
-                                      font: {
-                                        family: "'Plus Jakarta Sans', sans-serif",
-                                        size: 12
-                                      }
-                                    }
-                                  },
-                                  tooltip: {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                    padding: 12,
-                                    titleFont: {
-                                      family: "'Plus Jakarta Sans', sans-serif",
-                                      size: 13
-                                    },
-                                    bodyFont: {
-                                      family: "'Plus Jakarta Sans', sans-serif",
-                                      size: 12
-                                    },
-                                    callbacks: {
-                                      label: function(context) {
-                                        return 'Revenue: ₹' + context.parsed.y.toLocaleString('en-IN');
-                                      }
-                                    }
-                                  }
-                                },
-                                scales: {
-                                  y: {
-                                    beginAtZero: true,
-                                    grid: {
-                                      color: 'rgba(0, 0, 0, 0.05)'
-                                    },
-                                    ticks: {
-                                      callback: function(value) {
-                                        return '₹' + value.toLocaleString('en-IN');
-                                      },
-                                      font: {
-                                        family: "'Plus Jakarta Sans', sans-serif",
-                                        size: 11
-                                      }
-                                    }
-                                  },
-                                  x: {
-                                    grid: {
-                                      display: false
-                                    },
-                                    ticks: {
-                                      font: {
-                                        family: "'Plus Jakarta Sans', sans-serif",
-                                        size: 11
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            });
-                          } else {
-                            // Show empty state if no data
-                            document.getElementById('revenue-chart').parentElement.innerHTML = 
-                              '<div style="text-align: center; padding: 3rem; color: var(--text-muted);">' +
-                              '<i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>' +
-                              '<p>No revenue data available yet</p>' +
-                              '</div>';
-                          }
-                        </script>
-                      </div>
-                    </div>
 
                     <!-- Top Products -->
                     <div class="products-card">

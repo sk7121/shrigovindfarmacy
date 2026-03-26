@@ -205,6 +205,13 @@ deliverySchema.methods.addTimelineEntry = function(status, notes = '', location 
 
 // Update delivery status with timeline
 deliverySchema.methods.updateStatus = async function(newStatus, notes = '', location = '', updatedBy = null) {
+    console.log('\n========== DELIVERY STATUS UPDATE ==========');
+    console.log('Delivery ID:', this._id);
+    console.log('Order ID:', this.order);
+    console.log('Old Status:', this.status);
+    console.log('New Status:', newStatus);
+    console.log('============================================\n');
+
     const oldStatus = this.status;
     this.status = newStatus;
 
@@ -216,17 +223,59 @@ deliverySchema.methods.updateStatus = async function(newStatus, notes = '', loca
         this.actualDelivery = new Date();
         // Update related order status
         const Order = mongoose.model('Order');
-        await Order.findByIdAndUpdate(this.order, { 
+        await Order.findByIdAndUpdate(this.order, {
             status: 'delivered',
             deliveryAgent: this.assignedTo
         });
     } else if (newStatus === 'picked_up') {
+        console.log('\n========== DELIVERY: PICKED_UP STATUS ==========');
+        
         // Update related order status
         const Order = mongoose.model('Order');
-        await Order.findByIdAndUpdate(this.order, { 
-            status: 'processing',
+        await Order.findByIdAndUpdate(this.order, {
+            status: 'picked_up',
             deliveryAgent: this.assignedTo
         });
+        
+        // Generate OTP when order is picked up
+        const OTP = require('./otp');
+        const { sendOrderStatusSMS } = require('../services/smsService');
+        
+        const otpCode = OTP.generateOTP(6);
+        const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+        
+        console.log('Generated OTP Code:', otpCode);
+        console.log('Expires At:', expiresAt);
+        
+        // Store OTP in order (explicitly unset verifiedAt to ensure it's not carried over)
+        const updateResult = await Order.findByIdAndUpdate(this.order, {
+            $set: {
+                'deliveryOTP.code': otpCode,
+                'deliveryOTP.expiresAt': expiresAt,
+                'deliveryOTP.generatedAt': new Date()
+            },
+            $unset: {
+                'deliveryOTP.verifiedAt': 1  // Remove any existing verifiedAt
+            }
+        });
+        
+        console.log('OTP Update Result:', updateResult);
+        
+        // Send OTP to customer via SMS
+        try {
+            const order = await Order.findById(this.order);
+            if (order && order.address && order.address.phone) {
+                console.log('Sending OTP SMS to:', order.address.phone);
+                await sendOrderStatusSMS(order, order.address.phone, 'picked_up', otpCode);
+                console.log('✅ OTP SMS sent to customer on pickup:', order.address.phone);
+            } else {
+                console.log('⚠️ Cannot send SMS - No phone number found');
+            }
+        } catch (smsError) {
+            console.error('⚠️ Failed to send OTP SMS on pickup:', smsError);
+        }
+        
+        console.log('===============================================\n');
     } else if (newStatus === 'out_for_delivery') {
         // Update related order status AND set delivery agent
         const Order = mongoose.model('Order');

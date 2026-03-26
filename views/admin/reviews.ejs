@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Reviews - Admin | Shri Govind Pharmacy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1c8125;
+            --primary-dark: #145a1a;
+            --secondary: #e67e22;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #6c757d;
+            --border: #e9ecef;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #2d2d2d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .admin-header h1 {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .admin-nav a {
+            color: var(--text);
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .admin-nav a:hover {
+            background: var(--bg);
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .reviews-header {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-card .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .reviews-table {
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .reviews-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .reviews-table th {
+            background: var(--bg);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .reviews-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .reviews-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .reviews-table tr:hover {
+            background: var(--bg);
+        }
+
+        .review-product {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .review-product img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .rating-stars {
+            color: var(--warning);
+        }
+
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--text-muted);
+            opacity: 0.3;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .reviews-table {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="admin-header">
+        <h1><i class="fas fa-shield-alt"></i> Admin Dashboard</h1>
+        <nav class="admin-nav">
+            <a href="/admin/home"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/admin/orders"><i class="fas fa-box"></i> Orders</a>
+            <a href="/admin/products/new"><i class="fas fa-plus"></i> Products</a>
+            <a href="/admin/doctors"><i class="fas fa-user-md"></i> Doctors</a>
+            <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="reviews-header">
+            <div>
+                <h2><i class="fas fa-star"></i> Product Reviews Management</h2>
+                <p style="color: var(--text-muted); margin-top: 0.25rem;">Monitor and manage customer reviews</p>
+            </div>
+            <a href="/admin/home" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value"><%= reviews.length %></div>
+                <div class="stat-label">Total Reviews</div>
+            </div>
+            <% 
+                const verifiedCount = reviews.filter(r => r.verified).length;
+                const avgRating = reviews.length > 0 
+                    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+                    : '0.0';
+            %>
+            <div class="stat-card">
+                <div class="stat-value"><%= verifiedCount %></div>
+                <div class="stat-label">Verified Reviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><%= avgRating %></div>
+                <div class="stat-label">Average Rating</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><%= Math.round((verifiedCount / (reviews.length || 1)) * 100) %>%</div>
+                <div class="stat-label">Verified %</div>
+            </div>
+        </div>
+
+        <!-- Reviews Table -->
+        <div class="reviews-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Customer</th>
+                        <th>Rating</th>
+                        <th>Review</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (reviews && reviews.length > 0) { %>
+                        <% reviews.forEach(review => { %>
+                            <tr>
+                                <td>
+                                    <div class="review-product">
+                                        <% if (review.product && review.product.image) { %>
+                                            <img src="<%= review.product.image %>" alt="<%= review.product.name %>">
+                                        <% } else { %>
+                                            <div style="width: 50px; height: 50px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-image" style="color: var(--text-muted);"></i>
+                                            </div>
+                                        <% } %>
+                                        <div>
+                                            <div style="font-weight: 600;"><%= review.product ? review.product.name : 'Product Deleted' %></div>
+                                            <% if (review.verified) { %>
+                                                <span class="verified-badge">
+                                                    <i class="fas fa-check-circle"></i> Verified Purchase
+                                                </span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div><%= review.user ? review.user.name : 'User Deleted' %></div>
+                                    <div style="color: var(--text-muted); font-size: 0.875rem;">
+                                        <%= review.user ? review.user.email : '' %>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="rating-stars">
+                                        <% for (let i = 0; i < 5; i++) { %>
+                                            <i class="fas fa-star<%= i < review.rating ? '' : '-o' %>"></i>
+                                        <% } %>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="max-width: 300px;">
+                                        <div style="font-weight: 600; margin-bottom: 0.25rem;"><%= review.title %></div>
+                                        <div style="color: var(--text-muted); font-size: 0.875rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                            <%= review.comment %>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="color: var(--text-muted); font-size: 0.875rem;">
+                                    <%= new Date(review.createdAt).toLocaleDateString('en-IN') %>
+                                </td>
+                                <td>
+                                    <button class="btn btn-outline" onclick="openReplyModal('<%= review._id %>')">
+                                        <i class="fas fa-reply"></i> Reply
+                                    </button>
+                                    <button class="btn btn-danger" onclick="deleteReview('<%= review._id %>')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" class="empty-state">
+                                <i class="fas fa-star"></i>
+                                <h3>No Reviews Yet</h3>
+                                <p style="color: var(--text-muted);">Reviews will appear here once customers start reviewing products.</p>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Reply Modal -->
+    <div class="modal" id="replyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-reply"></i> Reply to Review</h2>
+                <button class="modal-close" onclick="closeReplyModal()">&times;</button>
+            </div>
+            <form id="replyForm" onsubmit="submitReply(event)">
+                <input type="hidden" id="reviewId">
+                <div class="form-group">
+                    <label>Your Reply</label>
+                    <textarea id="replyText" name="comment" placeholder="Write your official response..." required></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeReplyModal()">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-paper-plane"></i> Send Reply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openReplyModal(reviewId) {
+            document.getElementById('reviewId').value = reviewId;
+            document.getElementById('replyModal').classList.add('active');
+        }
+
+        function closeReplyModal() {
+            document.getElementById('replyModal').classList.remove('active');
+            document.getElementById('replyForm').reset();
+        }
+
+        async function submitReply(event) {
+            event.preventDefault();
+            
+            const reviewId = document.getElementById('reviewId').value;
+            const comment = document.getElementById('replyText').value;
+
+            try {
+                const response = await fetch(`/admin/reviews/${reviewId}/reply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ comment }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Reply added successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error adding reply. Please try again.');
+                console.error(error);
+            }
+        }
+
+        async function deleteReview(reviewId) {
+            if (!confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/reviews/${reviewId}`, {
+                    method: 'DELETE',
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Review deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error deleting review. Please try again.');
+                console.error(error);
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('replyModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeReplyModal();
+            }
+        });
+    </script>
+</body>
+
+</html>
