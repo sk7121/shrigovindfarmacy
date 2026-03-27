@@ -61,6 +61,9 @@
     Call: +91 <%= appointment.doctor?.contact?.phone || '9876543210' %>
   </div>
 
+  <!-- Toast Notifications -->
+  <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 10000;"></div>
+
   <!-- ══ HEADER ══ -->
   <header class="main-header">
     <nav class="navbar">
@@ -246,6 +249,22 @@
               </a>
             </div>
             <% } %>
+
+            <% if (appointment.status === 'No-Show') { %>
+            <div class="action-buttons">
+              <div style="background: rgba(255, 193, 7, 0.1); border: 2px solid var(--warning); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+                <p style="color: #b58900; margin: 0 0 0.75rem 0; font-weight: 600;">
+                  <i class="fa-solid fa-triangle-exclamation"></i> Appointment Marked as No-Show
+                </p>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0 0 1rem 0;">
+                  You missed this appointment. Click below to automatically reschedule to the next available time slot.
+                </p>
+                <button onclick="autoReschedule()" class="btn btn-primary" style="width: 100%;">
+                  <i class="fa-solid fa-rotate"></i> Auto-Reschedule to Next Available Slot
+                </button>
+              </div>
+            </div>
+            <% } %>
           </div>
 
         </div>
@@ -346,21 +365,121 @@
   <div id="toastZone"></div>
 
   <script>
-    // Show success message if coming from booking
-    <% if (typeof success !== 'undefined' && success) { %>
-      toast('Appointment booked successfully!', 'success');
-    <% } %>
+    // Show success/error messages from server as toasts
+    window.addEventListener('DOMContentLoaded', function() {
+      <% if (typeof success !== 'undefined' && success && success.length) { %>
+        showToast('<%= success[0] %>', 'success');
+      <% } %>
+      <% if (typeof error !== 'undefined' && error && error.length) { %>
+        showToast('<%= error[0] %>', 'error');
+      <% } %>
+    });
 
-    function toast(msg, type = 'success') {
-      const zone = document.getElementById('toastZone');
-      const t = document.createElement('div');
-      t.className = 'toast ' + type;
-      t.innerHTML = `<div class="t-dot"></div>${msg}`;
-      zone.appendChild(t);
-      setTimeout(() => {
-        t.style.animation = 'toastPop 0.3s reverse';
-        setTimeout(() => t.remove(), 300);
-      }, 3500);
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container') || document.getElementById('toastZone');
+      const toast = document.createElement('div');
+      
+      const bgColor = type === 'success' ? '#166534' : '#b91c1c';
+      const icon = type === 'success' ? '✓' : '✕';
+      
+      toast.style.cssText = `
+        background: ${bgColor};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease;
+        min-width: 320px;
+        max-width: 500px;
+        font-weight: 600;
+      `;
+      
+      toast.innerHTML = `
+        <span style="font-size: 1.25rem; font-weight: bold;">${icon}</span>
+        <span style="flex: 1;">${message}</span>
+      `;
+      
+      if (container) {
+        container.appendChild(toast);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+          toast.style.animation = 'slideOut 0.3s ease';
+          setTimeout(() => toast.remove(), 300);
+        }, 5000);
+      }
+    }
+
+    // Add animations if not already present
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Auto-reschedule function
+    async function autoReschedule() {
+      const appointmentId = '<%= appointment._id %>';
+      
+      if (!confirm('Are you sure you want to auto-reschedule this appointment to the next available slot?')) {
+        return;
+      }
+
+      const button = event.target;
+      const originalText = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Rescheduling...';
+
+      try {
+        const response = await fetch(`/api/appointments/${appointmentId}/auto-reschedule`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          showToast(`✅ ${data.message}`, 'success');
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          showToast(`❌ ${data.message || 'Failed to reschedule'}`, 'error');
+          button.disabled = false;
+          button.innerHTML = originalText;
+        }
+      } catch (error) {
+        console.error('Auto-reschedule error:', error);
+        showToast('❌ Error rescheduling appointment. Please try again.', 'error');
+        button.disabled = false;
+        button.innerHTML = originalText;
+      }
     }
   </script>
 </body>

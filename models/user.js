@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
 
     role: {
         type: String,
-        enum: ['user', 'distributor', 'admin'],
+        enum: ['user', 'distributor', 'admin', 'doctor'],
         default: 'user'
     },
     address: {
@@ -64,7 +64,23 @@ const userSchema = new mongoose.Schema({
                 default: Date.now
             }
         }
-    ]
+    ],
+
+    // Doctor profile reference (for doctor role users)
+    doctorProfile: {
+        isDoctor: {
+            type: Boolean,
+            default: false
+        },
+        doctorId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Doctor'
+        },
+        verifiedByAdmin: {
+            type: Boolean,
+            default: false
+        }
+    }
 
 }, {
     timestamps: true

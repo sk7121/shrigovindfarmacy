@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointment Details - Dr. Dashboard | Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --info: #17a2b8;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .header {
+      background: var(--surface);
+      padding: 1rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .nav-links a {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--primary);
+      background: var(--bg);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .breadcrumb {
+      padding: 1rem 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .breadcrumb a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-header h1 {
+      font-size: 1.5rem;
+      color: var(--text);
+    }
+
+    .status-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-badge.pending {
+      background: rgba(255, 193, 7, 0.1);
+      color: var(--warning);
+    }
+
+    .status-badge.confirmed {
+      background: rgba(40, 167, 69, 0.1);
+      color: var(--success);
+    }
+
+    .status-badge.completed {
+      background: rgba(23, 162, 184, 0.1);
+      color: var(--info);
+    }
+
+    .status-badge.cancelled {
+      background: rgba(220, 53, 69, 0.1);
+      color: var(--danger);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .detail-item {
+      padding: 1rem;
+      background: var(--bg);
+      border-radius: 12px;
+    }
+
+    .detail-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .detail-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .section {
+      margin-bottom: 2rem;
+    }
+
+    .section h3 {
+      font-size: 1.1rem;
+      color: var(--text);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-box {
+      background: var(--bg);
+      padding: 1rem;
+      border-radius: 10px;
+      border-left: 4px solid var(--primary);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      padding: 0.875rem 1.5rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      opacity: 0.9;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    form.inline {
+      display: inline;
+    }
+
+    @media (max-width: 768px) {
+      .header-inner {
+        padding: 0 1rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .card {
+        padding: 1.5rem;
+      }
+
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+</head>
+
+<body>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/doctor/dashboard" class="logo">
+        <div class="logo-icon">
+          <i class="fa-solid fa-user-doctor"></i>
+        </div>
+        <div>
+          <div style="font-weight: 700;">Doctor Dashboard</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Shri Govind Pharmacy</div>
+        </div>
+      </a>
+      <nav class="nav-links">
+        <a href="/doctor/dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="/doctor/appointments"><i class="fa-solid fa-calendar-check"></i> Appointments</a>
+        <a href="/home"><i class="fa-solid fa-house"></i> Back to Site</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="/doctor/dashboard"><i class="fa-solid fa-house"></i> Dashboard</a>
+      <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem; margin: 0 8px;"></i>
+      <span>Appointment Details</span>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h1><i class="fa-solid fa-calendar-check"></i> Appointment Details</h1>
+        <span class="status-badge <%= appointment.status.toLowerCase() %>"><%= appointment.status %></span>
+      </div>
+
+      <!-- Patient Information -->
+      <div class="section">
+        <h3><i class="fa-solid fa-user"></i> Patient Information</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label"><i class="fa-solid fa-user"></i> Name</div>
+            <div class="detail-value"><%= appointment.patientDetails?.name || appointment.patient?.name || 'N/A' %></div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fa-solid fa-envelope"></i> Email</div>
+            <div class="detail-value"><%= appointment.patientDetails?.email || appointment.patient?.email || 'N/A' %></div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fa-solid fa-phone"></i> Phone</div>
+            <div class="detail-value"><%= appointment.patientDetails?.phone || appointment.patient?.phone || 'N/A' %></div>
+          </div>
+          <% if (appointment.patientDetails?.age || appointment.patientDetails?.gender) { %>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fa-solid fa-cake-candles"></i> Age / Gender</div>
+            <div class="detail-value">
+              <%= appointment.patientDetails?.age ? appointment.patientDetails.age + ' years' : '' %>
+              <%= appointment.patientDetails?.age && appointment.patientDetails?.gender ? ' | ' : '' %>
+              <%= appointment.patientDetails?.gender || '' %>
+            </div>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Appointment Details -->
+      <div class="section">
+        <h3><i class="fa-solid fa-calendar"></i> Appointment Details</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label"><i class="fa-regular fa-calendar"></i> Date</div>
+            <div class="detail-value"><%= new Date(appointment.appointmentDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %></div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fa-regular fa-clock"></i> Time</div>
+            <div class="detail-value"><%= appointment.appointmentTime %></div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fa-solid fa-video"></i> Type</div>
+            <div class="detail-value"><%= appointment.appointmentType %></div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fa-solid fa-indian-rupee-sign"></i> Consultation Fee</div>
+            <div class="detail-value">₹<%= appointment.consultationFee || 0 %> (<%= appointment.paymentStatus %>)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Consultation Details -->
+      <% if (appointment.reason || appointment.symptoms) { %>
+      <div class="section">
+        <h3><i class="fa-solid fa-clipboard-list"></i> Consultation Details</h3>
+        <div class="info-box">
+          <% if (appointment.reason) { %>
+          <div class="info-row">
+            <span class="info-label">Reason for Consultation:</span>
+            <span class="info-value"><%= appointment.reason %></span>
+          </div>
+          <% } %>
+          <% if (appointment.symptoms && appointment.symptoms.length > 0) { %>
+          <div class="info-row">
+            <span class="info-label">Symptoms:</span>
+            <span class="info-value"><%= appointment.symptoms.join(', ') %></span>
+          </div>
+          <% } %>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Medical Information -->
+      <% if (appointment.medicalHistory || appointment.currentMedications) { %>
+      <div class="section">
+        <h3><i class="fa-solid fa-file-medical"></i> Medical Information</h3>
+        <div class="info-box">
+          <% if (appointment.medicalHistory) { %>
+          <div class="info-row">
+            <span class="info-label">Medical History:</span>
+            <span class="info-value"><%= appointment.medicalHistory %></span>
+          </div>
+          <% } %>
+          <% if (appointment.currentMedications) { %>
+          <div class="info-row">
+            <span class="info-label">Current Medications:</span>
+            <span class="info-value"><%= appointment.currentMedications %></span>
+          </div>
+          <% } %>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Doctor's Notes (for completed appointments) -->
+      <% if (appointment.notes || appointment.prescription) { %>
+      <div class="section">
+        <h3><i class="fa-solid fa-file-prescription"></i> Prescription & Notes</h3>
+        <div class="info-box">
+          <% if (appointment.notes) { %>
+          <div class="info-row">
+            <span class="info-label">Doctor's Notes:</span>
+            <span class="info-value"><%= appointment.notes %></span>
+          </div>
+          <% } %>
+          <% if (appointment.prescription) { %>
+          <div class="info-row">
+            <span class="info-label">Prescription:</span>
+            <span class="info-value"><%= appointment.prescription %></span>
+          </div>
+          <% } %>
+          <% if (appointment.followUpRequired) { %>
+          <div class="info-row">
+            <span class="info-label">Follow-up Required:</span>
+            <span class="info-value">
+              Yes
+              <% if (appointment.followUpDate) { %>
+                by <%= new Date(appointment.followUpDate).toLocaleDateString('en-IN') %>
+              <% } %>
+            </span>
+          </div>
+          <% } %>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Actions -->
+      <div class="actions">
+        <% if (appointment.status === 'Pending') { %>
+        <form action="/doctor/appointment/<%= appointment._id %>/confirm" method="POST" class="inline">
+          <button type="submit" class="btn btn-success">
+            <i class="fa-solid fa-check"></i> Confirm Appointment
+          </button>
+        </form>
+        <% } %>
+        
+        <% if (appointment.status === 'Confirmed' || appointment.status === 'Completed') { %>
+        <a href="/doctor/appointment/<%= appointment._id %>/video" class="btn btn-primary">
+          <i class="fa-solid fa-video"></i> Start Video Call
+        </a>
+        <% } %>
+        
+        <% if (appointment.status === 'Confirmed') { %>
+        <a href="/doctor/appointment/<%= appointment._id %>/complete" class="btn btn-success">
+          <i class="fa-solid fa-clipboard-check"></i> Mark as Completed
+        </a>
+        <% } %>
+        
+        <a href="/doctor/dashboard" class="btn btn-secondary">
+          <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

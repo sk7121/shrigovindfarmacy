@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Login - Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --secondary: #e67e22;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Topbar */
+    .topbar {
+      background: var(--surface);
+      padding: 0.75rem 0;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Header */
+    .main-header {
+      background: var(--surface);
+      padding: 1rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    .navbar {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .nav-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-main {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 0.625rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg);
+    }
+
+    /* Main Content */
+    .auth-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border-radius: 20px;
+      box-shadow: var(--shadow-lg);
+      padding: 3rem;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .login-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      color: white;
+      font-size: 2.5rem;
+    }
+
+    .login-header h1 {
+      font-size: 1.8rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .login-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg);
+      transition: all 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--surface);
+      box-shadow: 0 0 0 4px rgba(28, 129, 37, 0.1);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Links */
+    .login-links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .login-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+
+    .login-links a:hover {
+      color: var(--primary);
+    }
+
+    /* Info Box */
+    .info-box {
+      background: rgba(28, 129, 37, 0.05);
+      border: 1.5px solid rgba(28, 129, 37, 0.2);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .info-box h3 {
+      color: var(--primary);
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-box ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .info-box li {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      padding: 0.375rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .info-box li:before {
+      content: "✓";
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      transition: color 0.3s;
+    }
+
+    .back-link:hover {
+      color: var(--primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .auth-container {
+        padding: 1.5rem 1rem;
+      }
+
+      .login-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .login-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .login-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+      }
+    }
+
+    /* Flash Messages */
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+</head>
+
+<body>
+  <!-- Topbar -->
+  <div class="topbar">
+    <i class="fa-solid fa-leaf"></i>
+    100% Natural Ayurvedic Products &nbsp;|&nbsp;
+    Free Delivery on Orders ₹499+ &nbsp;|&nbsp;
+    Call: +91 98765 43210
+  </div>
+
+  <!-- Header -->
+  <header class="main-header">
+    <nav class="navbar">
+      <div class="nav-flex">
+        <a href="/home" class="logo">
+          <div class="logo-icon">
+            <i class="fa-solid fa-mortar-pestle"></i>
+          </div>
+          <div class="logo-text">
+            <span class="logo-main">Shri Govind Pharmacy</span>
+            <span class="brand-sub">Ayurvedic & Herbal Wellness</span>
+          </div>
+        </a>
+        <div class="nav-actions">
+          <a href="/home" class="btn btn-outline">
+            <i class="fa-solid fa-house"></i> Home
+          </a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <div class="auth-container">
+    <div class="login-card">
+      <!-- Back Link -->
+      <a href="/login" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Patient Login
+      </a>
+
+      <!-- Login Header -->
+      <div class="login-header">
+        <div class="login-icon">
+          <i class="fa-solid fa-user-doctor"></i>
+        </div>
+        <h1>Doctor Login</h1>
+        <p>Access your professional dashboard</p>
+      </div>
+
+      <!-- Flash Messages -->
+      <% if (typeof success !== 'undefined' && success && success.length) { %>
+        <div class="flash success"><%= success[0] %></div>
+      <% } %>
+      <% if (typeof error !== 'undefined' && error && error.length) { %>
+        <div class="flash error"><%= error[0] %></div>
+      <% } %>
+
+      <!-- Login Form -->
+      <form action="/doctor/login" method="POST">
+        <div class="form-group">
+          <label for="email">
+            <i class="fa-solid fa-envelope"></i> Email Address
+          </label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            required 
+            placeholder="doctor@shrigovindpharmacy.com"
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">
+            <i class="fa-solid fa-lock"></i> Password
+          </label>
+          <div style="position: relative;">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              style="padding-right: 3rem;"
+            >
+            <button
+              type="button"
+              id="togglePassword"
+              style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1.1rem; padding: 0.25rem;"
+              aria-label="Toggle password visibility"
+            >
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          Login to Dashboard
+        </button>
+      </form>
+
+      <!-- Info Box -->
+      <div class="info-box">
+        <h3>
+          <i class="fa-solid fa-circle-info"></i>
+          Doctor Portal Benefits
+        </h3>
+        <ul>
+          <li>Manage your appointments</li>
+          <li>View patient history</li>
+          <li>Conduct video consultations</li>
+          <li>Access consultation analytics</li>
+          <li>Update availability status</li>
+        </ul>
+      </div>
+
+      <!-- Links -->
+      <div class="login-links">
+        <a href="/doctor/register">
+          <i class="fa-solid fa-user-plus"></i> Register as Doctor
+        </a>
+        <a href="/forgot-password">
+          <i class="fa-solid fa-key"></i> Forgot Password?
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const passwordInput = document.getElementById('password');
+      const icon = this.querySelector('i');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    });
+  </script>
+</body>
+
+</html>

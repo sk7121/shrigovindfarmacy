@@ -260,5 +260,62 @@ module.exports = {
   sendOTPSMS,
   sendCancellationOTP,
   sendCancellationStatusSMS,
+  sendAppointmentConfirmationSMS,
+  sendAppointmentStatusSMS,
   SMS_CONFIG,
 };
+
+// Send Appointment Confirmation SMS
+async function sendAppointmentConfirmationSMS(appointment, phone) {
+  if (!appointment || !appointment.doctor || !phone) {
+    console.log("⚠️ Invalid appointment data for SMS confirmation");
+    return { success: false, error: "Invalid appointment data" };
+  }
+
+  const doctorName = appointment.doctor.name?.split(' ')[0] || 'Doctor';
+  const appointmentDate = new Date(appointment.appointmentDate).toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short'
+  });
+  const appointmentId = appointment._id.toString().slice(-8).toUpperCase();
+
+  const message = `Shri Govind Pharmacy: Appointment booked with Dr. ${doctorName} on ${appointmentDate} at ${appointment.appointmentTime}. Type: ${appointment.appointmentType}. ID: ${appointmentId}. View: ${process.env.BASE_URL || 'http://localhost:3000'}/appointment/${appointment._id}`;
+  
+  return await sendSMS(phone, message);
+}
+
+// Send Appointment Status SMS
+async function sendAppointmentStatusSMS(appointment, phone, status) {
+  if (!appointment || !appointment.doctor || !phone) {
+    console.log("⚠️ Invalid appointment data for SMS status update");
+    return { success: false, error: "Invalid appointment data" };
+  }
+
+  const doctorName = appointment.doctor.name?.split(' ')[0] || 'Doctor';
+  const appointmentId = appointment._id.toString().slice(-8).toUpperCase();
+  const statusText = status.replace(/_/g, ' ').toLowerCase();
+
+  let message = `Shri Govind Pharmacy: Your appointment with Dr. ${doctorName} is now ${statusText}.`;
+
+  if (status === 'Confirmed') {
+    const appointmentDate = new Date(appointment.appointmentDate).toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short'
+    });
+    message += ` Date: ${appointmentDate} at ${appointment.appointmentTime}. ID: ${appointmentId}`;
+  } else if (status === 'Rescheduled') {
+    const appointmentDate = new Date(appointment.appointmentDate).toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short'
+    });
+    message += ` New date: ${appointmentDate} at ${appointment.appointmentTime}`;
+  } else if (status === 'Cancelled') {
+    message += ` Ref: ${appointmentId}. Contact us for rescheduling.`;
+  } else if (status === 'Completed') {
+    message += ` Thank you for visiting. Please rate your experience.`;
+  }
+
+  message += ` Details: ${process.env.BASE_URL || 'http://localhost:3000'}/appointment/${appointment._id}`;
+
+  return await sendSMS(phone, message);
+}

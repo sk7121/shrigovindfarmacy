@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Video Consultation - Shri Govind Pharmacy</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #f8f9fa;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: white;
+      padding: 1rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #1a1a1a;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #1c8125, #145a1a);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .info-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .info-card h1 {
+      font-size: 1.5rem;
+      color: #1a1a1a;
+      margin-bottom: 1rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .info-item {
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border-left: 4px solid #1c8125;
+    }
+
+    .info-item-label {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-item-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-badge.waiting {
+      background: rgba(255, 193, 7, 0.1);
+      color: #ffc107;
+    }
+
+    .status-badge.active {
+      background: rgba(40, 167, 69, 0.1);
+      color: #28a745;
+    }
+
+    .status-badge.completed {
+      background: rgba(23, 162, 184, 0.1);
+      color: #17a2b8;
+    }
+
+    .whatsapp-card {
+      background: white;
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+
+    .whatsapp-icon {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      color: white;
+      font-size: 3rem;
+      box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+    }
+
+    .whatsapp-card h2 {
+      font-size: 1.8rem;
+      color: #1a1a1a;
+      margin-bottom: 1rem;
+    }
+
+    .whatsapp-card p {
+      color: #6c757d;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: all 0.3s;
+      font-size: 1rem;
+      justify-content: center;
+    }
+
+    .btn-whatsapp {
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: white;
+      box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+    }
+
+    .btn-whatsapp:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+    }
+
+    .btn-primary {
+      background: #1c8125;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #145a1a;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .tips-card {
+      background: #e7f3ff;
+      border-left: 4px solid #2196F3;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-top: 2rem;
+    }
+
+    .tips-card h3 {
+      color: #0d47a1;
+      margin-bottom: 1rem;
+    }
+
+    .tips-card ul {
+      list-style: none;
+      padding-left: 0;
+      text-align: left;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .tips-card li {
+      padding: 0.5rem 0;
+      color: #555;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .tips-card li:before {
+      content: "✓";
+      color: #2196F3;
+      font-weight: bold;
+    }
+
+    .patient-info {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      text-align: left;
+    }
+
+    .patient-info h3 {
+      color: #1a1a1a;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .patient-detail {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .patient-detail:last-child {
+      border-bottom: none;
+    }
+
+    .patient-detail-label {
+      color: #6c757d;
+      font-weight: 500;
+    }
+
+    .patient-detail-value {
+      color: #1a1a1a;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .header-inner {
+        padding: 0 1rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/home" class="logo">
+        <div class="logo-icon">
+          <i class="fa-solid fa-mortar-pestle"></i>
+        </div>
+        <div>
+          <div style="font-weight: 700;">Shri Govind Pharmacy</div>
+          <div style="font-size: 0.85rem; color: #6c757d;">WhatsApp Video Consultation</div>
+        </div>
+      </a>
+      <a href="/doctor/dashboard" class="btn btn-primary">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Appointment Info -->
+    <div class="info-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1><i class="fa-brands fa-whatsapp" style="color: #25D366;"></i> WhatsApp Video Call</h1>
+        <span class="status-badge <%= appointment.status === 'Completed' ? 'completed' : 'active' %>">
+          <%= appointment.status %>
+        </span>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-item-label"><i class="fa-solid fa-user-doctor"></i> Doctor</div>
+          <div class="info-item-value">Dr. <%= appointment.doctor?.name || 'Doctor' %></div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label"><i class="fa-solid fa-user"></i> Patient</div>
+          <div class="info-item-value"><%= appointment.patientDetails?.name || appointment.patient?.name || 'Patient' %></div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label"><i class="fa-regular fa-calendar"></i> Date</div>
+          <div class="info-item-value"><%= new Date(appointment.appointmentDate).toLocaleDateString('en-IN') %></div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-label"><i class="fa-regular fa-clock"></i> Time</div>
+          <div class="info-item-value"><%= appointment.appointmentTime %></div>
+        </div>
+      </div>
+    </div>
+
+    <% if (appointment.status === 'Completed') { %>
+    <!-- Completed Consultation -->
+    <div class="whatsapp-card">
+      <div class="whatsapp-icon">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <h2>Consultation Completed</h2>
+      <p>This video consultation session has been completed.</p>
+      <a href="/doctor/dashboard" class="btn btn-primary">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+      </a>
+    </div>
+    <% } else { %>
+    <!-- WhatsApp Video Call -->
+    <div class="whatsapp-card">
+      <div class="whatsapp-icon">
+        <i class="fa-brands fa-whatsapp"></i>
+      </div>
+      <h2>Start Video Consultation</h2>
+      <p>Click the button below to initiate a WhatsApp video call with the patient</p>
+
+      <!-- Patient Contact Info -->
+      <div class="patient-info">
+        <h3><i class="fa-solid fa-user"></i> Patient Details</h3>
+        <div class="patient-detail">
+          <span class="patient-detail-label">Name:</span>
+          <span class="patient-detail-value"><%= appointment.patientDetails?.name || appointment.patient?.name || 'N/A' %></span>
+        </div>
+        <div class="patient-detail">
+          <span class="patient-detail-label">Phone:</span>
+          <span class="patient-detail-value">
+            <% 
+              const patientPhone = appointment.patientDetails?.phone || appointment.patient?.phone;
+              const displayPhone = patientPhone ? patientPhone : 'Not available';
+              const whatsappPhone = patientPhone ? patientPhone.replace(/[^0-9]/g, '') : '91';
+            %>
+            <%= displayPhone %>
+            <% if (patientPhone) { %>
+              <a href="https://wa.me/91<%= whatsappPhone %>" target="_blank" style="color: #25D366; margin-left: 0.5rem; text-decoration: none;">
+                <i class="fa-brands fa-whatsapp"></i> Chat
+              </a>
+            <% } %>
+          </span>
+        </div>
+        <div class="patient-detail">
+          <span class="patient-detail-label">Email:</span>
+          <span class="patient-detail-value"><%= appointment.patientDetails?.email || appointment.patient?.email || 'N/A' %></span>
+        </div>
+        <div class="patient-detail">
+          <span class="patient-detail-label">Appointment Type:</span>
+          <span class="patient-detail-value"><%= appointment.appointmentType || 'Video Consultation' %></span>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <% 
+          const patientPhone = appointment.patientDetails?.phone || appointment.patient?.phone;
+          const whatsappPhone = patientPhone ? patientPhone.replace(/[^0-9]/g, '') : '91';
+        %>
+        <a href="https://wa.me/91<%= whatsappPhone %>?text=Hello<%= encodeURIComponent(' Dr. ' + (appointment.doctor?.name || 'Doctor') + ', this is regarding our video consultation appointment.') %>" 
+           target="_blank" 
+           class="btn btn-whatsapp">
+          <i class="fa-brands fa-whatsapp"></i> Start WhatsApp Video Call
+        </a>
+        
+        <a href="tel:<%= patientPhone || '#' %>" class="btn btn-primary">
+          <i class="fa-solid fa-phone"></i> Call Patient
+        </a>
+        
+        <a href="/doctor/dashboard" class="btn btn-secondary">
+          <i class="fa-solid fa-xmark"></i> Cancel
+        </a>
+      </div>
+    </div>
+
+    <!-- Tips -->
+    <div class="tips-card">
+      <h3><i class="fa-solid fa-lightbulb"></i> WhatsApp Video Call Tips</h3>
+      <ul>
+        <li>Ensure you have a stable internet connection (Wi-Fi recommended)</li>
+        <li>Use a quiet, well-lit room for the consultation</li>
+        <li>Keep patient reports and prescriptions ready</li>
+        <li>Use headphones for better audio quality</li>
+        <li>Test your camera and microphone before starting</li>
+        <li>The patient will receive a WhatsApp video call request</li>
+        <li>If the patient doesn't answer, try calling them directly</li>
+      </ul>
+    </div>
+    <% } %>
+  </div>
+</body>
+
+</html>

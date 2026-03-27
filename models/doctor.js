@@ -65,6 +65,22 @@ const doctorSchema = new mongoose.Schema({
             required: true
         }
     },
+    // Login credentials for doctor portal
+    loginEmail: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,
+        match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"]
+    },
+    password: {
+        type: String,
+        required: true,
+        minlength: [6, "Password must be at least 6 characters long"]
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
     availability: [{
         day: {
             type: String,

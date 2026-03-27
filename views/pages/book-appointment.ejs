@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Appointment - Dr. <%= doctor.name %> | Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --secondary: #e67e22;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .page-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .nav-links a {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+      background: var(--bg);
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .breadcrumb {
+      padding: 1rem 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .breadcrumb a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .booking-grid {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    /* Doctor Card */
+    .doctor-card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .doctor-header {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+
+    .doctor-image {
+      width: 150px;
+      height: 150px;
+      border-radius: 16px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .doctor-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .doctor-image-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+    }
+
+    .doctor-info h1 {
+      font-size: 1.8rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .doctor-title {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .doctor-stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .stat i {
+      color: var(--primary);
+    }
+
+    .rating {
+      color: #f6ad55;
+    }
+
+    .qualifications {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .qualification {
+      background: var(--bg);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .specializations {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .specialization {
+      background: rgba(28, 129, 37, 0.1);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--primary);
+    }
+
+    .doctor-about {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .doctor-about h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    .doctor-about p {
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* Booking Form */
+    .booking-form-card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      position: sticky;
+      top: 100px;
+    }
+
+    .booking-form-card h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg);
+      transition: all 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(28, 129, 37, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .btn {
+      padding: 0.875rem 1.5rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .fee-info {
+      background: var(--bg);
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .fee-amount {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .fee-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Success Message */
+    .success-message {
+      background: rgba(40, 167, 69, 0.1);
+      border: 2px solid var(--success);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .success-message i {
+      font-size: 3rem;
+      color: var(--success);
+      margin-bottom: 1rem;
+    }
+
+    .success-message h2 {
+      color: var(--success);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .booking-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .booking-form-card {
+        position: static;
+      }
+
+      .doctor-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .doctor-stats,
+      .qualifications,
+      .specializations {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .header-inner {
+        padding: 0 1rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Flash Messages */
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+</head>
+
+<body>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-inner">
+      <a href="/home" class="logo">
+        <div class="logo-icon">
+          <i class="fa-solid fa-mortar-pestle"></i>
+        </div>
+        <div>
+          <div style="font-weight: 700;">Shri Govind Pharmacy</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Ayurvedic & Herbal Wellness</div>
+        </div>
+      </a>
+      <nav class="nav-links">
+        <a href="/home"><i class="fa-solid fa-house"></i> Home</a>
+        <a href="/doctor"><i class="fa-solid fa-user-doctor"></i> Doctors</a>
+        <a href="/account"><i class="fa-solid fa-user"></i> Account</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="/home"><i class="fa-solid fa-house"></i> Home</a>
+      <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem; margin: 0 8px;"></i>
+      <a href="/doctor"><i class="fa-solid fa-user-doctor"></i> Doctors</a>
+      <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem; margin: 0 8px;"></i>
+      <span>Book Appointment</span>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 10000;"></div>
+
+    <% if (typeof appointmentSuccess !== 'undefined' && appointmentSuccess) { %>
+    <div class="success-message">
+      <i class="fa-solid fa-circle-check"></i>
+      <h2>Appointment Booked Successfully!</h2>
+      <p>Your consultation with Dr. <%= doctor.name %> is scheduled.</p>
+      <a href="/appointment/<%= typeof bookedAppointment !== 'undefined' && bookedAppointment ? bookedAppointment._id : '#' %>" class="btn btn-primary" style="max-width: 250px; margin: 1.5rem auto 0;">
+        <i class="fa-solid fa-eye"></i> View Appointment Details
+      </a>
+    </div>
+    <% } %>
+
+    <div class="booking-grid">
+      <!-- Left: Doctor Info -->
+      <div class="doctor-card">
+        <div class="doctor-header">
+          <div class="doctor-image">
+            <% if (doctor.image) { %>
+              <img src="<%= doctor.image %>" alt="Dr. <%= doctor.name %>">
+            <% } else { %>
+              <div class="doctor-image-placeholder">
+                <i class="fa-solid fa-user-doctor"></i>
+              </div>
+            <% } %>
+          </div>
+          <div class="doctor-info">
+            <h1>Dr. <%= doctor.name %></h1>
+            <p class="doctor-title"><%= doctor.title %></p>
+            
+            <div class="doctor-stats">
+              <div class="stat">
+                <i class="fa-solid fa-star rating"></i>
+                <span><%= (doctor.stats?.averageRating || 4.9).toFixed(1) %> (<%= doctor.stats?.totalReviews || 0 %> reviews)</span>
+              </div>
+              <div class="stat">
+                <i class="fa-solid fa-briefcase"></i>
+                <span><%= doctor.experience?.years || 20 %>+ years</span>
+              </div>
+              <div class="stat">
+                <i class="fa-solid fa-users"></i>
+                <span><%= (doctor.stats?.patientsTreated || 0).toLocaleString() %> patients</span>
+              </div>
+            </div>
+
+            <% if (doctor.qualifications && doctor.qualifications.length > 0) { %>
+            <div class="qualifications">
+              <% doctor.qualifications.forEach(q => { %>
+                <span class="qualification"><%= q.degree %></span>
+              <% }); %>
+            </div>
+            <% } %>
+
+            <% if (doctor.specializations && doctor.specializations.length > 0) { %>
+            <div class="specializations">
+              <% doctor.specializations.slice(0, 5).forEach(spec => { %>
+                <span class="specialization"><%= spec %></span>
+              <% }); %>
+            </div>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="doctor-about">
+          <h3><i class="fa-solid fa-circle-info"></i> About</h3>
+          <p><%= doctor.about %></p>
+        </div>
+
+        <% if (doctor.languages && doctor.languages.length > 0) { %>
+        <div class="doctor-about">
+          <h3><i class="fa-solid fa-language"></i> Languages</h3>
+          <div class="specializations">
+            <% doctor.languages.forEach(lang => { %>
+              <span class="specialization"><%= lang %></span>
+            <% }); %>
+          </div>
+        </div>
+        <% } %>
+
+        <% if (doctor.consultationModes && doctor.consultationModes.length > 0) { %>
+        <div class="doctor-about">
+          <h3><i class="fa-solid fa-video"></i> Consultation Modes</h3>
+          <div class="specializations">
+            <% doctor.consultationModes.forEach(mode => { %>
+              <span class="specialization"><%= mode %></span>
+            <% }); %>
+          </div>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Right: Booking Form -->
+      <div class="booking-form-card">
+        <h2><i class="fa-solid fa-calendar-check"></i> Book Appointment</h2>
+        
+        <div class="fee-info">
+          <div class="fee-amount">₹<%= doctor.consultationFee?.firstVisit || 0 %></div>
+          <div class="fee-label">Consultation Fee</div>
+          <% if (doctor.consultationFee?.isFreeFirstVisit) { %>
+            <div style="color: var(--success); font-size: 0.85rem; margin-top: 0.5rem;">
+              <i class="fa-solid fa-gift"></i> First consultation FREE
+            </div>
+          <% } %>
+        </div>
+
+        <form method="POST" action="/api/doctor/appointment">
+          <input type="hidden" name="doctorId" value="<%= doctor._id %>">
+          
+          <div class="form-group">
+            <label><i class="fa-solid fa-video"></i> Consultation Type *</label>
+            <select name="appointmentType" required>
+              <% const modes = doctor.consultationModes || ['In-Clinic']; %>
+              <% modes.forEach(mode => { %>
+                <option value="<%= mode %>"><%= mode %></option>
+              <% }); %>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fa-regular fa-calendar"></i> Date *</label>
+              <input type="date" name="appointmentDate" required min="<%= new Date().toISOString().split('T')[0] %>">
+            </div>
+            <div class="form-group">
+              <label><i class="fa-regular fa-clock"></i> Time *</label>
+              <select name="appointmentTime" required>
+                <option value="">Select time</option>
+                <option value="9:00 AM">9:00 AM</option>
+                <option value="9:30 AM">9:30 AM</option>
+                <option value="10:00 AM">10:00 AM</option>
+                <option value="10:30 AM">10:30 AM</option>
+                <option value="11:00 AM">11:00 AM</option>
+                <option value="11:30 AM">11:30 AM</option>
+                <option value="12:00 PM">12:00 PM</option>
+                <option value="12:30 PM">12:30 PM</option>
+                <option value="1:00 PM">1:00 PM</option>
+                <option value="4:00 PM">4:00 PM</option>
+                <option value="4:30 PM">4:30 PM</option>
+                <option value="5:00 PM">5:00 PM</option>
+                <option value="5:30 PM">5:30 PM</option>
+                <option value="6:00 PM">6:00 PM</option>
+                <option value="6:30 PM">6:30 PM</option>
+                <option value="7:00 PM">7:00 PM</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-clipboard-list"></i> Reason for Consultation *</label>
+            <textarea name="reason" required placeholder="Briefly describe your health concern or reason for consultation" maxlength="500"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-notes-medical"></i> Symptoms (Optional)</label>
+            <textarea name="symptoms" placeholder="List your symptoms (comma separated)" maxlength="500"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-file-medical"></i> Medical History (Optional)</label>
+            <textarea name="medicalHistory" placeholder="Any existing medical conditions, surgeries, etc." maxlength="1000"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-pills"></i> Current Medications (Optional)</label>
+            <textarea name="currentMedications" placeholder="List any medications you're currently taking" maxlength="500"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-check"></i> Confirm Booking
+          </button>
+
+          <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem;">
+            <i class="fa-solid fa-shield-halved"></i> Your information is secure and confidential
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // All available time slots
+    const allTimeSlots = [
+      '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+      '12:00 PM', '12:30 PM', '1:00 PM', '4:00 PM', '4:30 PM', '5:00 PM',
+      '5:30 PM', '6:00 PM', '6:30 PM', '7:00 PM'
+    ];
+
+    // Parse time string to minutes since midnight
+    function parseTimeToMinutes(timeStr) {
+      const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (!match) return 0;
+      
+      let hours = parseInt(match[1]);
+      const minutes = parseInt(match[2]);
+      const modifier = match[3].toUpperCase();
+      
+      if (modifier === 'PM' && hours !== 12) {
+        hours += 12;
+      } else if (modifier === 'AM' && hours === 12) {
+        hours = 0;
+      }
+      
+      return hours * 60 + minutes;
+    }
+
+    // Get current time in minutes
+    function getCurrentTimeInMinutes() {
+      const now = new Date();
+      return now.getHours() * 60 + now.getMinutes();
+    }
+
+    // Update available time slots based on selected date
+    function updateTimeSlots() {
+      const dateInput = document.querySelector('input[name="appointmentDate"]');
+      const timeSelect = document.querySelector('select[name="appointmentTime"]');
+      
+      if (!dateInput || !timeSelect) return;
+      
+      const selectedDate = dateInput.value;
+      if (!selectedDate) {
+        timeSelect.innerHTML = '<option value="">Select date first</option>';
+        timeSelect.disabled = true;
+        return;
+      }
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const selectedDateObj = new Date(selectedDate);
+      selectedDateObj.setHours(0, 0, 0, 0);
+      
+      const isToday = selectedDateObj.getTime() === today.getTime();
+      const currentTimeMinutes = getCurrentTimeInMinutes();
+      
+      // Save current selection
+      const currentValue = timeSelect.value;
+      
+      // Rebuild options
+      let html = '<option value="">Select time</option>';
+      let hasAvailableSlots = false;
+      
+      allTimeSlots.forEach(slot => {
+        const slotMinutes = parseTimeToMinutes(slot);
+        
+        // If today, only show future slots
+        if (isToday && slotMinutes <= currentTimeMinutes) {
+          html += `<option value="${slot}" disabled>${slot} (Passed)</option>`;
+        } else {
+          html += `<option value="${slot}">${slot}</option>`;
+          hasAvailableSlots = true;
+        }
+      });
+      
+      timeSelect.innerHTML = html;
+      timeSelect.disabled = !hasAvailableSlots;
+      
+      // Restore selection if still valid
+      if (currentValue && html.includes(`value="${currentValue}"`)) {
+        const selectedOption = timeSelect.querySelector(`option[value="${currentValue}"]`);
+        if (selectedOption && !selectedOption.disabled) {
+          timeSelect.value = currentValue;
+        }
+      }
+      
+      if (!hasAvailableSlots) {
+        timeSelect.innerHTML = '<option value="">No slots available today</option>';
+      }
+    }
+
+    // Set minimum date to today
+    const dateInput = document.querySelector('input[name="appointmentDate"]');
+    if (dateInput) {
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.setAttribute('min', today);
+      
+      // Add event listener to update time slots when date changes
+      dateInput.addEventListener('change', updateTimeSlots);
+    }
+
+    // Initialize time slots on page load
+    updateTimeSlots();
+
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+      const date = this.querySelector('input[name="appointmentDate"]').value;
+      const time = this.querySelector('select[name="appointmentTime"]').value;
+
+      if (!date || !time) {
+        e.preventDefault();
+        showToast('Please select both date and time for your appointment', 'error');
+        return false;
+      }
+
+      const selectedDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (selectedDate < today) {
+        e.preventDefault();
+        showToast('Please select a future date for your appointment', 'error');
+        return false;
+      }
+      
+      // Validate time is in the future if selecting today
+      const isToday = selectedDate.getTime() === today.getTime();
+      if (isToday) {
+        const currentTimeMinutes = getCurrentTimeInMinutes();
+        const selectedTimeMinutes = parseTimeToMinutes(time);
+        
+        if (selectedTimeMinutes <= currentTimeMinutes) {
+          e.preventDefault();
+          showToast('Selected time has already passed. Please choose a later time slot.', 'error');
+          return false;
+        }
+      }
+    });
+
+    // Show flash messages from server as toasts
+    window.addEventListener('DOMContentLoaded', function() {
+      <% if (typeof success !== 'undefined' && success && success.length) { %>
+        showToast('<%= success[0] %>', 'success');
+      <% } %>
+      <% if (typeof error !== 'undefined' && error && error.length) { %>
+        showToast('<%= error[0] %>', 'error');
+      <% } %>
+    });
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      const bgColor = type === 'success' ? '#166534' : '#b91c1c';
+      const icon = type === 'success' ? '✓' : '✕';
+
+      toast.style.cssText = `
+        background: ${bgColor};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease;
+        min-width: 320px;
+        max-width: 500px;
+        font-weight: 600;
+      `;
+
+      toast.innerHTML = `
+        <span style="font-size: 1.25rem; font-weight: bold;">${icon}</span>
+        <span style="flex: 1;">${message}</span>
+      `;
+
+      container.appendChild(toast);
+
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
+    }
+
+    // Add animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+
+</html>

@@ -172,13 +172,13 @@
               <i class="fa-brands fa-whatsapp"></i> Book via WhatsApp
             </a>
             <% if (typeof activeAppointment !== 'undefined' && activeAppointment) { %>
-            <button onclick="openBookingModal()" class="btn-ghost" style="background:rgba(255,255,255,0.12);color:white;border:1.5px solid rgba(255,255,255,0.3);">
+            <a href="/appointment/<%= activeAppointment._id %>" class="btn-ghost" style="background:rgba(255,255,255,0.12);color:white;border:1.5px solid rgba(255,255,255,0.3);">
               <i class="fa-solid fa-file-medical"></i> View My Appointment
-            </button>
+            </a>
             <% } else { %>
-            <button onclick="openBookingModal()" class="btn-ghost" style="background:rgba(255,255,255,0.12);color:white;border:1.5px solid rgba(255,255,255,0.3);">
+            <a href="/doctor/book/<%= doctor._id %>" class="btn-ghost" style="background:rgba(255,255,255,0.12);color:white;border:1.5px solid rgba(255,255,255,0.3);">
               <i class="fa-solid fa-calendar-check"></i> Book Appointment
-            </button>
+            </a>
             <% } %>
           </div>
         </div>

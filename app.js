@@ -139,6 +139,9 @@ const {
 const deliveryController = require("./controllers/deliveryController");
 const otpController = require("./controllers/otpController");
 const storePickupController = require("./controllers/storePickupController");
+const doctorController = require("./controllers/doctorController");
+const appointmentController = require("./controllers/appointmentController");
+const { initializeAppointmentScheduler } = require("./jobs/appointmentScheduler");
 
 const passport = require("./config/passport");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
@@ -517,6 +520,11 @@ app.get("/admin/login", (req, res) => {
   res.render("admin/login.ejs");
 });
 
+// Doctor Login Page
+app.get("/doctor/login", (req, res) => {
+  res.render("doctor/login.ejs");
+});
+
 // OTP Verification Page
 app.get("/verify-otp", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "verify-otp.html"));
@@ -683,28 +691,68 @@ app.get("/api/admin/analytics", authenticate, isAdmin, async (req, res) => {
 
 // ================== STORE PICKUP VERIFICATION ==================
 // Store Pickup Dashboard
-app.get("/admin/store-pickups", authenticate, isAdmin, storePickupController.getPendingStorePickups);
+app.get(
+  "/admin/store-pickups",
+  authenticate,
+  isAdmin,
+  storePickupController.getPendingStorePickups,
+);
 
 // All Store Pickup Records
-app.get("/admin/store-pickups/all", authenticate, isAdmin, storePickupController.getAllStorePickups);
+app.get(
+  "/admin/store-pickups/all",
+  authenticate,
+  isAdmin,
+  storePickupController.getAllStorePickups,
+);
 
 // API: Get pickup statistics
-app.get("/admin/store-pickups/api/stats", authenticate, isAdmin, storePickupController.getPickupStats);
+app.get(
+  "/admin/store-pickups/api/stats",
+  authenticate,
+  isAdmin,
+  storePickupController.getPickupStats,
+);
 
 // Generate OTP for store pickup
-app.post("/admin/store-pickups/:orderId/generate-otp", authenticate, isAdmin, storePickupController.generatePickupOTP);
+app.post(
+  "/admin/store-pickups/:orderId/generate-otp",
+  authenticate,
+  isAdmin,
+  storePickupController.generatePickupOTP,
+);
 
 // Verify OTP for store pickup
-app.post("/admin/store-pickups/:orderId/verify-otp", authenticate, isAdmin, storePickupController.verifyPickupOTP);
+app.post(
+  "/admin/store-pickups/:orderId/verify-otp",
+  authenticate,
+  isAdmin,
+  storePickupController.verifyPickupOTP,
+);
 
 // Manual pickup (without OTP)
-app.post("/admin/store-pickups/:orderId/manual-pickup", authenticate, isAdmin, storePickupController.manualPickup);
+app.post(
+  "/admin/store-pickups/:orderId/manual-pickup",
+  authenticate,
+  isAdmin,
+  storePickupController.manualPickup,
+);
 
 // Assign pickup (using delivery code)
-app.post("/admin/store-pickups/:orderId/assign", authenticate, isAdmin, storePickupController.assignPickup);
+app.post(
+  "/admin/store-pickups/:orderId/assign",
+  authenticate,
+  isAdmin,
+  storePickupController.assignPickup,
+);
 
 // Cancel pickup
-app.post("/admin/store-pickups/:orderId/cancel", authenticate, isAdmin, storePickupController.cancelPickup);
+app.post(
+  "/admin/store-pickups/:orderId/cancel",
+  authenticate,
+  isAdmin,
+  storePickupController.cancelPickup,
+);
 
 app.get(
   "/admin/products/edit/:productId",
@@ -948,6 +996,92 @@ app.post("/admin/login", async (req, res) => {
     console.error("🔥 ADMIN LOGIN ERROR:", error);
     req.flash("error", "Server error. Please try again.");
     return res.redirect("/admin/login");
+  }
+});
+
+// ================== DOCTOR LOGIN ==================
+app.post("/doctor/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    console.log("[Doctor Login] Attempt:", email);
+
+    // Find doctor by loginEmail
+    const doctor = await Doctor.findOne({ loginEmail: email });
+
+    // Doctor not found
+    if (!doctor) {
+      console.log("❌ Doctor not found");
+      req.flash("error", "Invalid doctor credentials. Please register first.");
+      return res.redirect("/doctor/login");
+    }
+
+    // Check if doctor is active
+    if (!doctor.isActive) {
+      console.log("🚫 Doctor account inactive:", email);
+      req.flash("error", "Your account is inactive. Please contact admin.");
+      return res.redirect("/doctor/login");
+    }
+
+    // Password check
+    const isMatch = await bcrypt.compare(password, doctor.password);
+
+    if (!isMatch) {
+      console.log("❌ Doctor password incorrect");
+      req.flash("error", "Invalid doctor credentials.");
+      return res.redirect("/doctor/login");
+    }
+
+    console.log("✅ Doctor login successful");
+
+    // Create Access Token - 7 days
+    const accessToken = jwt.sign(
+      {
+        userId: doctor._id,
+        role: "doctor",
+        email: doctor.loginEmail,
+        doctorId: doctor._id
+      },
+      process.env.ACCESS_SECRET,
+      { expiresIn: "7d" },
+    );
+
+    // Create Refresh Token - 7 days
+    const refreshToken = jwt.sign(
+      { userId: doctor._id },
+      process.env.REFRESH_SECRET,
+      { expiresIn: "7d" },
+    );
+
+    // Access token cookie - 7 days
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
+
+    // Refresh token cookie - 7 days
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
+
+    // Store doctor info in session for middleware
+    req.session.doctorId = doctor._id;
+    req.session.doctorEmail = doctor.loginEmail;
+
+    res.locals.doctor = doctor;
+
+    // Default redirect to doctor dashboard
+    return res.redirect("/doctor/dashboard");
+  } catch (error) {
+    console.error("🔥 DOCTOR LOGIN ERROR:", error);
+    req.flash("error", "Server error. Please try again.");
+    return res.redirect("/doctor/login");
   }
 });
 
@@ -1502,7 +1636,8 @@ app.post("/api/auth/otp-login/send", async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "No account found with this email address. Please register first.",
+        message:
+          "No account found with this email address. Please register first.",
       });
     }
 
@@ -1525,7 +1660,7 @@ app.post("/api/auth/otp-login/send", async (req, res) => {
       otp,
       purpose: "login_otp",
     };
-    
+
     await sendOTPEmail(email, otp, "login_otp", emailContent);
 
     res.json({
@@ -2046,6 +2181,15 @@ app.post("/logout", async (req, res) => {
   res.redirect("/login");
 });
 
+// Doctor logout
+app.get("/doctor/logout", (req, res) => {
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
+  req.session.doctorId = null;
+  req.session.doctorEmail = null;
+  res.redirect("/doctor/login");
+});
+
 app.get("/aboutUs", (req, res) => {
   res.render("pages/aboutUs.ejs");
 });
@@ -2186,6 +2330,10 @@ app.get("/doctor", optionalAuth, async (req, res) => {
 
     // If no doctor exists, create default doctor
     if (!doctors || doctors.length === 0) {
+      const bcrypt = require("bcrypt");
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash("doctor123", salt);
+      
       const defaultDoctor = await Doctor.create({
         name: "Himanshu Chaturvedi",
         title: "Senior Ayurvedic Physician & Herbal Specialist",
@@ -2231,6 +2379,8 @@ app.get("/doctor", optionalAuth, async (req, res) => {
           clinicAddress:
             "Ward No.6, Govind Marg, Neemkathana, Dist. Sikar, Rajasthan 332713, India",
         },
+        loginEmail: "doctor@shrigovindfarmacy.com",
+        password: hashedPassword,
         availability: [
           {
             day: "Monday",
@@ -2325,10 +2475,10 @@ app.get("/doctor", optionalAuth, async (req, res) => {
 
     const doctor = doctors[selectedIndex];
 
-    // Update availability status for current doctor
+    // Update availability status for current doctor (skip validation to avoid loginEmail/password issues)
     if (doctor && typeof doctor.updateAvailabilityStatus === "function") {
       doctor.updateAvailabilityStatus();
-      await doctor.save();
+      await doctor.save({ validateModifiedOnly: false });
     }
 
     // Check if user has an active appointment (pending or confirmed)
@@ -2431,6 +2581,32 @@ app.get("/api/doctor/:slug", optionalAuth, async (req, res) => {
   }
 });
 
+// Book Appointment Page
+app.get("/doctor/book/:id", authenticate, async (req, res) => {
+  try {
+    const doctor = await Doctor.findById(req.params.id);
+
+    if (!doctor || !doctor.isActive) {
+      req.flash("error", "Doctor not found or inactive");
+      return res.redirect("/doctor");
+    }
+
+    // Update availability status
+    if (typeof doctor.updateAvailabilityStatus === "function") {
+      doctor.updateAvailabilityStatus();
+      await doctor.save();
+    }
+
+    res.render("pages/book-appointment.ejs", {
+      doctor,
+      user: req.user || null,
+    });
+  } catch (err) {
+    console.log("Book appointment page error:", err);
+    res.status(500).send("Error loading booking page");
+  }
+});
+
 // API: Book appointment
 app.post(
   "/api/doctor/appointment",
@@ -2457,17 +2633,15 @@ app.post(
         !appointmentTime ||
         !reason
       ) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Missing required fields" });
+        req.flash('error', 'Please fill all required fields');
+        return res.redirect(`/doctor/book/${doctorId}`);
       }
 
       // Check if doctor exists
       const doctor = await Doctor.findById(doctorId);
       if (!doctor) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Doctor not found" });
+        req.flash('error', 'Doctor not found');
+        return res.redirect(`/doctor/book/${doctorId}`);
       }
 
       // Check if slot is available
@@ -2479,10 +2653,8 @@ app.post(
       });
 
       if (existingAppointments.length >= 1) {
-        return res.status(400).json({
-          success: false,
-          message: "This time slot is no longer available",
-        });
+        req.flash('error', 'This time slot is no longer available. Please select another time.');
+        return res.redirect(`/doctor/book/${doctorId}`);
       }
 
       // Create appointment
@@ -2492,33 +2664,48 @@ app.post(
         patientDetails: patientDetails || {
           name: req.user.name,
           email: req.user.email,
-          phone: req.user.phone,
+          phone: req.user.phone
         },
         appointmentType,
         appointmentDate: new Date(appointmentDate),
         appointmentTime,
         reason,
-        symptoms: symptoms || [],
+        symptoms: symptoms ? (Array.isArray(symptoms) ? symptoms : [symptoms]) : [],
         medicalHistory: medicalHistory || "",
         currentMedications: currentMedications || "",
         consultationFee: doctor.consultationFee.firstVisit,
+        paymentStatus: 'Unpaid'
       });
 
       // Update doctor stats
       doctor.stats.totalConsultations += 1;
       await doctor.save();
 
-      res.json({
-        success: true,
-        message:
-          "Appointment booked successfully! We will confirm your appointment soon.",
-        appointment,
-      });
+      // Populate doctor info for response
+      await appointment.populate('doctor', 'name title contact');
+
+      // Send confirmation email
+      try {
+        const { sendAppointmentConfirmation } = require("./services/emailService");
+        await sendAppointmentConfirmation(appointment, req.user);
+      } catch (emailError) {
+        console.error('Failed to send appointment confirmation email:', emailError);
+      }
+
+      // Send confirmation SMS
+      try {
+        const { sendAppointmentConfirmationSMS } = require("./services/smsService");
+        await sendAppointmentConfirmationSMS(appointment, patientDetails?.phone || req.user.phone);
+      } catch (smsError) {
+        console.error('Failed to send appointment confirmation SMS:', smsError);
+      }
+
+      req.flash('success', 'Appointment booked successfully! We will confirm your appointment soon.');
+      res.redirect(`/appointment/${appointment._id}`);
     } catch (err) {
       console.log("Book appointment error:", err);
-      res
-        .status(500)
-        .json({ success: false, message: "Error booking appointment" });
+      req.flash('error', 'Error booking appointment. Please try again.');
+      res.redirect(`/doctor/book/${req.body.doctorId}`);
     }
   },
 );
@@ -2680,6 +2867,28 @@ app.post(
         console.log("⚠️ No image file uploaded");
       }
 
+      // Validate login credentials
+      if (!doctorData.loginEmail) {
+        req.flash("error", "Login email is required");
+        return res.render("admin/doctor-form.ejs", {
+          doctor: null,
+          action: "create",
+        });
+      }
+
+      if (!doctorData.password || doctorData.password.length < 6) {
+        req.flash("error", "Password must be at least 6 characters long");
+        return res.render("admin/doctor-form.ejs", {
+          doctor: null,
+          action: "create",
+        });
+      }
+
+      // Hash password before saving
+      const bcrypt = require("bcrypt");
+      const salt = await bcrypt.genSalt(10);
+      doctorData.password = await bcrypt.hash(doctorData.password, salt);
+
       // Parse arrays from form data
       if (typeof doctorData.specializations === "string") {
         doctorData.specializations = [doctorData.specializations].filter((s) =>
@@ -2721,11 +2930,35 @@ app.post(
       }
 
       const doctor = await Doctor.create(doctorData);
+      
+      // Also create a User account for the doctor
+      const User = require("./models/user");
+      const userExists = await User.findOne({ email: doctorData.loginEmail });
+      if (!userExists) {
+        await User.create({
+          name: doctorData.name,
+          email: doctorData.loginEmail,
+          password: doctorData.password, // Already hashed
+          role: "doctor",
+          phone: doctorData.contact?.phone || "",
+          doctorProfile: {
+            isDoctor: true,
+            doctorId: doctor._id,
+            verifiedByAdmin: true
+          }
+        });
+      }
+      
       console.log("✅ Doctor added successfully:", doctor.name);
+      req.flash("success", "Doctor added successfully! Login credentials have been set.");
       res.redirect("/admin/doctors");
     } catch (err) {
       console.log("❌ Add doctor error:", err);
-      res.status(500).send("Error adding doctor: " + err.message);
+      req.flash("error", "Error adding doctor: " + err.message);
+      res.render("admin/doctor-form.ejs", {
+        doctor: null,
+        action: "create",
+      });
     }
   },
 );
@@ -2760,6 +2993,28 @@ app.post(
 
     try {
       const doctorData = req.body;
+
+      // Get existing doctor to preserve required fields
+      const existingDoctor = await Doctor.findById(req.params.id);
+      if (!existingDoctor) {
+        req.flash("error", "Doctor not found");
+        return res.redirect("/admin/doctors");
+      }
+
+      // Preserve loginEmail if not provided (required field)
+      if (!doctorData.loginEmail) {
+        doctorData.loginEmail = existingDoctor.loginEmail;
+      }
+
+      // Preserve password if not provided or empty (required field)
+      if (!doctorData.password || doctorData.password.trim() === "") {
+        doctorData.password = existingDoctor.password;
+      } else {
+        // Hash new password if provided
+        const bcrypt = require("bcrypt");
+        const salt = await bcrypt.genSalt(10);
+        doctorData.password = await bcrypt.hash(doctorData.password, salt);
+      }
 
       // Handle image upload to Cloudinary - only update if new file uploaded
       if (req.file) {
@@ -2816,10 +3071,12 @@ app.post(
         runValidators: true,
       });
       console.log("✅ Doctor updated successfully");
+      req.flash("success", "Doctor updated successfully");
       res.redirect("/admin/doctors");
     } catch (err) {
       console.log("❌ Update doctor error:", err);
-      res.status(500).send("Error updating doctor: " + err.message);
+      req.flash("error", "Error updating doctor: " + err.message);
+      res.redirect("/admin/doctors");
     }
   },
 );
@@ -2881,6 +3138,249 @@ app.post(
     }
   },
 );
+
+// ================== DOCTOR DASHBOARD ROUTES ==================
+
+// Middleware to authenticate doctor
+const authenticateDoctor = async (req, res, next) => {
+  try {
+    const token = req.cookies.accessToken;
+    
+    if (!token) {
+      return res.redirect("/doctor/login");
+    }
+
+    const decoded = jwt.verify(token, process.env.ACCESS_SECRET);
+    
+    // Check if role is doctor
+    if (decoded.role !== "doctor" && !decoded.doctorId) {
+      return res.redirect("/doctor/login");
+    }
+
+    // Get doctor from DB
+    const doctor = await Doctor.findById(decoded.doctorId || decoded.userId);
+    
+    if (!doctor || !doctor.isActive) {
+      req.flash("error", "Doctor account not found or inactive");
+      return res.redirect("/doctor/login");
+    }
+
+    req.doctor = doctor;
+    res.locals.doctor = doctor;
+    next();
+  } catch (error) {
+    console.log("Doctor auth error:", error);
+    return res.redirect("/doctor/login");
+  }
+};
+
+// Doctor Dashboard
+app.get("/doctor/dashboard", authenticateDoctor, async (req, res) => {
+  try {
+    const doctor = req.doctor;
+
+    // Get today's appointments
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const todayAppointments = await Appointment.find({
+      doctor: doctor._id,
+      appointmentDate: { $gte: today, $lt: tomorrow },
+    })
+      .sort({ appointmentTime: 1 })
+      .populate("patient", "name email phone");
+
+    // Get appointment statistics
+    const stats = {
+      pending: await Appointment.countDocuments({
+        doctor: doctor._id,
+        status: "Pending",
+      }),
+      confirmed: await Appointment.countDocuments({
+        doctor: doctor._id,
+        status: "Confirmed",
+      }),
+      completedToday: await Appointment.countDocuments({
+        doctor: doctor._id,
+        status: "Completed",
+        appointmentDate: { $gte: today },
+      }),
+      cancelled: await Appointment.countDocuments({
+        doctor: doctor._id,
+        status: "Cancelled",
+      }),
+    };
+
+    res.render("doctor/dashboard.ejs", {
+      doctor,
+      todayAppointments,
+      stats,
+    });
+  } catch (err) {
+    console.log("Doctor dashboard error:", err);
+    res.status(500).send("Error loading doctor dashboard");
+  }
+});
+
+// Doctor: Confirm appointment
+app.post("/doctor/appointment/:id/confirm", authenticateDoctor, async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!appointment) {
+      req.flash("error", "Appointment not found");
+      return res.redirect("/doctor/dashboard");
+    }
+
+    if (appointment.status !== "Pending") {
+      req.flash("error", "Only pending appointments can be confirmed");
+      return res.redirect("/doctor/dashboard");
+    }
+
+    await appointment.confirm();
+
+    // Populate for notifications
+    await appointment.populate("doctor", "name contact");
+    await appointment.populate("patient", "name email phone");
+
+    // Send confirmation notification
+    try {
+      const {
+        sendAppointmentConfirmation,
+      } = require("./services/emailService");
+      await sendAppointmentConfirmation(appointment, appointment.patient);
+    } catch (emailError) {
+      console.error("Failed to send confirmation email:", emailError);
+    }
+
+    try {
+      const {
+        sendAppointmentConfirmationSMS,
+      } = require("./services/smsService");
+      await sendAppointmentConfirmationSMS(
+        appointment,
+        appointment.patientDetails?.phone,
+      );
+    } catch (smsError) {
+      console.error("Failed to send confirmation SMS:", smsError);
+    }
+
+    req.flash("success", "Appointment confirmed successfully");
+    res.redirect("/doctor/dashboard");
+  } catch (err) {
+    console.log("Confirm appointment error:", err);
+    req.flash("error", "Error confirming appointment");
+    res.redirect("/doctor/dashboard");
+  }
+});
+
+// Doctor: Complete appointment with notes
+app.post("/doctor/appointment/:id/complete", authenticateDoctor, async (req, res) => {
+  try {
+    const { notes, prescription, followUpRequired, followUpDate } = req.body;
+
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!appointment) {
+      req.flash("error", "Appointment not found");
+      return res.redirect("/doctor/dashboard");
+    }
+
+    if (!['Confirmed', 'Pending'].includes(appointment.status)) {
+      req.flash("error", "Only confirmed appointments can be completed");
+      return res.redirect("/doctor/dashboard");
+    }
+
+    await appointment.complete(notes || '', prescription || '');
+
+    if (followUpRequired) {
+      appointment.followUpRequired = true;
+      appointment.followUpDate = followUpDate ? new Date(followUpDate) : null;
+      await appointment.save();
+    }
+
+    // Populate for notifications
+    await appointment.populate('doctor', 'name contact');
+    await appointment.populate('patient', 'name email phone');
+
+    // Send completion notification
+    try {
+      const { sendAppointmentStatusUpdate } = require("./services/emailService");
+      await sendAppointmentStatusUpdate(appointment, appointment.patient, 'Completed');
+    } catch (emailError) {
+      console.error('Failed to send completion email:', emailError);
+    }
+
+    req.flash("success", "Appointment completed successfully");
+    res.redirect("/doctor/dashboard");
+  } catch (err) {
+    console.log("Complete appointment error:", err);
+    req.flash("error", "Error completing appointment");
+    res.redirect("/doctor/dashboard");
+  }
+});
+
+// Doctor: View appointment details
+app.get("/doctor/appointment/:id", authenticateDoctor, async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id)
+      .populate("doctor", "name title contact")
+      .populate("patient", "name email phone");
+
+    if (!appointment) {
+      req.flash("error", "Appointment not found");
+      return res.redirect("/doctor/dashboard");
+    }
+
+    res.render("doctor/appointment-detail.ejs", { appointment });
+  } catch (err) {
+    console.log("Doctor appointment detail error:", err);
+    res.status(500).send("Error loading appointment details");
+  }
+});
+
+// Doctor: Video consultation room
+app.get("/doctor/appointment/:id/video", authenticateDoctor, async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id)
+      .populate('doctor', 'name title contact')
+      .populate('patient', 'name email phone');
+
+    if (!appointment) {
+      req.flash("error", "Appointment not found");
+      return res.redirect("/doctor/dashboard");
+    }
+
+    res.render("doctor/video-consultation.ejs", { appointment });
+  } catch (err) {
+    console.log("Video consultation error:", err);
+    res.status(500).send("Error loading video consultation");
+  }
+});
+
+// Doctor: Update availability
+app.post("/doctor/availability", authenticateDoctor, async (req, res) => {
+  try {
+    const doctor = req.doctor;
+
+    doctor.isAvailableNow =
+      req.body.isAvailable === "on" || req.body.isAvailable === "true";
+    await doctor.save({ validateModifiedOnly: false });
+
+    req.flash("success", "Availability status updated successfully");
+    res.redirect("/doctor/dashboard");
+  } catch (err) {
+    console.log("Update availability error:", err);
+    req.flash("error", "Error updating availability");
+    res.redirect("/doctor/dashboard");
+  }
+});
+
+// API: Use doctor routes
+app.use("/api/doctors", require("./routes/doctorRoutes"));
+app.use("/api/appointments", require("./routes/appointmentRoutes"));
 
 // ================== PRESCRIPTION ROUTES ==================
 
@@ -3075,19 +3575,19 @@ app.post(
       // ✅ Get image URL from Cloudinary - try all possible properties
       // multer-storage-cloudinary sets 'path' to the full URL
       const imageUrl = req.file.secure_url || req.file.url || req.file.path;
-      
+
       console.log("\n=== IMAGE URL CHECK ===");
       console.log("secure_url:", req.file.secure_url);
       console.log("url:", req.file.url);
       console.log("path:", req.file.path);
       console.log("Selected imageUrl:", imageUrl);
-      
+
       if (!imageUrl) {
         console.log("❌ No image URL found in file object");
         req.flash("error", "Failed to get image URL from Cloudinary");
         return res.redirect("/admin/products/new");
       }
-      
+
       productData.image = imageUrl;
       console.log("✅ Product image URL:", productData.image);
 
@@ -3101,7 +3601,7 @@ app.post(
       if (!productData.stock || isNaN(parseInt(productData.stock))) {
         productData.stock = 0;
       }
-      
+
       // Convert to proper types
       productData.price = parseFloat(productData.price);
       productData.stock = parseInt(productData.stock);
@@ -3114,7 +3614,7 @@ app.post(
 
       const newProduct = new Product(productData);
       console.log("Saving product to database...");
-      
+
       await newProduct.save();
 
       console.log("✅ Product added:", newProduct.name);
@@ -3129,11 +3629,11 @@ app.post(
       console.log("Full error:", err);
       console.log("Error name:", err.name);
       console.log("Error stack:", err.stack);
-      
+
       // Handle mongoose validation errors
       let errorMessage = "Error adding product";
       if (err.name === "ValidationError") {
-        const messages = Object.values(err.errors).map(e => e.message);
+        const messages = Object.values(err.errors).map((e) => e.message);
         errorMessage = messages.join(", ");
         console.log("❌ Validation errors:", messages);
       } else if (err.name === "CastError") {
@@ -4680,7 +5180,10 @@ app.post(
       await order.updateStatus(req.body.status, req.body.reason);
 
       // Generate unique delivery code when status changes to out_for_delivery
-      if (req.body.status === 'out_for_delivery' && oldStatus !== 'out_for_delivery') {
+      if (
+        req.body.status === "out_for_delivery" &&
+        oldStatus !== "out_for_delivery"
+      ) {
         await order.generateDeliveryCode();
       }
 
@@ -7819,10 +8322,14 @@ app.post("/agent/delivery/:id/start", authenticateAgent, async (req, res) => {
     }
 
     // Check if delivery is already out for delivery or delivered
-    if (['out_for_delivery', 'delivered', 'failed_attempt'].includes(delivery.status)) {
+    if (
+      ["out_for_delivery", "delivered", "failed_attempt"].includes(
+        delivery.status,
+      )
+    ) {
       return res.status(400).json({
         success: false,
-        message: `Delivery is already ${delivery.status.replace('_', ' ')}`
+        message: `Delivery is already ${delivery.status.replace("_", " ")}`,
       });
     }
 
@@ -7848,14 +8355,14 @@ app.post("/agent/delivery/:id/start", authenticateAgent, async (req, res) => {
         // Use $set and $unset to explicitly control OTP fields
         const orderUpdate = {
           $set: {
-            'deliveryOTP.code': deliveryOTP,
-            'deliveryOTP.expiresAt': expiresAt,
-            'deliveryOTP.generatedAt': new Date(),
-            'status': 'out_for_delivery'
+            "deliveryOTP.code": deliveryOTP,
+            "deliveryOTP.expiresAt": expiresAt,
+            "deliveryOTP.generatedAt": new Date(),
+            status: "out_for_delivery",
           },
           $unset: {
-            'deliveryOTP.verifiedAt': 1  // Remove any existing verifiedAt
-          }
+            "deliveryOTP.verifiedAt": 1, // Remove any existing verifiedAt
+          },
         };
 
         // Generate unique delivery code if not already generated
@@ -7874,31 +8381,37 @@ app.post("/agent/delivery/:id/start", authenticateAgent, async (req, res) => {
       // Verification code = Last 4 digits of Order ID
       try {
         const StorePickup = require("../models/storePickup.js");
-        const mongoose = require('mongoose');
-        
+        const mongoose = require("mongoose");
+
         // Check if pickup record already exists
-        let pickup = await StorePickup.findOne({ order: delivery.order._id }).select('+verificationCode');
-        
+        let pickup = await StorePickup.findOne({
+          order: delivery.order._id,
+        }).select("+verificationCode");
+
         if (!pickup) {
           // Create new pickup record with verification code
           pickup = new StorePickup({
             order: delivery.order._id,
-            storeName: 'Shri Govind Pharmacy - Main Store',
-            status: 'otp_generated'
+            storeName: "Shri Govind Pharmacy - Main Store",
+            status: "otp_generated",
           });
-          
+
           // Generate verification code (last 4 digits of order ID)
           const orderId = delivery.order._id.toString();
           const verificationCode = orderId.slice(-4).toUpperCase();
           pickup.verificationCode = verificationCode;
           pickup.codeGeneratedAt = new Date();
           pickup.codeExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-          
+
           await pickup.save();
-          
-          console.log(`✅ Verification Code generated: ${verificationCode} for order ${orderId}`);
+
+          console.log(
+            `✅ Verification Code generated: ${verificationCode} for order ${orderId}`,
+          );
         } else {
-          console.log(`ℹ️ Verification code already exists for order ${delivery.order._id}`);
+          console.log(
+            `ℹ️ Verification code already exists for order ${delivery.order._id}`,
+          );
         }
       } catch (pickupErr) {
         console.error("Failed to create store pickup record:", pickupErr);
@@ -7906,11 +8419,15 @@ app.post("/agent/delivery/:id/start", authenticateAgent, async (req, res) => {
       // === END STORE PICKUP RECORD ===
 
       // Send notification to customer that order is out for delivery (NO OTP in this SMS)
-      const customerPhone = delivery.deliveryAddress?.phone || delivery.order.address?.phone;
-      
+      const customerPhone =
+        delivery.deliveryAddress?.phone || delivery.order.address?.phone;
+
       try {
         // Send status update SMS without OTP (OTP is only for agent/admin)
-        const orderId = delivery.order?.tracking?.orderId || delivery.order?._id?.toString?.().slice(-4).toUpperCase() || 'N/A';
+        const orderId =
+          delivery.order?.tracking?.orderId ||
+          delivery.order?._id?.toString?.().slice(-4).toUpperCase() ||
+          "N/A";
         const message = `Shri Govind Pharmacy: Your order ${orderId} is out for delivery. Our delivery partner will reach you soon. Please keep the delivery OTP ready for verification.`;
         await sendSMS(customerPhone, message);
         console.log("Delivery status SMS sent to customer:", customerPhone);
@@ -7921,7 +8438,8 @@ app.post("/agent/delivery/:id/start", authenticateAgent, async (req, res) => {
 
     res.json({
       success: true,
-      message: "Delivery started successfully. Show the verification code at the store.",
+      message:
+        "Delivery started successfully. Show the verification code at the store.",
       data: {
         verificationCode: delivery.order._id.toString().slice(-4).toUpperCase(), // Last 4 digits of Order ID
         deliveryOTP: deliveryOTP, // OTP to collect from customer
@@ -8038,9 +8556,11 @@ app.get("/agent/delivery/:id", authenticateAgent, async (req, res) => {
     }
 
     // STRICT BLOCK: Only allow access if delivery is in 'picked_up' status
-    if (delivery.status !== 'picked_up') {
-      const errorMsg = `ACCESS DENIED: Cannot access delivery completion page. Current status is '${delivery.status.replace('_', ' ')}'. Delivery must be marked as 'Picked Up' before you can complete it.`;
-      console.error(`❌ ${errorMsg} - Agent: ${agent.email}, Delivery: ${delivery._id}`);
+    if (delivery.status !== "picked_up") {
+      const errorMsg = `ACCESS DENIED: Cannot access delivery completion page. Current status is '${delivery.status.replace("_", " ")}'. Delivery must be marked as 'Picked Up' before you can complete it.`;
+      console.error(
+        `❌ ${errorMsg} - Agent: ${agent.email}, Delivery: ${delivery._id}`,
+      );
       req.flash("error", errorMsg);
       return res.redirect("/agent/deliveries");
     }
@@ -8093,13 +8613,13 @@ app.get("/agent/delivery/:id", authenticateAgent, async (req, res) => {
         // Update order with OTP (explicitly unset verifiedAt)
         await Order.findByIdAndUpdate(delivery.order._id, {
           $set: {
-            'deliveryOTP.code': otpCode,
-            'deliveryOTP.expiresAt': expiresAt,
-            'deliveryOTP.generatedAt': new Date()
+            "deliveryOTP.code": otpCode,
+            "deliveryOTP.expiresAt": expiresAt,
+            "deliveryOTP.generatedAt": new Date(),
           },
           $unset: {
-            'deliveryOTP.verifiedAt': 1  // Remove any existing verifiedAt
-          }
+            "deliveryOTP.verifiedAt": 1, // Remove any existing verifiedAt
+          },
         });
 
         // Send OTP to customer via SMS
@@ -8761,31 +9281,42 @@ app.post("/api/verify-qr", async (req, res) => {
     let scanningUser = null;
     if (req.user && req.user._id) {
       // Try to find the full user document with role, phone, email
-      const User = require('../models/user');
-      const DeliveryAgent = require('../models/deliveryAgent');
-      
+      const User = require("../models/user");
+      const DeliveryAgent = require("../models/deliveryAgent");
+
       // Check if it's a delivery agent
       scanningUser = await DeliveryAgent.findOne({
-        $or: [{ email: req.user.email }, { phone: req.user.phone }]
+        $or: [{ email: req.user.email }, { phone: req.user.phone }],
       });
-      
+
       // If not a delivery agent, check if it's a regular user
       if (!scanningUser) {
         scanningUser = await User.findById(req.user._id);
       }
     }
 
-    const result = await QRCodeService.validateDeliveryQRCode(qrCode, Delivery, scanningUser);
+    const result = await QRCodeService.validateDeliveryQRCode(
+      qrCode,
+      Delivery,
+      scanningUser,
+    );
 
     if (result.valid) {
       res.json({
         valid: true,
         message: "QR code verified successfully",
-        authorizationReason: result.step === 'verified' ? 
-          (scanningUser ? 'authorized_user' : 'valid_qr') : 'valid_qr_no_auth_check',
+        authorizationReason:
+          result.step === "verified"
+            ? scanningUser
+              ? "authorized_user"
+              : "valid_qr"
+            : "valid_qr_no_auth_check",
         delivery: {
           id: result.delivery._id,
-          orderId: result.delivery.order?.tracking?.orderId || result.delivery.order?._id?.toString?.().slice(-4).toUpperCase() || 'N/A',
+          orderId:
+            result.delivery.order?.tracking?.orderId ||
+            result.delivery.order?._id?.toString?.().slice(-4).toUpperCase() ||
+            "N/A",
           status: result.delivery.status,
           customerName: result.delivery.deliveryAddress?.fullName,
           address: result.delivery.deliveryAddress?.address,
@@ -8896,4 +9427,7 @@ app.listen(port, () => {
   console.log(`✅ Error handlers registered`);
   console.log(`✅ 404 page: /views/error/404.ejs`);
   console.log(`✅ 500 page: /views/error/500.ejs`);
+  
+  // Initialize appointment scheduler
+  initializeAppointmentScheduler();
 });

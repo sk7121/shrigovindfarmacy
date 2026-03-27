@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Dashboard — Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --secondary: #e67e22;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --info: #17a2b8;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .doctor-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .nav-links a {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--primary);
+      background: var(--bg);
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.pending {
+      background: rgba(255, 193, 7, 0.1);
+      color: var(--warning);
+    }
+
+    .stat-icon.confirmed {
+      background: rgba(40, 167, 69, 0.1);
+      color: var(--success);
+    }
+
+    .stat-icon.completed {
+      background: rgba(23, 162, 184, 0.1);
+      color: var(--info);
+    }
+
+    .stat-icon.cancelled {
+      background: rgba(220, 53, 69, 0.1);
+      color: var(--danger);
+    }
+
+    .stat-info h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-info p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Content Grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 2rem;
+    }
+
+    /* Appointments Card */
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-header h2 {
+      font-size: 1.2rem;
+      color: var(--text);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .filter-tab {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: none;
+      background: var(--bg);
+      color: var(--text);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter-tab.active,
+    .filter-tab:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--bg);
+    }
+
+    th,
+    td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      font-size: 0.9rem;
+    }
+
+    tr:hover {
+      background: var(--bg);
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-badge.pending {
+      background: rgba(255, 193, 7, 0.1);
+      color: var(--warning);
+    }
+
+    .status-badge.confirmed {
+      background: rgba(40, 167, 69, 0.1);
+      color: var(--success);
+    }
+
+    .status-badge.completed {
+      background: rgba(23, 162, 184, 0.1);
+      color: var(--info);
+    }
+
+    .status-badge.cancelled {
+      background: rgba(220, 53, 69, 0.1);
+      color: var(--danger);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+      font-size: 0.85rem;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      opacity: 0.9;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .btn-sm {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    /* Sidebar */
+    .sidebar-card {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .sidebar-card h3 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .availability-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      background: var(--bg);
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--border);
+      transition: 0.3s;
+      border-radius: 26px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--success);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    .quick-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .quick-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem;
+      background: var(--bg);
+      border-radius: 8px;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-inner {
+        padding: 0 1rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 800px;
+      }
+    }
+
+    /* Flash Messages */
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+</head>
+
+<body>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+  <!-- Header -->
+  <header class="doctor-header">
+    <div class="header-inner">
+      <a href="/doctor/dashboard" class="logo">
+        <div class="logo-icon">
+          <i class="fa-solid fa-user-doctor"></i>
+        </div>
+        <div>
+          <div style="font-weight: 700;">Doctor Dashboard</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Shri Govind Pharmacy</div>
+        </div>
+      </a>
+      <nav class="nav-links">
+        <a href="/doctor/dashboard" class="active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="/doctor/appointments"><i class="fa-solid fa-calendar-check"></i> Appointments</a>
+        <a href="/doctor/patients"><i class="fa-solid fa-users"></i> Patients</a>
+        <a href="/home"><i class="fa-solid fa-house"></i> Back to Site</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <h1 class="page-title">Welcome, Dr. <%= doctor.name %></h1>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon pending">
+          <i class="fa-solid fa-clock"></i>
+        </div>
+        <div class="stat-info">
+          <h3><%= stats.pending || 0 %></h3>
+          <p>Pending</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon confirmed">
+          <i class="fa-solid fa-check-circle"></i>
+        </div>
+        <div class="stat-info">
+          <h3><%= stats.confirmed || 0 %></h3>
+          <p>Confirmed</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon completed">
+          <i class="fa-solid fa-clipboard-check"></i>
+        </div>
+        <div class="stat-info">
+          <h3><%= stats.completedToday || 0 %></h3>
+          <p>Today</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon cancelled">
+          <i class="fa-solid fa-times-circle"></i>
+        </div>
+        <div class="stat-info">
+          <h3><%= stats.cancelled || 0 %></h3>
+          <p>Cancelled</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <!-- Main Content -->
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-calendar-check"></i> Today's Appointments</h2>
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="Pending">Pending</button>
+            <button class="filter-tab" data-filter="Confirmed">Confirmed</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (todayAppointments && todayAppointments.length > 0) { %>
+                <% todayAppointments.forEach(apt => { %>
+                <tr>
+                  <td>
+                    <div>
+                      <div style="font-weight: 600;"><%= apt.patientDetails?.name || 'N/A' %></div>
+                      <div style="font-size: 0.8rem; color: var(--text-muted);"><%= apt.patientDetails?.phone || '' %></div>
+                    </div>
+                  </td>
+                  <td><%= apt.appointmentTime %></td>
+                  <td><%= apt.appointmentType %></td>
+                  <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                    <%= apt.reason %>
+                  </td>
+                  <td>
+                    <span class="status-badge <%= apt.status.toLowerCase() %>"><%= apt.status %></span>
+                  </td>
+                  <td>
+                    <div class="actions">
+                      <% if (apt.status === 'Pending') { %>
+                      <form action="/doctor/appointment/<%= apt._id %>/confirm" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-success btn-sm">
+                          <i class="fa-solid fa-check"></i> Confirm
+                        </button>
+                      </form>
+                      <% } %>
+                      <% if (apt.status !== 'Completed' && apt.status !== 'Cancelled') { %>
+                      <a href="/doctor/appointment/<%= apt._id %>" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-eye"></i> View
+                      </a>
+                      <% } %>
+                    </div>
+                  </td>
+                </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-calendar-times" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <p>No appointments scheduled for today</p>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <!-- Availability -->
+        <div class="sidebar-card">
+          <h3><i class="fa-solid fa-toggle-on"></i> Availability Status</h3>
+          <form action="/doctor/availability" method="POST">
+            <div class="availability-toggle">
+              <span>Mark as Available</span>
+              <label class="toggle-switch">
+                <input type="checkbox" name="isAvailable" <%= doctor.isAvailableNow ? 'checked' : '' %> onchange="this.form.submit()">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </form>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">
+            <i class="fa-solid fa-circle-info"></i> When disabled, patients won't be able to book appointments
+          </p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="sidebar-card">
+          <h3><i class="fa-solid fa-chart-bar"></i> Quick Stats</h3>
+          <div class="quick-stats">
+            <div class="quick-stat">
+              <span class="stat-label">Total Consultations</span>
+              <span class="stat-value"><%= doctor.stats?.totalConsultations || 0 %></span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-label">Patients Treated</span>
+              <span class="stat-value"><%= doctor.stats?.patientsTreated || 0 %></span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-label">Average Rating</span>
+              <span class="stat-value"><i class="fa-solid fa-star" style="color: #f6ad55;"></i> <%= (doctor.stats?.averageRating || 0).toFixed(1) %></span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-label">Total Reviews</span>
+              <span class="stat-value"><%= doctor.stats?.totalReviews || 0 %></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="sidebar-card">
+          <h3><i class="fa-solid fa-address-book"></i> Contact Information</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-muted);">
+              <i class="fa-solid fa-phone" style="color: var(--primary);"></i>
+              <span style="font-size: 0.9rem;"><%= doctor.contact?.phone || 'N/A' %></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-muted);">
+              <i class="fa-brands fa-whatsapp" style="color: var(--success);"></i>
+              <span style="font-size: 0.9rem;"><%= doctor.contact?.whatsapp || doctor.contact?.phone || 'N/A' %></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-muted);">
+              <i class="fa-solid fa-envelope" style="color: var(--danger);"></i>
+              <span style="font-size: 0.9rem;"><%= doctor.contact?.email || 'N/A' %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Filter tabs functionality
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        const filter = this.dataset.filter;
+        const rows = document.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+          if (filter === 'all') {
+            row.style.display = '';
+          } else {
+            const statusBadge = row.querySelector('.status-badge');
+            if (statusBadge && statusBadge.textContent === filter) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          }
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

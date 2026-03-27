@@ -779,11 +779,278 @@ async function sendCancellationStatusUpdate(cancellationRequest) {
   }
 }
 
+// Send Appointment Confirmation Email
+async function sendAppointmentConfirmation(appointment, patient) {
+  if (!transporter) {
+    console.log("⚠️  Email not sent - transporter not configured");
+    return;
+  }
+
+  const doctorName = appointment.doctor?.name || 'Doctor';
+  const appointmentDate = new Date(appointment.appointmentDate).toLocaleDateString('en-IN', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const mailOptions = {
+    from: `"Shri Govind Pharmacy" <${process.env.EMAIL_FROM || "noreply@shrigovindpharmacy.com"}>`,
+    to: patient.email,
+    subject: `Appointment Confirmed with Dr. ${doctorName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+          .header { background: linear-gradient(135deg, #4ade80, #22c55e); color: white; padding: 30px; text-align: center; }
+          .logo { font-size: 28px; font-weight: bold; }
+          .content { padding: 40px 30px; }
+          .appointment-box { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #4ade80; border-radius: 12px; padding: 25px; margin: 25px 0; }
+          .detail-row { display: flex; justify-content: space-between; margin: 12px 0; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+          .detail-label { font-weight: 600; color: #6b7280; }
+          .detail-value { font-weight: 600; color: #1f2937; }
+          .info-box { background: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin: 20px 0; border-radius: 6px; }
+          .footer { background: #f8f9fa; padding: 25px; text-align: center; border-top: 1px solid #e9ecef; }
+          .footer-text { color: #6c757d; font-size: 13px; }
+          .btn { display: inline-block; padding: 12px 30px; background: #22c55e; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">🌿 Shri Govind Pharmacy</div>
+            <p>Appointment Confirmation</p>
+          </div>
+          <div class="content">
+            <h2 style="color: #1a1a1a;">Dear ${patient.name},</h2>
+            <p>Your appointment has been successfully booked with <strong>Dr. ${doctorName}</strong>. We look forward to seeing you!</p>
+            
+            <div class="appointment-box">
+              <h3 style="margin-top: 0; color: #166534;">📋 Appointment Details</h3>
+              <div class="detail-row">
+                <span class="detail-label">Doctor:</span>
+                <span class="detail-value">Dr. ${doctorName}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Date:</span>
+                <span class="detail-value">${appointmentDate}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Time:</span>
+                <span class="detail-value">${appointment.appointmentTime}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Type:</span>
+                <span class="detail-value">${appointment.appointmentType}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Consultation Fee:</span>
+                <span class="detail-value">₹${appointment.consultationFee || 0}</span>
+              </div>
+              <div class="detail-row" style="border-bottom: none;">
+                <span class="detail-label">Appointment ID:</span>
+                <span class="detail-value">#${appointment._id.toString().slice(-8).toUpperCase()}</span>
+              </div>
+            </div>
+
+            <div class="info-box">
+              <p style="margin: 0;"><strong>💡 What's Next?</strong></p>
+              <ul style="margin: 10px 0 0 20px; color: #555;">
+                <li>You will receive a confirmation call/SMS within 24 hours</li>
+                <li>Please arrive 10 minutes early for your appointment</li>
+                <li>Bring any relevant medical reports/documents</li>
+                <li>For video consultations, ensure stable internet connection</li>
+              </ul>
+            </div>
+
+            <p style="margin-top: 25px;">
+              <strong>Need to reschedule or cancel?</strong><br>
+              You can reschedule or cancel your appointment up to 24 hours before the scheduled time through your account dashboard.
+            </p>
+
+            <div style="text-align: center;">
+              <a href="${process.env.BASE_URL || 'http://localhost:3000'}/appointment/${appointment._id}" class="btn">View Appointment Details</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p class="footer-text">© ${new Date().getFullYear()} Shri Govind Pharmacy. All rights reserved.</p>
+            <p class="footer-text">📞 +91 9413010731 | ✉️ support@shrigovindpharmacy.com</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("✅ Appointment confirmation email sent to:", patient.email);
+    return { success: true };
+  } catch (error) {
+    console.log("❌ Error sending appointment confirmation:", error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+// Send Appointment Reminder Email (24 hours before)
+async function sendAppointmentReminder(appointment, patient) {
+  if (!transporter) {
+    console.log("⚠️  Email not sent - transporter not configured");
+    return;
+  }
+
+  const doctorName = appointment.doctor?.name || 'Doctor';
+  const appointmentDate = new Date(appointment.appointmentDate).toLocaleDateString('en-IN', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const mailOptions = {
+    from: `"Shri Govind Pharmacy" <${process.env.EMAIL_FROM || "noreply@shrigovindpharmacy.com"}>`,
+    to: patient.email,
+    subject: `Reminder: Appointment with Dr. ${doctorName} Tomorrow`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; background: #fff; }
+          .header { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; padding: 30px; text-align: center; }
+          .content { padding: 40px 30px; }
+          .reminder-box { background: #fef3c7; border: 2px solid #fbbf24; border-radius: 12px; padding: 25px; margin: 25px 0; }
+          .detail-row { display: flex; justify-content: space-between; margin: 12px 0; }
+          .btn { display: inline-block; padding: 12px 30px; background: #f59e0b; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">⏰ Appointment Reminder</div>
+          </div>
+          <div class="content">
+            <h2>Hello ${patient.name},</h2>
+            <p>This is a friendly reminder about your upcoming appointment scheduled for <strong>tomorrow</strong>.</p>
+            
+            <div class="reminder-box">
+              <h3 style="margin-top: 0; color: #92400e;">📋 Appointment Details</h3>
+              <div class="detail-row"><strong>Doctor:</strong> <span>Dr. ${doctorName}</span></div>
+              <div class="detail-row"><strong>Date:</strong> <span>${appointmentDate}</span></div>
+              <div class="detail-row"><strong>Time:</strong> <span>${appointment.appointmentTime}</span></div>
+              <div class="detail-row"><strong>Type:</strong> <span>${appointment.appointmentType}</span></div>
+            </div>
+
+            <p><strong>Please Note:</strong></p>
+            <ul>
+              <li>Arrive 10 minutes early for your appointment</li>
+              <li>Bring valid ID and any relevant medical documents</li>
+              <li>For video consultations, test your connection beforehand</li>
+            </ul>
+
+            <div style="text-align: center; margin-top: 25px;">
+              <a href="${process.env.BASE_URL || 'http://localhost:3000'}/appointment/${appointment._id}" class="btn">View Appointment</a>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("✅ Appointment reminder email sent to:", patient.email);
+    return { success: true };
+  } catch (error) {
+    console.log("❌ Error sending appointment reminder:", error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+// Send Appointment Status Update Email
+async function sendAppointmentStatusUpdate(appointment, patient, newStatus) {
+  if (!transporter) {
+    console.log("⚠️  Email not sent - transporter not configured");
+    return;
+  }
+
+  const doctorName = appointment.doctor?.name || 'Doctor';
+  
+  const statusMessages = {
+    Confirmed: `Your appointment with Dr. ${doctorName} has been confirmed`,
+    Completed: `Your appointment with Dr. ${doctorName} has been completed`,
+    Cancelled: `Your appointment has been cancelled`,
+    Rescheduled: `Your appointment has been rescheduled`,
+    'No-Show': `You missed your appointment with Dr. ${doctorName}`
+  };
+
+  const mailOptions = {
+    from: `"Shri Govind Pharmacy" <${process.env.EMAIL_FROM || "noreply@shrigovindpharmacy.com"}>`,
+    to: patient.email,
+    subject: `Appointment Update: ${newStatus}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+          .container { max-width: 600px; margin: 0 auto; background: #fff; }
+          .header { background: linear-gradient(135deg, #4ade80, #22c55e); color: white; padding: 30px; text-align: center; }
+          .content { padding: 40px 30px; }
+          .status-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 20px; margin: 20px 0; }
+          .btn { display: inline-block; padding: 12px 30px; background: #22c55e; color: white; text-decoration: none; border-radius: 8px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h2>📋 Appointment Update</h2>
+          </div>
+          <div class="content">
+            <p>Dear ${patient.name},</p>
+            <div class="status-box">
+              <h3>${statusMessages[newStatus] || 'Appointment status updated'}</h3>
+              <p><strong>Doctor:</strong> Dr. ${doctorName}</p>
+              <p><strong>Date:</strong> ${new Date(appointment.appointmentDate).toLocaleDateString('en-IN')}</p>
+              <p><strong>Time:</strong> ${appointment.appointmentTime}</p>
+              <p><strong>Status:</strong> ${newStatus}</p>
+            </div>
+            ${appointment.notes ? `<p><strong>Doctor's Notes:</strong> ${appointment.notes}</p>` : ''}
+            <div style="text-align: center; margin-top: 25px;">
+              <a href="${process.env.BASE_URL || 'http://localhost:3000'}/appointment/${appointment._id}" class="btn">View Details</a>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("✅ Appointment status email sent to:", patient.email);
+    return { success: true };
+  } catch (error) {
+    console.log("❌ Error sending appointment status update:", error.message);
+    return { success: false, error: error.message };
+  }
+}
+
 module.exports = {
   sendOrderConfirmation,
   sendOrderStatusUpdate,
   sendWelcomeEmail,
   sendOTPEmail,
   sendPasswordResetEmail,
+  sendAppointmentConfirmation,
+  sendAppointmentReminder,
+  sendAppointmentStatusUpdate,
   transporter,
 };

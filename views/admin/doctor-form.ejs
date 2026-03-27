@@ -478,6 +478,57 @@
 
     <form method="POST" action="/admin/doctors/<%= action === 'create' ? 'new' : 'edit/' + doctor._id %>" enctype="multipart/form-data">
 
+      <!-- Login Credentials (Admin Only) -->
+      <div class="form-card">
+        <h3 class="section-title"><i class="fa-solid fa-lock"></i> Login Credentials</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
+          <i class="fa-solid fa-circle-info"></i> These credentials will be used by the doctor to login to the portal
+        </p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fa-solid fa-envelope"></i> Login Email *</label>
+            <input 
+              type="email" 
+              name="loginEmail" 
+              value="<%= doctor?.loginEmail || '' %>" 
+              required 
+              placeholder="doctor@shrigovindpharmacy.com"
+              <%= action === 'edit' ? 'readonly' : '' %>
+            >
+            <% if (action === 'edit') { %>
+            <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">
+              <i class="fa-solid fa-info-circle"></i> Email cannot be changed after creation
+            </small>
+            <% } %>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-lock"></i> Password <%= action === 'edit' ? '(Leave blank to keep current)' : '*' %></label>
+            <div class="field-wrap" style="position: relative;">
+              <input 
+                type="password" 
+                name="password" 
+                id="password"
+                <%= action === 'create' ? 'required' : '' %>
+                minlength="6"
+                placeholder="<%= action === 'create' ? 'Minimum 6 characters' : 'Enter new password to change' %>"
+                style="padding-right: 40px;"
+              >
+              <button 
+                type="button" 
+                onclick="togglePassword('password')" 
+                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted);"
+              >
+                <i class="fa-regular fa-eye" id="password-eye"></i>
+              </button>
+            </div>
+            <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">
+              <i class="fa-solid fa-shield-halved"></i> Minimum 6 characters required
+            </small>
+          </div>
+        </div>
+      </div>
 
       <!-- Basic Information -->
       <div class="form-card">
@@ -770,6 +821,22 @@
 
   <script>
     let qualCount = <%= doctor?.qualifications?.length || 1 %>;
+
+    // Toggle password visibility
+    function togglePassword(inputId) {
+      const input = document.getElementById(inputId);
+      const eye = document.getElementById(inputId + '-eye');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        eye.classList.remove('fa-eye');
+        eye.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        eye.classList.remove('fa-eye-slash');
+        eye.classList.add('fa-eye');
+      }
+    }
 
     function addQualification() {
       const container = document.getElementById('qualifications-container');
