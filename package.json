@@ -41,6 +41,8 @@
     "pdfkit": "^0.18.0",
     "peerjs": "^1.5.5",
     "qrcode": "^1.5.4",
-    "razorpay": "^2.9.6"
+    "razorpay": "^2.9.6",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
   }
 }

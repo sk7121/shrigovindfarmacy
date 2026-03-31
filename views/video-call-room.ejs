@@ -15,6 +15,9 @@
 
   <!-- PeerJS for WebRTC -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  
+  <!-- Socket.IO for signaling -->
+  <script src="/socket.io/socket.io.js"></script>
 
   <style>
     :root {
@@ -637,14 +640,31 @@
     const appointmentTime = '<%= new Date(appointment.appointmentDate).toLocaleDateString() + " " + appointment.appointmentTime %>';
     const appointmentReason = '<%= appointment.reason || "Consultation" %>';
 
+    // Get auth token from cookie for Socket.IO
+    function getAuthToken() {
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'accessToken') {
+          return value;
+        }
+      }
+      return null;
+    }
+
     // PeerJS variables
     let peer = null;
+    let myPeerId = null;
     let localStream = null;
     let currentCall = null;
     let callStartTime = null;
     let timerInterval = null;
     let isMuted = false;
     let isVideoOff = false;
+    
+    // Socket.IO connection
+    let socket = null;
+    let remotePeerId = null;
 
     // DOM Elements
     const loadingState = document.getElementById('loadingState');
@@ -683,6 +703,9 @@
 
         localVideo.srcObject = localStream;
 
+        // Initialize Socket.IO first
+        initializeSocket();
+        
         // Initialize PeerJS
         initializePeer();
 
@@ -692,6 +715,56 @@
       }
     }
 
+    // Initialize Socket.IO connection
+    function initializeSocket() {
+      const token = getAuthToken();
+      socket = io({
+        auth: { token }
+      });
+
+      socket.on('connect', () => {
+        console.log('📡 Connected to Socket.IO');
+        // Join the video call room
+        socket.emit('call:join', { roomId });
+      });
+
+      socket.on('call:ready', (data) => {
+        console.log('📞 Call ready received from:', data.from);
+        if (!isDoctor) {
+          // Patient receives doctor's peer ID
+          remotePeerId = data.peerId;
+          connectToDoctor();
+        }
+      });
+
+      socket.on('call:accepted', (data) => {
+        console.log('📞 Call accepted from:', data.from);
+        if (isDoctor) {
+          // Doctor receives patient's peer ID
+          remotePeerId = data.peerId;
+          connectToPatient();
+        }
+      });
+
+      socket.on('user:joined', (data) => {
+        console.log('📞 User joined:', data.userId, data.role);
+        if (isDoctor && data.role !== 'doctor') {
+          updateStatus('waiting', 'Patient joined - connecting...');
+        } else if (!isDoctor && data.role === 'doctor') {
+          updateStatus('waiting', 'Doctor joined - connecting...');
+        }
+      });
+
+      socket.on('call:ended', () => {
+        console.log('📞 Call ended by other party');
+        endCall(false);
+      });
+
+      socket.on('connect_error', (error) => {
+        console.error('Socket.IO connection error:', error);
+      });
+    }
+
     // Initialize PeerJS connection
     function initializePeer() {
       peer = new Peer(null, {
@@ -699,12 +772,13 @@
       });
 
       peer.on('open', (id) => {
-        console.log('My peer ID is:', id);
-        
+        console.log('📞 My peer ID is:', id);
+        myPeerId = id;
+
         if (isDoctor) {
-          // Doctor starts the call - wait for patient to join
+          // Doctor starts the call
           updateStatus('waiting', 'Waiting for patient to join...');
-          
+
           // Notify server that call is ready
           fetch('/api/video-call/join', {
             method: 'POST',
@@ -717,16 +791,23 @@
             .then(data => {
               if (data.success) {
                 console.log('Call joined successfully');
+                // Broadcast peer ID to patient via Socket.IO
+                socket.emit('call:ready', {
+                  roomId,
+                  peerId: myPeerId,
+                  appointmentId
+                });
               }
             });
         } else {
-          // Patient joins the call
-          connectToDoctor();
+          // Patient joins the call room
+          // Wait for doctor's peer ID via Socket.IO
+          updateStatus('waiting', 'Waiting for doctor to start call...');
         }
       });
 
       peer.on('call', (call) => {
-        console.log('Received call');
+        console.log('📞 Received incoming call');
         call.answer(localStream);
         currentCall = call;
         setupCallHandlers(call);
@@ -740,29 +821,38 @@
 
     // Patient connects to doctor
     function connectToDoctor() {
-      fetch('/api/video-call/join', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ roomId })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          console.log('Joining call with doctor');
-          const call = peer.call(data.call.roomId, localStream);
-          currentCall = call;
-          setupCallHandlers(call);
-        } else {
-          showError('Failed to join call: ' + data.message);
-        }
-      })
-      .catch(error => {
-        console.error('Error joining call:', error);
-        showError('Failed to connect to server');
+      if (!remotePeerId) {
+        console.error('No doctor peer ID available');
+        showError('Waiting for doctor to join...');
+        return;
+      }
+
+      console.log('📞 Connecting to doctor:', remotePeerId);
+      updateStatus('waiting', 'Connecting to doctor...');
+      
+      const call = peer.call(remotePeerId, localStream);
+      currentCall = call;
+      setupCallHandlers(call);
+      
+      // Send patient's peer ID to doctor via Socket.IO
+      socket.emit('call:accept', {
+        roomId,
+        peerId: myPeerId
       });
+    }
+
+    // Doctor connects to patient (after patient accepts)
+    function connectToPatient() {
+      if (!remotePeerId) {
+        console.error('No patient peer ID available');
+        showError('Waiting for patient to join...');
+        return;
+      }
+
+      console.log('📞 Connecting to patient:', remotePeerId);
+      const call = peer.call(remotePeerId, localStream);
+      currentCall = call;
+      setupCallHandlers(call);
     }
 
     // Setup call handlers
@@ -835,6 +925,12 @@
 
       if (peer) {
         peer.destroy();
+      }
+
+      // Notify via Socket.IO
+      if (socket) {
+        socket.emit('call:end', { roomId });
+        socket.disconnect();
       }
 
       if (notifyServer && isDoctor) {

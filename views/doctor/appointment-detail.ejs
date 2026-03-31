@@ -551,8 +551,8 @@
         <% } %>
 
         <% if ((appointment.status === 'Confirmed' || appointment.status === 'Completed' || appointment.status === 'No-Show') && appointment.appointmentType === 'Video Call') { %>
-        <a href="/doctor/appointment/<%= appointment._id %>/video" class="btn btn-primary">
-          <i class="fa-solid fa-video"></i> Start Video Call
+        <a href="/whatsapp-call/<%= appointment._id %>" class="btn btn-primary" target="_blank">
+          <i class="fa-brands fa-whatsapp"></i> Start WhatsApp Video Call
         </a>
         <% } %>
 

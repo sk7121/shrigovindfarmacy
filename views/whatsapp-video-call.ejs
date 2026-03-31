@@ -1,0 +1,739 @@
+<%
+const patientPhone = appointment.patientDetails?.phone || appointment.patient?.phone;
+const doctorPhone = appointment.doctorDetails?.phone || appointment.doctor?.phone;
+
+// Clean and format phone numbers
+function formatPhoneForWhatsApp(phone) {
+  if (!phone) return '';
+  let cleaned = phone.replace(/[^0-9]/g, '');
+  cleaned = cleaned.replace(/^0+/, '');
+  if (cleaned.length === 10 && !cleaned.startsWith('91')) {
+    cleaned = '91' + cleaned;
+  }
+  return cleaned;
+}
+
+const whatsappPatientPhone = formatPhoneForWhatsApp(patientPhone);
+const whatsappDoctorPhone = formatPhoneForWhatsApp(doctorPhone);
+
+// Determine if we're in doctor or patient view
+const isDoctorView = typeof doctor !== 'undefined';
+const otherPartyName = isDoctorView ? appointment.patient?.name : appointment.doctor?.name;
+const otherPartyPhone = isDoctorView ? patientPhone : doctorPhone;
+const whatsappOtherPhone = isDoctorView ? whatsappPatientPhone : whatsappDoctorPhone;
+
+// Create pre-filled message
+const consultationMessage = isDoctorView
+  ? `Hello ${appointment.patient?.name || 'Patient'}, this is Dr. ${appointment.doctor?.name}. I'm calling for our scheduled video consultation.`
+  : `Hello Dr. ${appointment.doctor?.name}, this is ${appointment.patient?.name}. I'm joining our scheduled video consultation.`;
+
+const encodedMessage = encodeURIComponent(consultationMessage);
+%>
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Video Call - Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --whatsapp: #25D366;
+      --whatsapp-dark: #128C7E;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --info: #17a2b8;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: var(--surface);
+      padding: 1rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--whatsapp), var(--whatsapp-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Call Card */
+    .call-card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .call-icon {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, var(--whatsapp), var(--whatsapp-dark));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 20px rgba(37, 211, 102, 0);
+      }
+    }
+
+    .call-icon i {
+      font-size: 3rem;
+      color: white;
+    }
+
+    .call-card h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .call-card .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Contact Info */
+    .contact-info {
+      background: var(--bg);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .contact-info h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text);
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .contact-item:last-child {
+      border-bottom: none;
+    }
+
+    .contact-item i {
+      width: 40px;
+      height: 40px;
+      background: var(--surface);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--whatsapp);
+      font-size: 1.2rem;
+      margin-right: 1rem;
+    }
+
+    .contact-item-content {
+      flex: 1;
+    }
+
+    .contact-item-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .contact-item-value {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      transition: all 0.3s;
+      font-size: 1rem;
+    }
+
+    .btn-whatsapp {
+      background: linear-gradient(135deg, var(--whatsapp), var(--whatsapp-dark));
+      color: white;
+      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    }
+
+    .btn-whatsapp:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+    }
+
+    .btn-phone {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-phone:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+      transform: translateY(-2px);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn i {
+      font-size: 1.2rem;
+    }
+
+    /* Instructions */
+    .instructions-card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 1.5rem;
+    }
+
+    .instructions-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text);
+    }
+
+    .instructions-list {
+      list-style: none;
+      counter-reset: instruction-counter;
+    }
+
+    .instructions-list li {
+      counter-increment: instruction-counter;
+      padding: 1rem 0;
+      padding-left: 3rem;
+      position: relative;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .instructions-list li:last-child {
+      border-bottom: none;
+    }
+
+    .instructions-list li::before {
+      content: counter(instruction-counter);
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--whatsapp), var(--whatsapp-dark));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .instructions-list li span {
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Tips */
+    .tips-card {
+      background: linear-gradient(135deg, rgba(37, 211, 102, 0.1), rgba(18, 140, 126, 0.1));
+      border: 2px solid var(--whatsapp);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tips-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text);
+    }
+
+    .tips-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .tips-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .tips-list li i {
+      color: var(--whatsapp);
+      margin-top: 0.25rem;
+    }
+
+    /* Alert */
+    .alert {
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .alert-warning {
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid var(--warning);
+      color: #856404;
+    }
+
+    .alert-danger {
+      background: rgba(220, 53, 69, 0.1);
+      border: 1px solid var(--danger);
+      color: #721c24;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .call-card {
+        padding: 1.5rem;
+      }
+
+      .call-icon {
+        width: 80px;
+        height: 80px;
+      }
+
+      .call-icon i {
+        font-size: 2.5rem;
+      }
+
+      .call-card h1 {
+        font-size: 1.4rem;
+      }
+
+      .button-group {
+        gap: 0.75rem;
+      }
+
+      .btn {
+        padding: 0.875rem 1.5rem;
+      }
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="<%= isDoctorView ? '/doctor/dashboard' : '/home' %>" class="logo">
+        <div class="logo-icon">
+          <i class="fa-brands fa-whatsapp"></i>
+        </div>
+        <div>
+          <div style="font-weight: 700;">Video Consultation</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Shri Govind Pharmacy</div>
+        </div>
+      </a>
+      <nav>
+        <a href="<%= isDoctorView ? '/doctor/dashboard' : '/home' %>" class="btn btn-secondary" style="padding: 0.5rem 1rem;">
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <% if (!otherPartyPhone) { %>
+      <!-- No Phone Number Alert -->
+      <div class="alert alert-danger">
+        <i class="fa-solid fa-circle-exclamation" style="font-size: 1.5rem;"></i>
+        <div>
+          <strong>Phone Number Not Available</strong>
+          <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+            <%= isDoctorView ? 'The patient has not provided a phone number.' : 'The doctor has not provided a phone number.' %>
+            Please contact through other means or update the contact information.
+          </p>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Call Card -->
+    <div class="call-card">
+      <div class="call-icon">
+        <i class="fa-brands fa-whatsapp"></i>
+      </div>
+      <h1>Start Video Call</h1>
+      <p class="subtitle">Connect with <%= otherPartyName || 'your consultation partner' %> via WhatsApp</p>
+
+      <!-- Contact Information -->
+      <div class="contact-info">
+        <h3><i class="fa-solid fa-address-card"></i> Contact Information</h3>
+        
+        <div class="contact-item">
+          <i class="fa-solid fa-user"></i>
+          <div class="contact-item-content">
+            <div class="contact-item-label">Name</div>
+            <div class="contact-item-value"><%= otherPartyName || 'Not available' %></div>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <i class="fa-brands fa-whatsapp"></i>
+          <div class="contact-item-content">
+            <div class="contact-item-label">WhatsApp Number</div>
+            <div class="contact-item-value">
+              <%= otherPartyPhone || 'Not available' %>
+              <% if (otherPartyPhone) { %>
+                <span style="color: var(--whatsapp); margin-left: 0.5rem;">
+                  <i class="fa-solid fa-circle-check"></i> Verified
+                </span>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <i class="fa-regular fa-clock"></i>
+          <div class="contact-item-content">
+            <div class="contact-item-label">Appointment Time</div>
+            <div class="contact-item-value">
+              <%= new Date(appointment.appointmentDate).toLocaleDateString() %> at <%= appointment.appointmentTime %>
+            </div>
+          </div>
+        </div>
+
+        <% if (appointment.reason) { %>
+        <div class="contact-item">
+          <i class="fa-solid fa-notes-medical"></i>
+          <div class="contact-item-content">
+            <div class="contact-item-label">Reason</div>
+            <div class="contact-item-value"><%= appointment.reason %></div>
+          </div>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="button-group">
+        <% if (otherPartyPhone) { %>
+          <a href="https://wa.me/<%= whatsappOtherPhone %>?text=<%= encodedMessage %>"
+             target="_blank"
+             class="btn btn-whatsapp"
+             id="whatsappBtn">
+            <i class="fa-brands fa-whatsapp"></i>
+            Start WhatsApp Video Call
+          </a>
+
+          <a href="tel:<%= otherPartyPhone %>" class="btn btn-phone">
+            <i class="fa-solid fa-phone"></i>
+            Call <%= isDoctorView ? 'Patient' : 'Doctor' %>
+          </a>
+
+          <button class="btn btn-secondary" onclick="copyInstructions()">
+            <i class="fa-regular fa-copy"></i>
+            Copy Call Instructions
+          </button>
+        <% } else { %>
+          <a href="<%= isDoctorView ? '/doctor/dashboard' : '/user/appointments' %>" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i>
+            Go Back
+          </a>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (otherPartyPhone) { %>
+    <!-- Instructions -->
+    <div class="instructions-card" id="instructionsCard">
+      <h3><i class="fa-solid fa-list-check"></i> How to Start the Call</h3>
+      <ol class="instructions-list">
+        <li>
+          <span>Click the <strong>"Start WhatsApp Video Call"</strong> button above</span>
+        </li>
+        <li>
+          <span>WhatsApp will open with a pre-filled message for your consultation</span>
+        </li>
+        <li>
+          <span>Send the message to initiate the chat</span>
+        </li>
+        <li>
+          <span>Tap the <strong>video camera icon</strong> in WhatsApp to start a video call</span>
+        </li>
+        <li>
+          <span>Wait for <%= otherPartyName ? 'them' : 'the other party' %> to accept the call</span>
+        </li>
+        <li>
+          <span>Once connected, proceed with your video consultation</span>
+        </li>
+      </ol>
+    </div>
+
+    <!-- Tips -->
+    <div class="tips-card">
+      <h3><i class="fa-solid fa-lightbulb"></i> Tips for Better Experience</h3>
+      <ul class="tips-list">
+        <li>
+          <i class="fa-solid fa-check"></i>
+          <span>Use a stable Wi-Fi connection for better quality</span>
+        </li>
+        <li>
+          <i class="fa-solid fa-check"></i>
+          <span>Find a quiet, well-lit place for the consultation</span>
+        </li>
+        <li>
+          <i class="fa-solid fa-check"></i>
+          <span>Keep all medical reports and prescriptions ready</span>
+        </li>
+        <li>
+          <i class="fa-solid fa-check"></i>
+          <span>Use headphones for clearer audio</span>
+        </li>
+        <li>
+          <i class="fa-solid fa-check"></i>
+          <span>Test your camera before the call starts</span>
+        </li>
+        <li>
+          <i class="fa-solid fa-check"></i>
+          <span>Keep your phone charged or plugged in</span>
+        </li>
+        <li>
+          <i class="fa-solid fa-check"></i>
+          <span>Use the front camera for better eye contact</span>
+        </li>
+        <li>
+          <i class="fa-solid fa-check"></i>
+          <span>Speak clearly and maintain good posture</span>
+        </li>
+      </ul>
+    </div>
+    <% } %>
+  </div>
+
+  <script>
+    // Track call initiation
+    const whatsappBtn = document.getElementById('whatsappBtn');
+    if (whatsappBtn) {
+      whatsappBtn.addEventListener('click', () => {
+        // Log call attempt (you can add analytics here)
+        console.log('WhatsApp video call initiated');
+        
+        // Optional: Show a quick toast notification
+        showToast('Opening WhatsApp...');
+      });
+    }
+
+    // Toast notification
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #323232;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        z-index: 9999;
+        animation: slideUp 0.3s ease;
+      `;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideDown 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 2000);
+    }
+
+    // Copy instructions to clipboard
+    function copyInstructions() {
+      const instructions = `
+📞 Video Call Instructions:
+
+1. Click "Start WhatsApp Video Call" button
+2. WhatsApp will open with a pre-filled message
+3. Send the message to start the chat
+4. Tap the video camera icon in WhatsApp
+5. Wait for the other party to accept
+6. Begin your consultation
+
+Tips:
+- Use Wi-Fi for better quality
+- Find a quiet, well-lit place
+- Keep medical reports ready
+- Use headphones for clear audio
+      `.trim();
+
+      navigator.clipboard.writeText(instructions).then(() => {
+        showToast('Instructions copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+        showToast('Failed to copy instructions');
+      });
+    }
+
+    // Add animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateX(-50%) translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+      }
+      @keyframes slideDown {
+        from {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateX(-50%) translateY(20px);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+
+</html>

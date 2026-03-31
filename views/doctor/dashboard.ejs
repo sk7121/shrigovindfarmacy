@@ -629,8 +629,8 @@
                       </a>
                       <% } %>
                       <% if ((apt.status === 'Confirmed' || apt.status === 'Completed' || apt.status === 'No-Show') && apt.appointmentType === 'Video Call') { %>
-                      <a href="/doctor/appointment/<%= apt._id %>/video" class="btn btn-secondary btn-sm">
-                        <i class="fa-solid fa-video"></i> Video Call
+                      <a href="/whatsapp-call/<%= apt._id %>" class="btn btn-secondary btn-sm" target="_blank">
+                        <i class="fa-brands fa-whatsapp"></i> Video Call
                       </a>
                       <% } %>
                       <% if (apt.status === 'Confirmed' && apt.appointmentType === 'Video Call') { %>

@@ -3446,7 +3446,7 @@ app.get("/video-call/join/:appointmentId", authenticate, async (req, res) => {
   try {
     const Appointment = require('./models/appointment');
     const VideoCall = require('./models/videoCall');
-    
+
     const appointment = await Appointment.findById(req.params.appointmentId)
       .populate('doctor', 'name title specializations')
       .populate('patient', 'name email phone');
@@ -3478,7 +3478,7 @@ app.get("/video-call/join/:appointmentId", authenticate, async (req, res) => {
       // Check if doctor has started the call
       const crypto = require('crypto');
       const roomId = 'room_' + crypto.randomBytes(8).toString('hex');
-      
+
       videoCall = await VideoCall.create({
         appointment: appointment._id,
         doctor: appointment.doctor._id,
@@ -3486,7 +3486,7 @@ app.get("/video-call/join/:appointmentId", authenticate, async (req, res) => {
         roomId: roomId,
         status: 'waiting'
       });
-      
+
       req.flash("info", "Waiting for doctor to start the video call");
     }
 
@@ -3497,6 +3497,40 @@ app.get("/video-call/join/:appointmentId", authenticate, async (req, res) => {
   } catch (err) {
     console.log("Join video call error:", err);
     res.status(500).send("Error joining video call");
+  }
+});
+
+// WhatsApp Video Call Route (Simpler alternative)
+app.get("/whatsapp-call/:appointmentId", authenticate, async (req, res) => {
+  try {
+    const Appointment = require('./models/appointment');
+
+    const appointment = await Appointment.findById(req.params.appointmentId)
+      .populate('doctor', 'name phone email')
+      .populate('patient', 'name phone email');
+
+    if (!appointment) {
+      req.flash("error", "Appointment not found");
+      return res.redirect(req.doctor ? "/doctor/dashboard" : "/user/appointments");
+    }
+
+    // Check authorization
+    const isDoctor = req.doctor;
+    const isPatient = req.user && appointment.patient && appointment.patient._id.toString() === req.user._id.toString();
+    
+    if (!isDoctor && !isPatient && req.user?.role !== 'admin') {
+      req.flash("error", "Not authorized to access this call");
+      return res.redirect("/home");
+    }
+
+    res.render("whatsapp-video-call.ejs", {
+      appointment,
+      doctor: isDoctor ? req.doctor : undefined
+    });
+  } catch (err) {
+    console.log("WhatsApp call error:", err);
+    req.flash("error", "Error loading call page");
+    res.redirect(req.doctor ? "/doctor/dashboard" : "/user/appointments");
   }
 });
 
@@ -9562,13 +9596,108 @@ app.use(errorHandler);
 
 // ================== SERVER ==================
 const port = process.env.PORT;
+const http = require('http');
+const server = http.createServer(app);
 
-app.listen(port, () => {
+// Initialize Socket.IO
+const io = require('socket.io')(server, {
+  cors: {
+    origin: process.env.NODE_ENV === 'production' ? false : '*',
+    credentials: true
+  }
+});
+
+// Socket.IO authentication middleware
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    return next(new Error('Authentication required'));
+  }
+  
+  const jwt = require('jsonwebtoken');
+  jwt.verify(token, process.env.ACCESS_SECRET, (err, decoded) => {
+    if (err) {
+      return next(new Error('Invalid token'));
+    }
+    socket.userId = decoded.userId;
+    socket.userRole = decoded.role;
+    next();
+  });
+});
+
+// Socket.IO connection handler
+io.on('connection', (socket) => {
+  console.log(`📡 User connected: ${socket.userId} (${socket.userRole})`);
+  
+  // Join user's personal room
+  socket.join(`user:${socket.userId}`);
+  
+  // Doctor joins their personal room
+  if (socket.userRole === 'doctor') {
+    socket.join(`doctor:${socket.userId}`);
+  }
+  
+  // Video call signaling events
+  socket.on('call:ready', async (data) => {
+    const { roomId, peerId, appointmentId } = data;
+    console.log(`📞 Call ready: ${roomId} by ${socket.userId} (${socket.userRole})`);
+    
+    // Store peer ID in room
+    socket.to(`room:${roomId}`).emit('call:ready', {
+      peerId,
+      roomId,
+      from: socket.userId,
+      fromRole: socket.userRole
+    });
+  });
+  
+  socket.on('call:join', (data) => {
+    const { roomId } = data;
+    socket.join(`room:${roomId}`);
+    console.log(`📞 User ${socket.userId} joined room: ${roomId}`);
+    
+    // Notify others in the room
+    socket.to(`room:${roomId}`).emit('user:joined', {
+      userId: socket.userId,
+      role: socket.userRole
+    });
+  });
+  
+  socket.on('call:accept', (data) => {
+    const { roomId, peerId } = data;
+    socket.to(`room:${roomId}`).emit('call:accepted', {
+      peerId,
+      from: socket.userId
+    });
+  });
+  
+  socket.on('call:end', (data) => {
+    const { roomId } = data;
+    socket.to(`room:${roomId}`).emit('call:ended', {
+      from: socket.userId
+    });
+    socket.leave(`room:${roomId}`);
+  });
+  
+  socket.on('disconnect', () => {
+    console.log(`📡 User disconnected: ${socket.userId}`);
+    socket.leave(`user:${socket.userId}`);
+    if (socket.userRole === 'doctor') {
+      socket.leave(`doctor:${socket.userId}`);
+    }
+  });
+});
+
+// Make io accessible to routes
+app.set('io', io);
+
+server.listen(port, () => {
   console.log(`🚀 Server running on http://localhost:${port}`);
+  console.log(`✅ Socket.IO initialized`);
   console.log(`✅ Error handlers registered`);
   console.log(`✅ 404 page: /views/error/404.ejs`);
   console.log(`✅ 500 page: /views/error/500.ejs`);
-  
+
   // Initialize appointment scheduler
   initializeAppointmentScheduler();
 });
