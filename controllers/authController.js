@@ -243,8 +243,8 @@ const sendOTPLogin = async (req, res) => {
         }
 
         // Generate and send OTP for login
-        const { otp, expiresAt } = await OTP.createOTP(email, 'email_verification', 10);
-        const emailResult = await sendOTPEmail(email, otp, 'email_verification', user.name);
+        const { otp, expiresAt } = await OTP.createOTP(email, 'login_otp', 10);
+        const emailResult = await sendOTPEmail(email, otp, 'login_otp', user.name);
 
         console.log("\n📧 OTP Login Email Result:");
         console.log("   To:", email);
@@ -284,8 +284,8 @@ const verifyOTPLogin = async (req, res) => {
             return res.json({ success: false, message: 'Email and OTP are required' });
         }
 
-        // Verify OTP
-        const otpResult = await OTP.verifyOTP(email, otp, 'email_verification');
+        // Verify OTP for login
+        const otpResult = await OTP.verifyOTP(email, otp, 'login_otp');
 
         if (!otpResult.success) {
             return res.json({ success: false, message: otpResult.message });
@@ -295,6 +295,13 @@ const verifyOTPLogin = async (req, res) => {
         const user = await User.findOne({ email });
         if (!user) {
             return res.json({ success: false, message: 'User not found' });
+        }
+
+        // Mark email as verified since they proved ownership via OTP
+        if (!user.isEmailVerified) {
+            user.isEmailVerified = true;
+            user.emailVerifiedAt = new Date();
+            await user.save();
         }
 
         // Generate tokens
@@ -336,18 +343,15 @@ const verifyOTPLogin = async (req, res) => {
         delete req.session.otpLoginEmail;
 
         console.log(`✅ OTP Login successful for: ${email}`);
-        
-        // Determine redirect based on role and email verification
+
+        // Determine redirect based on role
         let redirectUrl;
         if (user.role === 'admin') {
             redirectUrl = '/admin/home';
-        } else if (!user.isEmailVerified) {
-            // If email not verified, redirect to OTP verification page
-            redirectUrl = `/verify-otp?email=${encodeURIComponent(email)}`;
         } else {
             redirectUrl = '/home';
         }
-        
+
         return res.json({
             success: true,
             message: 'Login successful!',
@@ -360,11 +364,65 @@ const verifyOTPLogin = async (req, res) => {
     }
 };
 
+// @desc    Resend OTP for passwordless login
+// @route   POST /api/auth/otp-login/resend
+// @access  Public
+const resendOTPLogin = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.json({ success: false, message: 'Email is required' });
+        }
+
+        // Check if user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.json({ success: false, message: 'No account found with this email. Please register first.' });
+        }
+
+        // Check rate limiting - only 3 requests per hour
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+        const recentOTPs = await OTP.countDocuments({
+            email,
+            purpose: 'login_otp',
+            createdAt: { $gte: oneHourAgo }
+        });
+
+        if (recentOTPs >= 3) {
+            return res.json({ 
+                success: false, 
+                message: 'Too many OTP requests. Please wait 1 hour.' 
+            });
+        }
+
+        // Generate and send new OTP for login
+        const { otp, expiresAt } = await OTP.createOTP(email, 'login_otp', 10);
+        const emailResult = await sendOTPEmail(email, otp, 'login_otp', user.name);
+
+        if (!emailResult.success) {
+            return res.json({ success: false, message: 'Failed to send OTP. Please try again.' });
+        }
+
+        console.log(`✅ Login OTP resent to: ${email}`);
+        return res.json({
+            success: true,
+            message: 'OTP resent successfully to your email',
+            expiresAt
+        });
+
+    } catch (error) {
+        console.error('OTP Login resend error:', error);
+        return res.json({ success: false, message: 'Server error. Please try again.' });
+    }
+};
+
 module.exports = {
     register,
     login,
     logout,
     refreshToken,
     sendOTPLogin,
-    verifyOTPLogin
+    verifyOTPLogin,
+    resendOTPLogin
 };

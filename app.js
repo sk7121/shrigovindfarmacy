@@ -141,6 +141,7 @@ const otpController = require("./controllers/otpController");
 const storePickupController = require("./controllers/storePickupController");
 const doctorController = require("./controllers/doctorController");
 const appointmentController = require("./controllers/appointmentController");
+const authRoutes = require("./routes/authRoutes");
 const { initializeAppointmentScheduler } = require("./jobs/appointmentScheduler");
 
 const passport = require("./config/passport");
@@ -1617,212 +1618,9 @@ app.post("/api/otp/check", otpController.checkOTP);
 // Bravo SMS Configuration Status
 app.get("/api/otp/bravo-status", otpController.getBravoStatus);
 
-// ================== OTP LOGIN ROUTES (Passwordless Login) ==================
-
-// Send OTP for login
-app.post("/api/auth/otp-login/send", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide a valid email address",
-      });
-    }
-
-    // Check if user exists
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message:
-          "No account found with this email address. Please register first.",
-      });
-    }
-
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-    // Store OTP in database
-    await OTP.create({
-      email,
-      otp,
-      purpose: "login_otp",
-      expiresAt,
-    });
-
-    // Send OTP via email
-    const { sendOTPEmail } = require("../services/emailService");
-    const emailContent = {
-      subject: "Your Login OTP - Shri Govind Pharmacy",
-      otp,
-      purpose: "login_otp",
-    };
-
-    await sendOTPEmail(email, otp, "login_otp", emailContent);
-
-    res.json({
-      success: true,
-      message: "OTP sent successfully to your email",
-      expiresAt,
-    });
-  } catch (error) {
-    console.error("OTP login send error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to send OTP. Please try again.",
-    });
-  }
-});
-
-// Verify OTP and login
-app.post("/api/auth/otp-login/verify", async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-
-    if (!email || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and OTP are required",
-      });
-    }
-
-    // Find valid OTP
-    const otpRecord = await OTP.findOne({
-      email,
-      otp,
-      purpose: "login_otp",
-      expiresAt: { $gt: new Date() },
-    }).sort({ createdAt: -1 });
-
-    if (!otpRecord) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or expired OTP",
-      });
-    }
-
-    // Find user
-    const user = await User.findOne({ email }).select("+password");
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    // Mark OTP as verified
-    otpRecord.verifiedAt = new Date();
-    await otpRecord.save();
-
-    // Generate JWT tokens
-    const jwt = require("jsonwebtoken");
-    const accessToken = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
-      process.env.ACCESS_SECRET,
-      { expiresIn: "15m" },
-    );
-
-    const refreshToken = jwt.sign(
-      { userId: user._id },
-      process.env.REFRESH_SECRET,
-      { expiresIn: "7d" },
-    );
-
-    // Save refresh token
-    user.refreshToken = refreshToken;
-    await user.save();
-
-    // Set cookies
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
-      maxAge: 15 * 60 * 1000,
-    });
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.json({
-      success: true,
-      message: "Login successful!",
-      redirect: "/home",
-    });
-  } catch (error) {
-    console.error("OTP login verify error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to verify OTP. Please try again.",
-    });
-  }
-});
-
-// Resend OTP for login
-app.post("/api/auth/otp-login/resend", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is required",
-      });
-    }
-
-    // Check rate limiting
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    const recentOTPs = await OTP.countDocuments({
-      email,
-      purpose: "login_otp",
-      createdAt: { $gte: oneHourAgo },
-    });
-
-    if (recentOTPs >= 3) {
-      return res.status(429).json({
-        success: false,
-        message: "Too many OTP requests. Please wait 1 hour.",
-      });
-    }
-
-    // Generate new OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-
-    await OTP.create({
-      email,
-      otp,
-      purpose: "login_otp",
-      expiresAt,
-    });
-
-    // Send OTP
-    const { sendOTPEmail } = require("../services/emailService");
-    await sendOTPEmail(email, otp, "login_otp", {
-      subject: "Your New Login OTP - Shri Govind Pharmacy",
-      otp,
-      purpose: "login_otp",
-    });
-
-    res.json({
-      success: true,
-      message: "OTP resent successfully",
-      expiresAt,
-    });
-  } catch (error) {
-    console.error("OTP login resend error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to resend OTP. Please try again.",
-    });
-  }
-});
+// ================== AUTH ROUTES ==================
+// Mount auth routes (includes OTP login)
+app.use("/api/auth", authRoutes);
 
 // OTP System Diagnostic Page
 app.get("/test-otp-system", (req, res) => {
@@ -3190,7 +2988,21 @@ app.get("/doctor/dashboard", authenticateDoctor, async (req, res) => {
       appointmentDate: { $gte: today, $lt: tomorrow },
     })
       .sort({ appointmentTime: 1 })
-      .populate("patient", "name email phone");
+      .populate("patient", "name email phone")
+      .lean();
+
+    // Merge patientDetails with populated patient data for display
+    const appointmentsWithPatientInfo = todayAppointments.map(apt => {
+      // Use patientDetails if available, otherwise use populated patient data
+      const patientInfo = apt.patientDetails?.name 
+        ? apt.patientDetails 
+        : (apt.patient ? { name: apt.patient.name, phone: apt.patient.phone, email: apt.patient.email } : null);
+      
+      return {
+        ...apt,
+        patientDetails: patientInfo
+      };
+    });
 
     // Get appointment statistics
     const stats = {
@@ -3215,12 +3027,127 @@ app.get("/doctor/dashboard", authenticateDoctor, async (req, res) => {
 
     res.render("doctor/dashboard.ejs", {
       doctor,
-      todayAppointments,
+      todayAppointments: appointmentsWithPatientInfo,
       stats,
     });
   } catch (err) {
     console.log("Doctor dashboard error:", err);
     res.status(500).send("Error loading doctor dashboard");
+  }
+});
+
+// Doctor: All appointments page
+app.get("/doctor/appointments", authenticateDoctor, async (req, res) => {
+  try {
+    const doctor = req.doctor;
+    const { status, patient } = req.query;
+
+    // Build query
+    let query = { doctor: doctor._id };
+
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+
+    // Get all appointments for this doctor
+    const appointments = await Appointment.find(query)
+      .sort({ appointmentDate: -1, appointmentTime: -1 })
+      .populate("patient", "name email phone")
+      .lean();
+
+    // Merge patientDetails with populated patient data for display
+    const appointmentsWithPatientInfo = appointments.map(apt => {
+      const patientInfo = apt.patientDetails?.name 
+        ? apt.patientDetails 
+        : (apt.patient ? { name: apt.patient.name, phone: apt.patient.phone, email: apt.patient.email } : null);
+      
+      return {
+        ...apt,
+        patientDetails: patientInfo
+      };
+    });
+
+    res.render("doctor/appointments.ejs", {
+      doctor,
+      appointments: appointmentsWithPatientInfo,
+    });
+  } catch (err) {
+    console.log("Doctor appointments page error:", err);
+    res.status(500).send("Error loading appointments page");
+  }
+});
+
+// Doctor: Patients page
+app.get("/doctor/patients", authenticateDoctor, async (req, res) => {
+  try {
+    const doctor = req.doctor;
+
+    // Get all appointments for this doctor to extract unique patients
+    const appointments = await Appointment.find({ doctor: doctor._id })
+      .populate("patient", "name email phone")
+      .sort({ appointmentDate: -1 })
+      .lean();
+
+    // Extract unique patients from appointments
+    const patientMap = new Map();
+
+    appointments.forEach(apt => {
+      // Use patientDetails if available, otherwise use populated patient
+      const patientData = apt.patientDetails?.name 
+        ? apt.patientDetails 
+        : (apt.patient ? { name: apt.patient.name, email: apt.patient.email, phone: apt.patient.phone } : null);
+
+      if (!patientData || !patientData.name) return;
+
+      // Use phone or email as unique key
+      const key = patientData.phone || patientData.email || patientData.name;
+
+      if (!patientMap.has(key)) {
+        patientMap.set(key, {
+          _id: apt.patient?._id || apt._id,
+          name: patientData.name,
+          email: patientData.email || '',
+          phone: patientData.phone || '',
+          totalVisits: 0,
+          lastAppointment: null
+        });
+      }
+
+      // Update patient data
+      const patient = patientMap.get(key);
+      patient.totalVisits += 1;
+      patient.lastAppointment = apt.appointmentDate;
+    });
+
+    // Convert map to array
+    const patients = Array.from(patientMap.values());
+
+    // Get total consultations count
+    const totalConsultations = await Appointment.countDocuments({ 
+      doctor: doctor._id, 
+      status: 'Completed' 
+    });
+
+    // Get today's appointments count
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const todayCount = await Appointment.countDocuments({
+      doctor: doctor._id,
+      appointmentDate: { $gte: today, $lt: tomorrow },
+    });
+
+    res.render("doctor/patients.ejs", {
+      doctor,
+      patients,
+      totalConsultations,
+      todayCount,
+    });
+  } catch (err) {
+    console.log("Doctor patients page error:", err);
+    res.status(500).send("Error loading patients page");
   }
 });
 
@@ -3272,6 +3199,58 @@ app.post("/doctor/appointment/:id/confirm", authenticateDoctor, async (req, res)
   } catch (err) {
     console.log("Confirm appointment error:", err);
     req.flash("error", "Error confirming appointment");
+    res.redirect("/doctor/dashboard");
+  }
+});
+
+// Doctor: Start appointment (for Video Call)
+app.post("/doctor/appointment/:id/start", authenticateDoctor, async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id)
+      .populate('doctor', 'name')
+      .populate('patient', 'name email phone');
+
+    if (!appointment) {
+      req.flash("error", "Appointment not found");
+      return res.redirect("/doctor/dashboard");
+    }
+
+    if (appointment.status !== 'Confirmed') {
+      req.flash("error", "Only confirmed appointments can be started");
+      return res.redirect("/doctor/appointment/" + req.params.id);
+    }
+
+    // Create video call session
+    const VideoCall = require('./models/videoCall');
+    const crypto = require('crypto');
+    
+    let videoCall = await VideoCall.findOne({
+      appointment: appointment._id,
+      status: { $in: ['waiting', 'active'] }
+    });
+
+    if (!videoCall) {
+      const roomId = 'room_' + crypto.randomBytes(8).toString('hex');
+      
+      videoCall = await VideoCall.create({
+        appointment: appointment._id,
+        doctor: appointment.doctor._id,
+        patient: appointment.patient._id,
+        roomId: roomId,
+        status: 'waiting'
+      });
+    }
+
+    // Update appointment status to Confirmed (if not already)
+    if (appointment.status === 'Pending') {
+      await appointment.confirm();
+    }
+
+    req.flash("success", "Appointment started! Redirecting to video call...");
+    res.redirect("/doctor/appointment/" + req.params.id + "/video");
+  } catch (err) {
+    console.log("Start appointment error:", err);
+    req.flash("error", "Error starting appointment");
     res.redirect("/doctor/dashboard");
   }
 });
@@ -3334,7 +3313,36 @@ app.get("/doctor/appointment/:id", authenticateDoctor, async (req, res) => {
       return res.redirect("/doctor/dashboard");
     }
 
-    res.render("doctor/appointment-detail.ejs", { appointment });
+    // For Video Call appointments, create video call session if it doesn't exist
+    let videoCall = null;
+    if (appointment.appointmentType === 'Video Call' && 
+        ['Confirmed', 'Completed', 'No-Show'].includes(appointment.status)) {
+      
+      const VideoCall = require('./models/videoCall');
+      const crypto = require('crypto');
+      
+      videoCall = await VideoCall.findOne({
+        appointment: appointment._id,
+        status: { $in: ['waiting', 'active'] }
+      });
+
+      if (!videoCall) {
+        const roomId = 'room_' + crypto.randomBytes(8).toString('hex');
+        
+        videoCall = await VideoCall.create({
+          appointment: appointment._id,
+          doctor: appointment.doctor._id,
+          patient: appointment.patient._id,
+          roomId: roomId,
+          status: 'waiting'
+        });
+      }
+    }
+
+    res.render("doctor/appointment-detail.ejs", { 
+      appointment,
+      videoCall 
+    });
   } catch (err) {
     console.log("Doctor appointment detail error:", err);
     res.status(500).send("Error loading appointment details");
@@ -3353,10 +3361,142 @@ app.get("/doctor/appointment/:id/video", authenticateDoctor, async (req, res) =>
       return res.redirect("/doctor/dashboard");
     }
 
-    res.render("doctor/video-consultation.ejs", { appointment });
+    // Check if video call type
+    if (appointment.appointmentType !== 'Video Call') {
+      req.flash("error", "This appointment is not a video consultation");
+      return res.redirect("/doctor/appointment/" + req.params.id);
+    }
+
+    // Get or create video call session
+    const VideoCall = require('./models/videoCall');
+    let videoCall = await VideoCall.findOne({
+      appointment: appointment._id,
+      status: { $in: ['waiting', 'active'] }
+    });
+
+    if (!videoCall) {
+      // Create new video call session
+      const crypto = require('crypto');
+      const roomId = 'room_' + crypto.randomBytes(8).toString('hex');
+      
+      videoCall = await VideoCall.create({
+        appointment: appointment._id,
+        doctor: appointment.doctor._id,
+        patient: appointment.patient._id,
+        roomId: roomId,
+        status: 'waiting'
+      });
+
+      // Update appointment status to Confirmed if Pending
+      if (appointment.status === 'Pending') {
+        await appointment.confirm();
+      }
+    }
+
+    res.render("video-call-room.ejs", { 
+      appointment,
+      call: videoCall,
+      doctor: req.doctor
+    });
   } catch (err) {
     console.log("Video consultation error:", err);
     res.status(500).send("Error loading video consultation");
+  }
+});
+
+// Patient: Video consultation room
+app.get("/video-call/:roomId", authenticate, async (req, res) => {
+  try {
+    const VideoCall = require('./models/videoCall');
+    
+    const videoCall = await VideoCall.findOne({ roomId: req.params.roomId })
+      .populate('appointment', 'status appointmentDate appointmentTime reason appointmentType')
+      .populate('doctor', 'name title specializations')
+      .populate('patient', 'name email phone');
+
+    if (!videoCall) {
+      req.flash("error", "Video call not found");
+      return res.redirect("/home");
+    }
+
+    // Check if user is the patient
+    if (videoCall.patient._id.toString() !== req.user._id.toString()) {
+      req.flash("error", "Not authorized to join this call");
+      return res.redirect("/home");
+    }
+
+    // Check if appointment is video call type
+    if (videoCall.appointment.appointmentType !== 'Video Call') {
+      req.flash("error", "This is not a video consultation appointment");
+      return res.redirect("/user/appointments");
+    }
+
+    res.render("video-call-room.ejs", {
+      appointment: videoCall.appointment,
+      call: videoCall
+    });
+  } catch (err) {
+    console.log("Video call room error:", err);
+    res.status(500).send("Error loading video call room");
+  }
+});
+
+// Patient: Join video call by appointment ID
+app.get("/video-call/join/:appointmentId", authenticate, async (req, res) => {
+  try {
+    const Appointment = require('./models/appointment');
+    const VideoCall = require('./models/videoCall');
+    
+    const appointment = await Appointment.findById(req.params.appointmentId)
+      .populate('doctor', 'name title specializations')
+      .populate('patient', 'name email phone');
+
+    if (!appointment) {
+      req.flash("error", "Appointment not found");
+      return res.redirect("/user/appointments");
+    }
+
+    // Check if user is the patient
+    if (appointment.patient._id.toString() !== req.user._id.toString()) {
+      req.flash("error", "Not authorized to join this call");
+      return res.redirect("/home");
+    }
+
+    // Check if appointment is video call type
+    if (appointment.appointmentType !== 'Video Call') {
+      req.flash("error", "This is not a video consultation appointment");
+      return res.redirect("/user/appointments");
+    }
+
+    // Get or create video call session
+    let videoCall = await VideoCall.findOne({
+      appointment: appointment._id,
+      status: { $in: ['waiting', 'active'] }
+    });
+
+    if (!videoCall) {
+      // Check if doctor has started the call
+      const crypto = require('crypto');
+      const roomId = 'room_' + crypto.randomBytes(8).toString('hex');
+      
+      videoCall = await VideoCall.create({
+        appointment: appointment._id,
+        doctor: appointment.doctor._id,
+        patient: appointment.patient._id,
+        roomId: roomId,
+        status: 'waiting'
+      });
+      
+      req.flash("info", "Waiting for doctor to start the video call");
+    }
+
+    res.render("video-call-room.ejs", {
+      appointment,
+      call: videoCall
+    });
+  } catch (err) {
+    console.log("Join video call error:", err);
+    res.status(500).send("Error joining video call");
   }
 });
 
@@ -3381,6 +3521,7 @@ app.post("/doctor/availability", authenticateDoctor, async (req, res) => {
 // API: Use doctor routes
 app.use("/api/doctors", require("./routes/doctorRoutes"));
 app.use("/api/appointments", require("./routes/appointmentRoutes"));
+app.use("/api/video-call", require("./routes/videoCallRoutes"));
 
 // ================== PRESCRIPTION ROUTES ==================
 

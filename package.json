@@ -28,6 +28,7 @@
     "dotenv": "^17.3.1",
     "ejs": "^5.0.1",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.3.1",
     "express-session": "^1.19.0",
     "jsonwebtoken": "^9.0.3",
     "method-override": "^3.0.0",
@@ -38,6 +39,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pdfkit": "^0.18.0",
+    "peerjs": "^1.5.5",
     "qrcode": "^1.5.4",
     "razorpay": "^2.9.6"
   }

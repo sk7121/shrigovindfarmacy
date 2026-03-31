@@ -385,14 +385,13 @@
         <div class="patient-detail">
           <span class="patient-detail-label">Phone:</span>
           <span class="patient-detail-value">
-            <% 
+            <%
               const patientPhone = appointment.patientDetails?.phone || appointment.patient?.phone;
               const displayPhone = patientPhone ? patientPhone : 'Not available';
-              const whatsappPhone = patientPhone ? patientPhone.replace(/[^0-9]/g, '') : '91';
             %>
             <%= displayPhone %>
             <% if (patientPhone) { %>
-              <a href="https://wa.me/91<%= whatsappPhone %>" target="_blank" style="color: #25D366; margin-left: 0.5rem; text-decoration: none;">
+              <a href="https://wa.me/<%= patientPhone.replace(/[^0-9]/g, '') %>" target="_blank" style="color: #25D366; margin-left: 0.5rem; text-decoration: none;">
                 <i class="fa-brands fa-whatsapp"></i> Chat
               </a>
             <% } %>
@@ -409,23 +408,40 @@
       </div>
 
       <div class="button-group">
-        <% 
+        <%
           const patientPhone = appointment.patientDetails?.phone || appointment.patient?.phone;
-          const whatsappPhone = patientPhone ? patientPhone.replace(/[^0-9]/g, '') : '91';
+          // Clean phone number: remove all non-digits
+          let whatsappPhone = patientPhone ? patientPhone.replace(/[^0-9]/g, '') : '';
+          // Remove leading zeros
+          whatsappPhone = whatsappPhone.replace(/^0+/, '');
+          // Add country code if not present (default to India +91)
+          if (whatsappPhone && !whatsappPhone.startsWith('91') && whatsappPhone.length === 10) {
+            whatsappPhone = '91' + whatsappPhone;
+          }
+          if (!whatsappPhone) {
+            whatsappPhone = '91'; // Default fallback
+          }
         %>
-        <a href="https://wa.me/91<%= whatsappPhone %>?text=Hello<%= encodeURIComponent(' Dr. ' + (appointment.doctor?.name || 'Doctor') + ', this is regarding our video consultation appointment.') %>" 
-           target="_blank" 
-           class="btn btn-whatsapp">
+        <a href="https://wa.me/<%= whatsappPhone %>?text=<%= encodeURIComponent('Hello Dr. ' + (appointment.doctor?.name || 'Doctor') + ', this is regarding our video consultation appointment.') %>"
+           target="_blank"
+           class="btn btn-whatsapp"
+           style="pointer-events: <%= patientPhone ? 'auto' : 'none' %>; opacity: <%= patientPhone ? '1' : '0.5' %>;">
           <i class="fa-brands fa-whatsapp"></i> Start WhatsApp Video Call
         </a>
-        
-        <a href="tel:<%= patientPhone || '#' %>" class="btn btn-primary">
+
+        <a href="tel:<%= patientPhone || '#' %>" class="btn btn-primary" style="pointer-events: <%= patientPhone ? 'auto' : 'none' %>; opacity: <%= patientPhone ? '1' : '0.5' %>;">
           <i class="fa-solid fa-phone"></i> Call Patient
         </a>
-        
+
         <a href="/doctor/dashboard" class="btn btn-secondary">
           <i class="fa-solid fa-xmark"></i> Cancel
         </a>
+        
+        <% if (!patientPhone) { %>
+          <p style="color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem;">
+            <i class="fa-solid fa-triangle-exclamation"></i> Patient phone number is not available. Please ask the patient to update their contact information.
+          </p>
+        <% } %>
       </div>
     </div>
 

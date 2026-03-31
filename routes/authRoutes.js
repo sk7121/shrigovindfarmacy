@@ -7,6 +7,7 @@ const {
   refreshToken,
   sendOTPLogin,
   verifyOTPLogin,
+  resendOTPLogin,
 } = require("../controllers/authController");
 const { authLimiter } = require("../middleware/rateLimiter");
 
@@ -20,5 +21,6 @@ router.post("/refresh-token", refreshToken);
 // OTP Login routes
 router.post("/otp-login/send", authLimiter, sendOTPLogin);
 router.post("/otp-login/verify", authLimiter, verifyOTPLogin);
+router.post("/otp-login/resend", authLimiter, resendOTPLogin);
 
 module.exports = router;

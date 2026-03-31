@@ -395,6 +395,25 @@
         <span class="status-badge <%= appointment.status.toLowerCase() %>"><%= appointment.status %></span>
       </div>
 
+      <% if (videoCall && appointment.appointmentType === 'Video Call') { %>
+      <div class="section" style="background: rgba(28, 129, 37, 0.05); border-left: 4px solid var(--primary); padding: 1rem; margin: 1rem 0; border-radius: 8px;">
+        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">
+          <i class="fa-solid fa-video"></i> Video Call Ready
+        </h3>
+        <p style="color: var(--text-muted); margin-bottom: 0.75rem;">
+          Video call room has been created. Click the button below to start the appointment.
+        </p>
+        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+          <a href="/doctor/appointment/<%= appointment._id %>/video" class="btn btn-success">
+            <i class="fa-solid fa-play"></i> Start Appointment
+          </a>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">
+            <i class="fa-solid fa-circle-info"></i> Room ID: <strong><%= videoCall.roomId %></strong>
+          </span>
+        </div>
+      </div>
+      <% } %>
+
       <!-- Patient Information -->
       <div class="section">
         <h3><i class="fa-solid fa-user"></i> Patient Information</h3>
@@ -530,19 +549,21 @@
           </button>
         </form>
         <% } %>
-        
-        <% if (appointment.status === 'Confirmed' || appointment.status === 'Completed') { %>
+
+        <% if ((appointment.status === 'Confirmed' || appointment.status === 'Completed' || appointment.status === 'No-Show') && appointment.appointmentType === 'Video Call') { %>
         <a href="/doctor/appointment/<%= appointment._id %>/video" class="btn btn-primary">
           <i class="fa-solid fa-video"></i> Start Video Call
         </a>
         <% } %>
-        
+
         <% if (appointment.status === 'Confirmed') { %>
-        <a href="/doctor/appointment/<%= appointment._id %>/complete" class="btn btn-success">
-          <i class="fa-solid fa-clipboard-check"></i> Mark as Completed
-        </a>
+        <form action="/doctor/appointment/<%= appointment._id %>/complete" method="POST" class="inline" onsubmit="return confirm('Mark this appointment as completed?')">
+          <button type="submit" class="btn btn-success">
+            <i class="fa-solid fa-clipboard-check"></i> Mark as Completed
+          </button>
+        </form>
         <% } %>
-        
+
         <a href="/doctor/dashboard" class="btn btn-secondary">
           <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
         </a>

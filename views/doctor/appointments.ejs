@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Appointments — Dr. Dashboard | Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --secondary: #e67e22;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --info: #17a2b8;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .doctor-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .nav-links a {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--primary);
+      background: var(--bg);
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .card-header h2 {
+      font-size: 1.2rem;
+      color: var(--text);
+    }
+
+    .filter-controls {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-select,
+    .filter-input {
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter-select:focus,
+    .filter-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(28, 129, 37, 0.1);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .filter-tab {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: none;
+      background: var(--bg);
+      color: var(--text);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter-tab.active,
+    .filter-tab:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--bg);
+    }
+
+    th,
+    td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      font-size: 0.9rem;
+    }
+
+    tr:hover {
+      background: var(--bg);
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      display: inline-block;
+    }
+
+    .status-badge.pending {
+      background: rgba(255, 193, 7, 0.1);
+      color: var(--warning);
+    }
+
+    .status-badge.confirmed {
+      background: rgba(40, 167, 69, 0.1);
+      color: var(--success);
+    }
+
+    .status-badge.completed {
+      background: rgba(23, 162, 184, 0.1);
+      color: var(--info);
+    }
+
+    .status-badge.cancelled {
+      background: rgba(220, 53, 69, 0.1);
+      color: var(--danger);
+    }
+
+    .status-badge.no-show {
+      background: rgba(108, 117, 125, 0.1);
+      color: var(--text-muted);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+      font-size: 0.85rem;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      opacity: 0.9;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    .btn-sm {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      opacity: 0.9;
+    }
+
+    /* Flash Messages */
+    .flash {
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 18px auto;
+      max-width: 980px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .flash.success {
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #166534;
+      background: rgba(74, 222, 128, 0.15);
+    }
+    .flash.error {
+      border-color: rgba(255, 107, 107, 0.4);
+      color: #b91c1c;
+      background: rgba(254, 202, 202, 0.25);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-inner {
+        padding: 0 1rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .filter-controls {
+        width: 100%;
+      }
+
+      .filter-select,
+      .filter-input {
+        flex: 1;
+        min-width: 150px;
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 900px;
+      }
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+</head>
+
+<body>
+  <% if (success && success.length) { %>
+    <div class="flash success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="flash error"><%= error[0] %></div>
+  <% } %>
+
+  <!-- Header -->
+  <header class="doctor-header">
+    <div class="header-inner">
+      <a href="/doctor/dashboard" class="logo">
+        <div class="logo-icon">
+          <i class="fa-solid fa-user-doctor"></i>
+        </div>
+        <div>
+          <div style="font-weight: 700;">Doctor Dashboard</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Shri Govind Pharmacy</div>
+        </div>
+      </a>
+      <nav class="nav-links">
+        <a href="/doctor/dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="/doctor/appointments" class="active"><i class="fa-solid fa-calendar-check"></i> Appointments</a>
+        <a href="/doctor/patients"><i class="fa-solid fa-users"></i> Patients</a>
+        <a href="/home"><i class="fa-solid fa-house"></i> Back to Site</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <h1 class="page-title">
+      <i class="fa-solid fa-calendar-check"></i>
+      All Appointments
+    </h1>
+
+    <div class="card">
+      <div class="card-header">
+        <h2><i class="fa-solid fa-list"></i> Appointment List</h2>
+        <div class="filter-controls">
+          <select class="filter-select" id="statusFilter">
+            <option value="all">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+          <input type="date" class="filter-input" id="dateFilter">
+          <button class="filter-tab" id="clearFilters">
+            <i class="fa-solid fa-times"></i> Clear
+          </button>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Patient</th>
+              <th>Type</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (appointments && appointments.length > 0) { %>
+              <% appointments.forEach(apt => { %>
+              <tr data-status="<%= apt.status %>" data-date="<%= new Date(apt.appointmentDate).toISOString().split('T')[0] %>">
+                <td><%= new Date(apt.appointmentDate).toLocaleDateString('en-IN') %></td>
+                <td><%= apt.appointmentTime %></td>
+                <td>
+                  <div>
+                    <div style="font-weight: 600;"><%= apt.patientDetails?.name || apt.patient?.name || 'N/A' %></div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);"><%= apt.patientDetails?.phone || apt.patient?.phone || '' %></div>
+                  </div>
+                </td>
+                <td><%= apt.appointmentType %></td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                  <%= apt.reason %>
+                </td>
+                <td>
+                  <span class="status-badge <%= apt.status.toLowerCase().replace(' ', '-') %>"><%= apt.status %></span>
+                </td>
+                <td>
+                  <div class="actions">
+                    <% if (apt.status === 'Pending') { %>
+                    <form action="/doctor/appointment/<%= apt._id %>/confirm" method="POST" style="display: inline;">
+                      <button type="submit" class="btn btn-success btn-sm">
+                        <i class="fa-solid fa-check"></i> Confirm
+                      </button>
+                    </form>
+                    <% } %>
+                    <% if (apt.status !== 'Completed' && apt.status !== 'Cancelled') { %>
+                    <a href="/doctor/appointment/<%= apt._id %>" class="btn btn-primary btn-sm">
+                      <i class="fa-solid fa-eye"></i> View
+                    </a>
+                    <% } %>
+                    <% if ((apt.status === 'Confirmed' || apt.status === 'Completed' || apt.status === 'No-Show') && apt.appointmentType === 'Video Call') { %>
+                    <a href="/doctor/appointment/<%= apt._id %>/video" class="btn btn-secondary btn-sm">
+                      <i class="fa-solid fa-video"></i> Video Call
+                    </a>
+                    <% } %>
+                    <% if (apt.status === 'Confirmed' && apt.appointmentType === 'Video Call') { %>
+                    <form action="/doctor/appointment/<%= apt._id %>/start" method="POST" style="display: inline;">
+                      <button type="submit" class="btn btn-success btn-sm">
+                        <i class="fa-solid fa-play"></i> Start
+                      </button>
+                    </form>
+                    <% } %>
+                    <% if (apt.status === 'Confirmed') { %>
+                    <form action="/doctor/appointment/<%= apt._id %>/complete" method="POST" style="display: inline;">
+                      <button type="submit" class="btn btn-success btn-sm">
+                        <i class="fa-solid fa-clipboard-check"></i> Complete
+                      </button>
+                    </form>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            <% } else { %>
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                  <i class="fa-solid fa-calendar-times" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                  <p>No appointments found</p>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Filter functionality
+    const statusFilter = document.getElementById('statusFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    const clearFilters = document.getElementById('clearFilters');
+    const rows = document.querySelectorAll('tbody tr');
+
+    function applyFilters() {
+      const statusValue = statusFilter.value;
+      const dateValue = dateFilter.value;
+
+      rows.forEach(row => {
+        const rowStatus = row.dataset.status;
+        const rowDate = row.dataset.date;
+
+        const statusMatch = statusValue === 'all' || rowStatus === statusValue;
+        const dateMatch = !dateValue || rowDate === dateValue;
+
+        row.style.display = (statusMatch && dateMatch) ? '' : 'none';
+      });
+    }
+
+    statusFilter.addEventListener('change', applyFilters);
+    dateFilter.addEventListener('change', applyFilters);
+
+    clearFilters.addEventListener('click', () => {
+      statusFilter.value = 'all';
+      dateFilter.value = '';
+      applyFilters();
+    });
+  </script>
+</body>
+
+</html>

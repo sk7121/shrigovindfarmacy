@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Consultation - Shri Govind Pharmacy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- PeerJS for WebRTC -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #1c8125;
+      --primary-dark: #145a1a;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --border: #e9ecef;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --info: #17a2b8;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #a0a0a0;
+      --border: #2d2d2d;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: var(--surface);
+      padding: 1rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    /* Main Container */
+    .video-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Video Grid */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .video-wrapper {
+      background: var(--surface);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    .video-wrapper.local {
+      border: 2px solid var(--primary);
+    }
+
+    .video-wrapper.remote {
+      border: 2px solid var(--success);
+    }
+
+    video {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      background: #000;
+    }
+
+    .video-label {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      padding: 0.5rem 1rem;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .video-status {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      background: rgba(40, 167, 69, 0.9);
+      color: white;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .video-status.waiting {
+      background: rgba(255, 193, 7, 0.9);
+    }
+
+    .video-status.ended {
+      background: rgba(108, 117, 125, 0.9);
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .control-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: white;
+    }
+
+    .control-btn.mute {
+      background: var(--info);
+    }
+
+    .control-btn.mute:hover {
+      background: var(--primary-dark);
+    }
+
+    .control-btn.video {
+      background: var(--primary);
+    }
+
+    .control-btn.video:hover {
+      background: var(--primary-dark);
+    }
+
+    .control-btn.end {
+      background: var(--danger);
+      width: 80px;
+      height: 80px;
+      font-size: 1.8rem;
+    }
+
+    .control-btn.end:hover {
+      background: #c82333;
+      transform: scale(1.1);
+    }
+
+    .control-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Info Card */
+    .info-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .info-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .info-item {
+      padding: 0.75rem;
+      background: var(--bg);
+      border-radius: 8px;
+    }
+
+    .info-item-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .info-item-value {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Timer */
+    .timer {
+      text-align: center;
+      padding: 1rem;
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .timer-display {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-body {
+      margin: 1.5rem 0;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .rating-input {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 2rem;
+    }
+
+    .rating-star {
+      cursor: pointer;
+      color: var(--border);
+      transition: color 0.2s;
+    }
+
+    .rating-star.active,
+    .rating-star:hover {
+      color: var(--warning);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    /* Error */
+    .error-message {
+      background: rgba(220, 53, 69, 0.1);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-inner {
+        padding: 0 1rem;
+      }
+
+      .video-container {
+        padding: 1rem;
+      }
+
+      .video-grid {
+        grid-template-columns: 1fr;
+      }
+
+      video {
+        height: 300px;
+      }
+
+      .controls {
+        flex-wrap: wrap;
+      }
+
+      .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+      }
+
+      .control-btn.end {
+        width: 70px;
+        height: 70px;
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+  <script src="/js/theme.js"></script>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/doctor/dashboard" class="logo">
+        <div class="logo-icon">
+          <i class="fa-solid fa-user-doctor"></i>
+        </div>
+        <div>
+          <div style="font-weight: 700;">Video Consultation</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Shri Govind Pharmacy</div>
+        </div>
+      </a>
+      <nav>
+        <a href="/doctor/dashboard" class="btn btn-secondary">
+          <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="video-container">
+    <!-- Error Message -->
+    <div id="errorMessage" style="display: none;"></div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="loading">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Initializing video call...</div>
+    </div>
+
+    <!-- Video Call Interface (hidden initially) -->
+    <div id="videoInterface" style="display: none;">
+      <!-- Info Card -->
+      <div class="info-card">
+        <h3><i class="fa-solid fa-circle-info"></i> Appointment Details</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-item-label">Patient</div>
+            <div class="info-item-value" id="patientName">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Appointment Time</div>
+            <div class="info-item-value" id="appointmentTime">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Reason</div>
+            <div class="info-item-value" id="appointmentReason">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">Call Status</div>
+            <div class="info-item-value">
+              <span id="callStatus" class="status-badge pending">Waiting</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timer -->
+      <div class="timer">
+        <div class="timer-display" id="timerDisplay">00:00</div>
+        <div class="timer-label">Call Duration</div>
+      </div>
+
+      <!-- Video Grid -->
+      <div class="video-grid">
+        <!-- Local Video -->
+        <div class="video-wrapper local">
+          <video id="localVideo" autoplay muted playsinline></video>
+          <div class="video-label">
+            <i class="fa-solid fa-user"></i>
+            <span>You (<%= typeof doctor !== 'undefined' ? 'Doctor' : 'Patient' %>)</span>
+          </div>
+          <div class="video-status waiting" id="localStatus">
+            <i class="fa-solid fa-circle"></i>
+            <span>Connecting...</span>
+          </div>
+        </div>
+
+        <!-- Remote Video -->
+        <div class="video-wrapper remote">
+          <video id="remoteVideo" autoplay playsinline></video>
+          <div class="video-label">
+            <i class="fa-solid fa-user-doctor"></i>
+            <span id="remoteLabel"><%= typeof doctor !== 'undefined' ? 'Patient' : 'Doctor' %></span>
+          </div>
+          <div class="video-status waiting" id="remoteStatus">
+            <i class="fa-solid fa-circle"></i>
+            <span>Waiting for <%= typeof doctor !== 'undefined' ? 'patient' : 'doctor' %>...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="control-btn mute" id="muteBtn" title="Mute/Unmute">
+          <i class="fa-solid fa-microphone"></i>
+        </button>
+        <button class="control-btn video" id="videoBtn" title="Toggle Camera">
+          <i class="fa-solid fa-video"></i>
+        </button>
+        <button class="control-btn end" id="endBtn" title="End Call">
+          <i class="fa-solid fa-phone-slash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rating Modal -->
+  <div class="modal-overlay" id="ratingModal">
+    <div class="modal">
+      <h3><i class="fa-solid fa-star" style="color: var(--warning);"></i> Rate Your Consultation</h3>
+      <div class="modal-body">
+        <p style="margin-bottom: 1rem;">How was your video consultation experience?</p>
+        
+        <div class="form-group">
+          <label>Rating</label>
+          <div class="rating-input" id="ratingInput">
+            <i class="fa-solid fa-star rating-star" data-rating="1"></i>
+            <i class="fa-solid fa-star rating-star" data-rating="2"></i>
+            <i class="fa-solid fa-star rating-star" data-rating="3"></i>
+            <i class="fa-solid fa-star rating-star" data-rating="4"></i>
+            <i class="fa-solid fa-star rating-star" data-rating="5"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Review (Optional)</label>
+          <textarea id="reviewInput" placeholder="Share your experience..."></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeRatingModal()">Later</button>
+        <button class="btn btn-primary" onclick="submitRating()">
+          <i class="fa-solid fa-check"></i> Submit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data from server
+    const appointmentId = '<%= appointment._id %>';
+    const roomId = '<%= call.roomId %>';
+    const isDoctor = <%= typeof doctor !== 'undefined' ? 'true' : 'false' %>;
+    const patientName = '<%= appointment.patient?.name || "Patient" %>';
+    const doctorName = '<%= appointment.doctor?.name || "Doctor" %>';
+    const appointmentTime = '<%= new Date(appointment.appointmentDate).toLocaleDateString() + " " + appointment.appointmentTime %>';
+    const appointmentReason = '<%= appointment.reason || "Consultation" %>';
+
+    // PeerJS variables
+    let peer = null;
+    let localStream = null;
+    let currentCall = null;
+    let callStartTime = null;
+    let timerInterval = null;
+    let isMuted = false;
+    let isVideoOff = false;
+
+    // DOM Elements
+    const loadingState = document.getElementById('loadingState');
+    const videoInterface = document.getElementById('videoInterface');
+    const errorMessage = document.getElementById('errorMessage');
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const muteBtn = document.getElementById('muteBtn');
+    const videoBtn = document.getElementById('videoBtn');
+    const endBtn = document.getElementById('endBtn');
+    const callStatus = document.getElementById('callStatus');
+    const localStatus = document.getElementById('localStatus');
+    const remoteStatus = document.getElementById('remoteStatus');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const patientNameEl = document.getElementById('patientName');
+    const appointmentTimeEl = document.getElementById('appointmentTime');
+    const appointmentReasonEl = document.getElementById('appointmentReason');
+
+    // Initialize
+    async function init() {
+      try {
+        // Update UI with appointment details
+        if (isDoctor) {
+          patientNameEl.textContent = patientName;
+        } else {
+          patientNameEl.textContent = doctorName;
+        }
+        appointmentTimeEl.textContent = appointmentTime;
+        appointmentReasonEl.textContent = appointmentReason;
+
+        // Get user media
+        localStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true
+        });
+
+        localVideo.srcObject = localStream;
+
+        // Initialize PeerJS
+        initializePeer();
+
+      } catch (error) {
+        console.error('Error initializing video call:', error);
+        showError('Failed to access camera/microphone. Please check permissions.');
+      }
+    }
+
+    // Initialize PeerJS connection
+    function initializePeer() {
+      peer = new Peer(null, {
+        debug: 2
+      });
+
+      peer.on('open', (id) => {
+        console.log('My peer ID is:', id);
+        
+        if (isDoctor) {
+          // Doctor starts the call - wait for patient to join
+          updateStatus('waiting', 'Waiting for patient to join...');
+          
+          // Notify server that call is ready
+          fetch('/api/video-call/join', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ roomId })
+          }).then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                console.log('Call joined successfully');
+              }
+            });
+        } else {
+          // Patient joins the call
+          connectToDoctor();
+        }
+      });
+
+      peer.on('call', (call) => {
+        console.log('Received call');
+        call.answer(localStream);
+        currentCall = call;
+        setupCallHandlers(call);
+      });
+
+      peer.on('error', (error) => {
+        console.error('PeerJS error:', error);
+        showError('Connection error. Please refresh the page.');
+      });
+    }
+
+    // Patient connects to doctor
+    function connectToDoctor() {
+      fetch('/api/video-call/join', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ roomId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Joining call with doctor');
+          const call = peer.call(data.call.roomId, localStream);
+          currentCall = call;
+          setupCallHandlers(call);
+        } else {
+          showError('Failed to join call: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error joining call:', error);
+        showError('Failed to connect to server');
+      });
+    }
+
+    // Setup call handlers
+    function setupCallHandlers(call) {
+      call.on('stream', (remoteStream) => {
+        console.log('Received remote stream');
+        remoteVideo.srcObject = remoteStream;
+        updateStatus('active', 'In Call');
+        startTimer();
+        
+        // Hide loading, show interface
+        loadingState.style.display = 'none';
+        videoInterface.style.display = 'block';
+      });
+
+      call.on('close', () => {
+        console.log('Call ended');
+        endCall(false);
+      });
+
+      call.on('error', (error) => {
+        console.error('Call error:', error);
+        showError('Call connection lost');
+      });
+    }
+
+    // Update status display
+    function updateStatus(status, text) {
+      const statusEl = isDoctor ? remoteStatus : localStatus;
+      const statusBadge = callStatus;
+      
+      statusEl.querySelector('span').textContent = text;
+      statusEl.className = 'video-status ' + status;
+      
+      statusBadge.textContent = text;
+      statusBadge.className = 'status-badge ' + status;
+    }
+
+    // Start call timer
+    function startTimer() {
+      callStartTime = Date.now();
+      timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const seconds = (elapsed % 60).toString().padStart(2, '0');
+        timerDisplay.textContent = `${minutes}:${seconds}`;
+      }, 1000);
+    }
+
+    // Stop timer
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    // End call
+    async function endCall(notifyServer = true) {
+      stopTimer();
+
+      if (currentCall) {
+        currentCall.close();
+        currentCall = null;
+      }
+
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+
+      if (peer) {
+        peer.destroy();
+      }
+
+      if (notifyServer && isDoctor) {
+        try {
+          await fetch('/api/video-call/end', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ roomId })
+          });
+        } catch (error) {
+          console.error('Error ending call on server:', error);
+        }
+      }
+
+      // Show rating modal for patient
+      if (!isDoctor) {
+        setTimeout(() => {
+          document.getElementById('ratingModal').classList.add('active');
+        }, 1000);
+      } else {
+        // Redirect doctor after delay
+        setTimeout(() => {
+          window.location.href = '/doctor/dashboard';
+        }, 2000);
+      }
+    }
+
+    // Show error message
+    function showError(message) {
+      errorMessage.innerHTML = `
+        <div class="error-message">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      errorMessage.style.display = 'block';
+      loadingState.style.display = 'none';
+    }
+
+    // Control button handlers
+    muteBtn.addEventListener('click', () => {
+      if (localStream) {
+        const audioTrack = localStream.getAudioTracks()[0];
+        if (audioTrack) {
+          audioTrack.enabled = !audioTrack.enabled;
+          isMuted = !audioTrack.enabled;
+          muteBtn.innerHTML = isMuted 
+            ? '<i class="fa-solid fa-microphone-slash"></i>'
+            : '<i class="fa-solid fa-microphone"></i>';
+        }
+      }
+    });
+
+    videoBtn.addEventListener('click', () => {
+      if (localStream) {
+        const videoTrack = localStream.getVideoTracks()[0];
+        if (videoTrack) {
+          videoTrack.enabled = !videoTrack.enabled;
+          isVideoOff = !videoTrack.enabled;
+          videoBtn.innerHTML = isVideoOff
+            ? '<i class="fa-solid fa-video-slash"></i>'
+            : '<i class="fa-solid fa-video"></i>';
+        }
+      }
+    });
+
+    endBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to end this call?')) {
+        endCall();
+      }
+    });
+
+    // Rating modal handlers
+    let selectedRating = 0;
+
+    document.querySelectorAll('.rating-star').forEach(star => {
+      star.addEventListener('click', () => {
+        selectedRating = parseInt(star.dataset.rating);
+        updateRatingStars(selectedRating);
+      });
+    });
+
+    function updateRatingStars(rating) {
+      document.querySelectorAll('.rating-star').forEach((star, index) => {
+        if (index < rating) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+    }
+
+    function closeRatingModal() {
+      document.getElementById('ratingModal').classList.remove('active');
+      window.location.href = '/home';
+    }
+
+    async function submitRating() {
+      if (selectedRating === 0) {
+        alert('Please select a rating');
+        return;
+      }
+
+      const review = document.getElementById('reviewInput').value;
+
+      try {
+        const response = await fetch('/api/video-call/rating', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            roomId,
+            rating: selectedRating,
+            review
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert('Thank you for your feedback!');
+          window.location.href = '/home';
+        } else {
+          alert('Error submitting rating: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error submitting rating:', error);
+        alert('Error submitting rating');
+      }
+    }
+
+    // Start initialization
+    init();
+  </script>
+</body>
+
+</html>
