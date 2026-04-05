@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Design Tester - Shri Govind Pharmacy</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; padding: 20px; }
+    h1 { text-align: center; margin-bottom: 30px; color: #333; }
+    
+    .device-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .device-frame {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .device-label {
+      background: #2c3e50;
+      color: white;
+      padding: 12px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .device-label span {
+      display: block;
+      font-size: 11px;
+      color: #95a5a6;
+      margin-top: 2px;
+    }
+
+    iframe {
+      width: 100%;
+      border: none;
+      background: white;
+    }
+
+    .laptop iframe { height: 700px; }
+    .tablet iframe { height: 900px; }
+    .mobile iframe { height: 700px; }
+
+    .issues-list {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-top: 30px;
+    }
+
+    .issue {
+      padding: 15px;
+      margin-bottom: 15px;
+      border-left: 4px solid;
+      border-radius: 4px;
+    }
+
+    .issue.high { border-color: #e74c3c; background: #fdf2f2; }
+    .issue.medium { border-color: #f39c12; background: #fef9e7; }
+    .issue.low { border-color: #3498db; background: #ebf5fb; }
+
+    .issue h3 { margin-bottom: 8px; font-size: 16px; }
+    .issue p { font-size: 14px; color: #555; line-height: 1.6; }
+    .issue code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>📱 Responsive Design Testing - Shri Govind Pharmacy</h1>
+
+  <div class="device-container">
+    <div class="device-frame laptop">
+      <div class="device-label">
+        💻 LAPTOP (1024px+)
+        <span>Desktop View - Full Width</span>
+      </div>
+      <iframe src="http://localhost:3000/home" style="width: 1024px; height: 700px; transform: scale(0.34); transform-origin: top left;"></iframe>
+    </div>
+
+    <div class="device-frame tablet">
+      <div class="device-label">
+        📱 TABLET (768px)
+        <span> iPad View - Medium Screen</span>
+      </div>
+      <iframe src="http://localhost:3000/home" style="width: 768px; height: 1024px; transform: scale(0.45); transform-origin: top left;"></iframe>
+    </div>
+
+    <div class="device-frame mobile">
+      <div class="device-label">
+        📲 MOBILE (375px)
+        <span>Smartphone View - Small Screen</span>
+      </div>
+      <iframe src="http://localhost:3000/home" style="width: 375px; height: 667px; transform: scale(0.9); transform-origin: top left;"></iframe>
+    </div>
+  </div>
+
+  <div class="issues-list">
+    <h2>🔍 Detected Issues (Need Manual Verification)</h2>
+    
+    <div class="issue high">
+      <h3>1. Modal Bottom Sheet - iPhone Safe Area</h3>
+      <p>Modal bottom sheet on mobile may not have padding for iPhone home indicator bar. Check if modal content gets cut off at the bottom on devices with home bars.</p>
+      <p><strong>Fix Location:</strong> <code>style.css</code> around line 3230-3245</p>
+    </div>
+
+    <div class="issue high">
+      <h3>2. Doctor CTA Badge Positioning</h3>
+      <p>The <code>.doc-cta-badge</code> uses absolute positioning but parent <code>.doctor-image-stack</code> may not have <code>position: relative</code>, causing the badge to appear in wrong location.</p>
+      <p><strong>Fix Location:</strong> <code>style.css</code> around line 2270</p>
+    </div>
+
+    <div class="issue medium">
+      <h3>3. Toast & WhatsApp Float Overlap on Mobile</h3>
+      <p>On cart page, toast notifications at <code>bottom: 110px</code> might overlap with WhatsApp float at <code>bottom: 90px</code> on small screens.</p>
+      <p><strong>Fix Location:</strong> <code>cart.css</code> lines 720-728</p>
+    </div>
+
+    <div class="issue medium">
+      <h3>4. Dropdown Menus on Touch Tablets</h3>
+      <p>Category dropdowns rely on hover which doesn't work on touch devices between 768px-1024px. Users may not be able to access dropdown menu items.</p>
+      <p><strong>Fix Location:</strong> <code>style.css</code> around line 355-375</p>
+    </div>
+
+    <div class="issue medium">
+      <h3>5. Category Sticky Navigation</h3>
+      <p>Sticky nav <code>top: 70px</code> may collide with header if announcement bar is visible (36px extra height).</p>
+      <p><strong>Fix Location:</strong> <code>categories.css</code> line 140</p>
+    </div>
+
+    <div class="issue medium">
+      <h3>6. Modal Z-Index vs Mobile Menu</h3>
+      <p>Modal backdrop (z-index: 890) sits below mobile menu (z-index: 900), causing stacking issues when both are open.</p>
+      <p><strong>Fix Location:</strong> <code>style.css</code> lines 910-920</p>
+    </div>
+
+    <div class="issue low">
+      <h3>7. Slider Content Clipping at 320px</h3>
+      <p>Hero slider at 320px width has only 240px height. Content with heading, badge, buttons, and stats may overflow and get clipped by <code>overflow: hidden</code>.</p>
+      <p><strong>Fix Location:</strong> <code>style.css</code> line 1130</p>
+    </div>
+
+    <div class="issue low">
+      <h3>8. Duplicate Z-Indexes Across CSS Files</h3>
+      <p>Multiple CSS files define <code>.wa-float</code> (9998) and <code>.toast-zone</code> (9999). If loaded together, last file wins causing inconsistent behavior.</p>
+      <p><strong>Fix Location:</strong> All CSS files (various locations)</p>
+    </div>
+  </div>
+</body>
+</html>

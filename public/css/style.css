@@ -1763,6 +1763,7 @@ button {
   transition: var(--transition);
   display: flex;
   flex-direction: column;
+  contain: layout style paint;
 }
 
 .product-card:hover {
@@ -2021,6 +2022,7 @@ button {
   max-height: 90vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  contain: layout style paint;
 }
 
 .modal.open .modal-content {
@@ -2778,6 +2780,7 @@ button {
   text-decoration: none;
   box-shadow: 0 6px 25px rgba(37, 211, 102, 0.45);
   animation: floatBounce 3s ease-in-out infinite;
+  will-change: transform, opacity;
   transition: transform 0.2s, background 0.2s;
   max-width: none;
 }
@@ -2838,6 +2841,7 @@ button {
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-md);
+  will-change: transform, opacity;
   transition: var(--transition);
   opacity: 0;
   pointer-events: none;
@@ -2887,6 +2891,7 @@ button {
   pointer-events: auto;
   position: relative;
   overflow: hidden;
+  contain: layout paint;
 }
 
 .toast strong {
@@ -3799,6 +3804,52 @@ button {
   .product-overlay {
     opacity: 0;
   }
+}
+
+/* ═══════════════════════════════════════
+   GLOBAL LOADING OVERLAY
+   Auto-shows when fetch takes >0.5s
+═══════════════════════════════════════ */
+.global-loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.global-loading-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.global-loading-spinner {
+  background: var(--card-bg);
+  padding: 40px 60px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: var(--shadow-lg);
+}
+
+.global-loading-spinner i {
+  font-size: 3rem;
+  color: var(--primary);
+}
+
+.global-loading-spinner p {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0;
 }
 
 /* ═══════════════════════════════════════

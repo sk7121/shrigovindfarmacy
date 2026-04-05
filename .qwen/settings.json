@@ -5,7 +5,12 @@
       "Bash(curl *)",
       "Bash(git push)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(node *)",
+      "Bash(timeout *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(taskkill *)"
     ]
   },
   "$version": 3

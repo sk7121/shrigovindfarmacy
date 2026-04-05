@@ -3,6 +3,7 @@ const express = require("express");
 const dns = require("dns");
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
+const compression = require("compression");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
@@ -163,7 +164,15 @@ const methodOverride = require("method-override");
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
-app.use(express.static("public"));
+// Compression middleware - reduce transfer size by 60-70%
+app.use(compression());
+
+// Cache static assets for 1 day (images, CSS, JS, fonts)
+app.use(express.static("public", {
+  maxAge: '1d',
+  immutable: process.env.NODE_ENV === 'production'
+}));
+
 app.use(express.json());
 
 // Serve favicon.ico
@@ -359,8 +368,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Disable cache for HTML pages only (not static assets)
 app.use((req, res, next) => {
-  res.set("Cache-Control", "no-store");
+  if (req.accepts('html')) {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+  }
   next();
 });
 

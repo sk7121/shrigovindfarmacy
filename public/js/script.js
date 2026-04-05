@@ -113,6 +113,45 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
   /* ══════════════════════════════════════
+     4b. TOUCH DROPDOWN SUPPORT FOR TABLETS
+  ══════════════════════════════════════ */
+  // Enable dropdown menus on touch devices (tablets 768px-1024px)
+  document.querySelectorAll('.has-dropdown > a').forEach(trigger => {
+    trigger.addEventListener('click', function (e) {
+      // Only prevent default on touch devices or tablet/mobile viewports
+      if (window.innerWidth <= 1024) {
+        const parent = this.closest('.has-dropdown');
+        const dropdown = parent.querySelector('.mega-dropdown, .user-dropdown');
+        
+        if (dropdown) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Close all other dropdowns
+          document.querySelectorAll('.has-dropdown').forEach(item => {
+            if (item !== parent) {
+              item.classList.remove('touch-open');
+            }
+          });
+          
+          // Toggle this dropdown
+          parent.classList.toggle('touch-open');
+        }
+      }
+    });
+  });
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.has-dropdown')) {
+      document.querySelectorAll('.has-dropdown').forEach(item => {
+        item.classList.remove('touch-open');
+      });
+    }
+  });
+
+
+  /* ══════════════════════════════════════
      5. SEARCH OVERLAY
   ══════════════════════════════════════ */
   const searchTrigger = document.getElementById('search-trigger');
@@ -778,5 +817,60 @@ document.addEventListener('DOMContentLoaded', function () {
       toast('All filters cleared', 'info');
     });
   }
+
+
+  /* ══════════════════════════════════════
+     GLOBAL LOADING OVERLAY
+     Auto-shows after 0.5s delay on any fetch request
+  ══════════════════════════════════════ */
+  
+  // Create loading overlay element
+  const loadingOverlay = document.createElement('div');
+  loadingOverlay.className = 'global-loading-overlay';
+  loadingOverlay.innerHTML = `
+    <div class="global-loading-spinner">
+      <i class="fas fa-circle-notch fa-spin"></i>
+      <p>Loading...</p>
+    </div>
+  `;
+  document.body.appendChild(loadingOverlay);
+
+  let loadingTimer = null;
+  let isLoadingVisible = false;
+
+  // Global function to show loading with delay
+  window.showLoading = function(delay = 500) {
+    if (isLoadingVisible) return;
+    
+    loadingTimer = setTimeout(() => {
+      loadingOverlay.classList.add('visible');
+      isLoadingVisible = true;
+    }, delay);
+  };
+
+  // Global function to hide loading
+  window.hideLoading = function() {
+    if (loadingTimer) {
+      clearTimeout(loadingTimer);
+      loadingTimer = null;
+    }
+    
+    if (isLoadingVisible) {
+      loadingOverlay.classList.remove('visible');
+      isLoadingVisible = false;
+    }
+  };
+
+  // Intercept fetch to auto-show loading
+  const originalFetch = window.fetch;
+  window.fetch = async function(...args) {
+    showLoading(500);
+    try {
+      const response = await originalFetch.apply(this, args);
+      return response;
+    } finally {
+      hideLoading();
+    }
+  };
 
 });
