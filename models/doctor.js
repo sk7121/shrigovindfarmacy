@@ -113,7 +113,7 @@ const doctorSchema = new mongoose.Schema({
     },
     consultationModes: [{
         type: String,
-        enum: ['In-Clinic', 'Online', 'WhatsApp', 'Video Call']
+        enum: ['In-Clinic', 'Online', 'WhatsApp']
     }],
     image: {
         type: String,
@@ -213,15 +213,15 @@ doctorSchema.methods.updateAvailabilityStatus = function() {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const now = new Date();
     const currentDay = days[now.getDay()];
-    
+
     const todayAvailability = this.availability.find(a => a.day === currentDay);
-    
+
     if (todayAvailability && todayAvailability.isAvailable) {
         this.isAvailableNow = true;
     } else {
         this.isAvailableNow = false;
     }
-    
+
     return this.isAvailableNow;
 };
 

@@ -228,7 +228,7 @@
 
             <% if (appointment.status === 'Pending' || appointment.status === 'Confirmed') { %>
             <div class="action-buttons">
-              <% if (appointment.appointmentType === 'Video Call') { %>
+              <% if (appointment.appointmentType === 'WhatsApp') { %>
               <a href="/whatsapp-call/<%= appointment._id %>" class="btn btn-primary" target="_blank">
                 <i class="fa-brands fa-whatsapp"></i> Join Video Call
               </a>
@@ -249,6 +249,17 @@
 
             <% if (appointment.status === 'Completed') { %>
             <div class="action-buttons">
+              <% if (appointment.appointmentType === 'WhatsApp' && !appointment.isRated) { %>
+              <button onclick="showRatingModal()" class="btn btn-primary">
+                <i class="fa-solid fa-star"></i> Rate Doctor
+              </button>
+              <% } else if (appointment.isRated) { %>
+              <div style="background: rgba(28, 129, 37, 0.1); border: 2px solid var(--primary); border-radius: 12px; padding: 1rem; text-align: center;">
+                <p style="color: var(--primary); margin: 0; font-weight: 600;">
+                  <i class="fa-solid fa-circle-check"></i> You have rated this consultation
+                </p>
+              </div>
+              <% } %>
               <a href="/doctor" class="btn btn-primary">
                 <i class="fa-solid fa-rotate"></i> Book Follow-up
               </a>
@@ -484,6 +495,72 @@
         showToast('❌ Error rescheduling appointment. Please try again.', 'error');
         button.disabled = false;
         button.innerHTML = originalText;
+      }
+    }
+
+    // Rating modal
+    function showRatingModal() {
+      const modal = document.createElement('div');
+      modal.className = 'rating-modal';
+      modal.innerHTML = `
+        <div class="rating-modal-content">
+          <h3><i class="fa-solid fa-star"></i> Rate Your Consultation</h3>
+          <div class="star-rating">
+            <input type="radio" name="rating" value="5" id="star5"><label for="star5">☆</label>
+            <input type="radio" name="rating" value="4" id="star4"><label for="star4">☆</label>
+            <input type="radio" name="rating" value="3" id="star3"><label for="star3">☆</label>
+            <input type="radio" name="rating" value="2" id="star2"><label for="star2">☆</label>
+            <input type="radio" name="rating" value="1" id="star1"><label for="star1">☆</label>
+          </div>
+          <textarea id="reviewText" placeholder="Write your review (optional)" rows="4"></textarea>
+          <div class="rating-actions">
+            <button onclick="submitRating()" class="btn btn-primary">Submit Rating</button>
+            <button onclick="closeRatingModal()" class="btn btn-secondary">Cancel</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function closeRatingModal() {
+      const modal = document.querySelector('.rating-modal');
+      if (modal) modal.remove();
+    }
+
+    async function submitRating() {
+      const ratingInput = document.querySelector('input[name="rating"]:checked');
+      const reviewText = document.getElementById('reviewText').value;
+      const appointmentId = '<%= appointment._id %>';
+      
+      if (!ratingInput) {
+        showToast('⚠️ Please select a rating', 'warning');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/whatsapp-call/${appointmentId}/rate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rating: parseInt(ratingInput.value),
+            review: reviewText
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast('✅ Thank you for your rating!', 'success');
+          closeRatingModal();
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          showToast('❌ ' + result.message, 'error');
+        }
+      } catch (error) {
+        console.error('Error submitting rating:', error);
+        showToast('❌ Error submitting rating', 'error');
       }
     }
   </script>

@@ -776,7 +776,7 @@
         <div class="form-group">
           <label><i class="fa-solid fa-video"></i> Consultation Modes</label>
           <div class="checkbox-group">
-            <% const modes = ['In-Clinic', 'Online', 'WhatsApp', 'Video Call']; %>
+            <% const modes = ['In-Clinic', 'Online', 'WhatsApp']; %>
             <% modes.forEach(mode => { %>
             <label class="checkbox-item">
               <input type="checkbox" name="consultationModes" value="<%= mode %>" <%= doctor?.consultationModes?.includes(mode) ? 'checked' : '' %>>

@@ -2273,10 +2273,17 @@ app.get("/doctor", optionalAuth, async (req, res) => {
 
     const doctor = doctors[selectedIndex];
 
-    // Update availability status for current doctor (skip validation to avoid loginEmail/password issues)
+    // Update availability status for current doctor
     if (doctor && typeof doctor.updateAvailabilityStatus === "function") {
       doctor.updateAvailabilityStatus();
-      await doctor.save({ validateModifiedOnly: false });
+      // Use direct MongoDB update to avoid validation errors with old data
+      await mongoose.connection.collection('doctors').updateOne(
+        { _id: doctor._id },
+        { 
+          $set: { isAvailableNow: doctor.isAvailableNow },
+          $pull: { consultationModes: 'Video Call' }
+        }
+      );
     }
 
     // Check if user has an active appointment (pending or confirmed)
@@ -2342,7 +2349,14 @@ app.get("/api/doctor", optionalAuth, async (req, res) => {
     }
 
     doctor.updateAvailabilityStatus();
-    await doctor.save();
+    // Use direct MongoDB update to avoid validation errors with old data
+    await mongoose.connection.collection('doctors').updateOne(
+      { _id: doctor._id },
+      { 
+        $set: { isAvailableNow: doctor.isAvailableNow },
+        $pull: { consultationModes: 'Video Call' }
+      }
+    );
 
     res.json({ success: true, doctor });
   } catch (err) {
@@ -2368,7 +2382,14 @@ app.get("/api/doctor/:slug", optionalAuth, async (req, res) => {
     }
 
     doctor.updateAvailabilityStatus();
-    await doctor.save();
+    // Use direct MongoDB update to avoid validation errors with old data
+    await mongoose.connection.collection('doctors').updateOne(
+      { _id: doctor._id },
+      { 
+        $set: { isAvailableNow: doctor.isAvailableNow },
+        $pull: { consultationModes: 'Video Call' }
+      }
+    );
 
     res.json({ success: true, doctor });
   } catch (err) {
@@ -2392,7 +2413,14 @@ app.get("/doctor/book/:id", authenticate, async (req, res) => {
     // Update availability status
     if (typeof doctor.updateAvailabilityStatus === "function") {
       doctor.updateAvailabilityStatus();
-      await doctor.save();
+      // Use direct MongoDB update to avoid validation errors with old data
+      await mongoose.connection.collection('doctors').updateOne(
+        { _id: doctor._id },
+        { 
+          $set: { isAvailableNow: doctor.isAvailableNow },
+          $pull: { consultationModes: 'Video Call' }
+        }
+      );
     }
 
     res.render("pages/book-appointment.ejs", {
@@ -2477,7 +2505,14 @@ app.post(
 
       // Update doctor stats
       doctor.stats.totalConsultations += 1;
-      await doctor.save();
+      // Use direct MongoDB update to avoid validation errors with old data
+      await mongoose.connection.collection('doctors').updateOne(
+        { _id: doctor._id },
+        { 
+          $inc: { 'stats.totalConsultations': 1 },
+          $pull: { consultationModes: 'Video Call' }
+        }
+      );
 
       // Populate doctor info for response
       await appointment.populate('doctor', 'name title contact');
@@ -3203,58 +3238,6 @@ app.post("/doctor/appointment/:id/confirm", authenticateDoctor, async (req, res)
   }
 });
 
-// Doctor: Start appointment (for Video Call)
-app.post("/doctor/appointment/:id/start", authenticateDoctor, async (req, res) => {
-  try {
-    const appointment = await Appointment.findById(req.params.id)
-      .populate('doctor', 'name')
-      .populate('patient', 'name email phone');
-
-    if (!appointment) {
-      req.flash("error", "Appointment not found");
-      return res.redirect("/doctor/dashboard");
-    }
-
-    if (appointment.status !== 'Confirmed') {
-      req.flash("error", "Only confirmed appointments can be started");
-      return res.redirect("/doctor/appointment/" + req.params.id);
-    }
-
-    // Create video call session
-    const VideoCall = require('./models/videoCall');
-    const crypto = require('crypto');
-    
-    let videoCall = await VideoCall.findOne({
-      appointment: appointment._id,
-      status: { $in: ['waiting', 'active'] }
-    });
-
-    if (!videoCall) {
-      const roomId = 'room_' + crypto.randomBytes(8).toString('hex');
-      
-      videoCall = await VideoCall.create({
-        appointment: appointment._id,
-        doctor: appointment.doctor._id,
-        patient: appointment.patient._id,
-        roomId: roomId,
-        status: 'waiting'
-      });
-    }
-
-    // Update appointment status to Confirmed (if not already)
-    if (appointment.status === 'Pending') {
-      await appointment.confirm();
-    }
-
-    req.flash("success", "Appointment started! Redirecting to video call...");
-    res.redirect("/doctor/appointment/" + req.params.id + "/video");
-  } catch (err) {
-    console.log("Start appointment error:", err);
-    req.flash("error", "Error starting appointment");
-    res.redirect("/doctor/dashboard");
-  }
-});
-
 // Doctor: Complete appointment with notes
 app.post("/doctor/appointment/:id/complete", authenticateDoctor, async (req, res) => {
   try {
@@ -3313,190 +3296,12 @@ app.get("/doctor/appointment/:id", authenticateDoctor, async (req, res) => {
       return res.redirect("/doctor/dashboard");
     }
 
-    // For Video Call appointments, create video call session if it doesn't exist
-    let videoCall = null;
-    if (appointment.appointmentType === 'Video Call' && 
-        ['Confirmed', 'Completed', 'No-Show'].includes(appointment.status)) {
-      
-      const VideoCall = require('./models/videoCall');
-      const crypto = require('crypto');
-      
-      videoCall = await VideoCall.findOne({
-        appointment: appointment._id,
-        status: { $in: ['waiting', 'active'] }
-      });
-
-      if (!videoCall) {
-        const roomId = 'room_' + crypto.randomBytes(8).toString('hex');
-        
-        videoCall = await VideoCall.create({
-          appointment: appointment._id,
-          doctor: appointment.doctor._id,
-          patient: appointment.patient._id,
-          roomId: roomId,
-          status: 'waiting'
-        });
-      }
-    }
-
-    res.render("doctor/appointment-detail.ejs", { 
-      appointment,
-      videoCall 
+    res.render("doctor/appointment-detail.ejs", {
+      appointment
     });
   } catch (err) {
     console.log("Doctor appointment detail error:", err);
     res.status(500).send("Error loading appointment details");
-  }
-});
-
-// Doctor: Video consultation room
-app.get("/doctor/appointment/:id/video", authenticateDoctor, async (req, res) => {
-  try {
-    const appointment = await Appointment.findById(req.params.id)
-      .populate('doctor', 'name title contact')
-      .populate('patient', 'name email phone');
-
-    if (!appointment) {
-      req.flash("error", "Appointment not found");
-      return res.redirect("/doctor/dashboard");
-    }
-
-    // Check if video call type
-    if (appointment.appointmentType !== 'Video Call') {
-      req.flash("error", "This appointment is not a video consultation");
-      return res.redirect("/doctor/appointment/" + req.params.id);
-    }
-
-    // Get or create video call session
-    const VideoCall = require('./models/videoCall');
-    let videoCall = await VideoCall.findOne({
-      appointment: appointment._id,
-      status: { $in: ['waiting', 'active'] }
-    });
-
-    if (!videoCall) {
-      // Create new video call session
-      const crypto = require('crypto');
-      const roomId = 'room_' + crypto.randomBytes(8).toString('hex');
-      
-      videoCall = await VideoCall.create({
-        appointment: appointment._id,
-        doctor: appointment.doctor._id,
-        patient: appointment.patient._id,
-        roomId: roomId,
-        status: 'waiting'
-      });
-
-      // Update appointment status to Confirmed if Pending
-      if (appointment.status === 'Pending') {
-        await appointment.confirm();
-      }
-    }
-
-    res.render("video-call-room.ejs", { 
-      appointment,
-      call: videoCall,
-      doctor: req.doctor
-    });
-  } catch (err) {
-    console.log("Video consultation error:", err);
-    res.status(500).send("Error loading video consultation");
-  }
-});
-
-// Patient: Video consultation room
-app.get("/video-call/:roomId", authenticate, async (req, res) => {
-  try {
-    const VideoCall = require('./models/videoCall');
-    
-    const videoCall = await VideoCall.findOne({ roomId: req.params.roomId })
-      .populate('appointment', 'status appointmentDate appointmentTime reason appointmentType')
-      .populate('doctor', 'name title specializations')
-      .populate('patient', 'name email phone');
-
-    if (!videoCall) {
-      req.flash("error", "Video call not found");
-      return res.redirect("/home");
-    }
-
-    // Check if user is the patient
-    if (videoCall.patient._id.toString() !== req.user._id.toString()) {
-      req.flash("error", "Not authorized to join this call");
-      return res.redirect("/home");
-    }
-
-    // Check if appointment is video call type
-    if (videoCall.appointment.appointmentType !== 'Video Call') {
-      req.flash("error", "This is not a video consultation appointment");
-      return res.redirect("/user/appointments");
-    }
-
-    res.render("video-call-room.ejs", {
-      appointment: videoCall.appointment,
-      call: videoCall
-    });
-  } catch (err) {
-    console.log("Video call room error:", err);
-    res.status(500).send("Error loading video call room");
-  }
-});
-
-// Patient: Join video call by appointment ID
-app.get("/video-call/join/:appointmentId", authenticate, async (req, res) => {
-  try {
-    const Appointment = require('./models/appointment');
-    const VideoCall = require('./models/videoCall');
-
-    const appointment = await Appointment.findById(req.params.appointmentId)
-      .populate('doctor', 'name title specializations')
-      .populate('patient', 'name email phone');
-
-    if (!appointment) {
-      req.flash("error", "Appointment not found");
-      return res.redirect("/user/appointments");
-    }
-
-    // Check if user is the patient
-    if (appointment.patient._id.toString() !== req.user._id.toString()) {
-      req.flash("error", "Not authorized to join this call");
-      return res.redirect("/home");
-    }
-
-    // Check if appointment is video call type
-    if (appointment.appointmentType !== 'Video Call') {
-      req.flash("error", "This is not a video consultation appointment");
-      return res.redirect("/user/appointments");
-    }
-
-    // Get or create video call session
-    let videoCall = await VideoCall.findOne({
-      appointment: appointment._id,
-      status: { $in: ['waiting', 'active'] }
-    });
-
-    if (!videoCall) {
-      // Check if doctor has started the call
-      const crypto = require('crypto');
-      const roomId = 'room_' + crypto.randomBytes(8).toString('hex');
-
-      videoCall = await VideoCall.create({
-        appointment: appointment._id,
-        doctor: appointment.doctor._id,
-        patient: appointment.patient._id,
-        roomId: roomId,
-        status: 'waiting'
-      });
-
-      req.flash("info", "Waiting for doctor to start the video call");
-    }
-
-    res.render("video-call-room.ejs", {
-      appointment,
-      call: videoCall
-    });
-  } catch (err) {
-    console.log("Join video call error:", err);
-    res.status(500).send("Error joining video call");
   }
 });
 
@@ -3541,7 +3346,15 @@ app.post("/doctor/availability", authenticateDoctor, async (req, res) => {
 
     doctor.isAvailableNow =
       req.body.isAvailable === "on" || req.body.isAvailable === "true";
-    await doctor.save({ validateModifiedOnly: false });
+    
+    // Use direct MongoDB update to avoid validation errors with old data
+    await mongoose.connection.collection('doctors').updateOne(
+      { _id: doctor._id },
+      { 
+        $set: { isAvailableNow: doctor.isAvailableNow },
+        $pull: { consultationModes: 'Video Call' }
+      }
+    );
 
     req.flash("success", "Availability status updated successfully");
     res.redirect("/doctor/dashboard");
@@ -3555,7 +3368,7 @@ app.post("/doctor/availability", authenticateDoctor, async (req, res) => {
 // API: Use doctor routes
 app.use("/api/doctors", require("./routes/doctorRoutes"));
 app.use("/api/appointments", require("./routes/appointmentRoutes"));
-app.use("/api/video-call", require("./routes/videoCallRoutes"));
+app.use("/api/whatsapp-call", require("./routes/whatsappCallRoutes"));
 
 // ================== PRESCRIPTION ROUTES ==================
 
@@ -9631,54 +9444,12 @@ io.on('connection', (socket) => {
   
   // Join user's personal room
   socket.join(`user:${socket.userId}`);
-  
+
   // Doctor joins their personal room
   if (socket.userRole === 'doctor') {
     socket.join(`doctor:${socket.userId}`);
   }
-  
-  // Video call signaling events
-  socket.on('call:ready', async (data) => {
-    const { roomId, peerId, appointmentId } = data;
-    console.log(`📞 Call ready: ${roomId} by ${socket.userId} (${socket.userRole})`);
-    
-    // Store peer ID in room
-    socket.to(`room:${roomId}`).emit('call:ready', {
-      peerId,
-      roomId,
-      from: socket.userId,
-      fromRole: socket.userRole
-    });
-  });
-  
-  socket.on('call:join', (data) => {
-    const { roomId } = data;
-    socket.join(`room:${roomId}`);
-    console.log(`📞 User ${socket.userId} joined room: ${roomId}`);
-    
-    // Notify others in the room
-    socket.to(`room:${roomId}`).emit('user:joined', {
-      userId: socket.userId,
-      role: socket.userRole
-    });
-  });
-  
-  socket.on('call:accept', (data) => {
-    const { roomId, peerId } = data;
-    socket.to(`room:${roomId}`).emit('call:accepted', {
-      peerId,
-      from: socket.userId
-    });
-  });
-  
-  socket.on('call:end', (data) => {
-    const { roomId } = data;
-    socket.to(`room:${roomId}`).emit('call:ended', {
-      from: socket.userId
-    });
-    socket.leave(`room:${roomId}`);
-  });
-  
+
   socket.on('disconnect', () => {
     console.log(`📡 User disconnected: ${socket.userId}`);
     socket.leave(`user:${socket.userId}`);

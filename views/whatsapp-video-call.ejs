@@ -450,6 +450,85 @@ const encodedMessage = encodeURIComponent(consultationMessage);
         padding: 0.875rem 1.5rem;
       }
     }
+
+    /* Rating Modal */
+    .rating-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .rating-modal-content {
+      background: var(--surface);
+      padding: 2rem;
+      border-radius: 16px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .rating-modal-content h3 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+
+    .star-rating {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .star-rating input {
+      display: none;
+    }
+
+    .star-rating label {
+      font-size: 2.5rem;
+      color: #ddd;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+      color: #ffc107;
+    }
+
+    .rating-modal-content textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      resize: vertical;
+      margin-bottom: 1rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .rating-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
   </style>
   <script src="/js/theme.js"></script>
 </head>
@@ -550,13 +629,10 @@ const encodedMessage = encodeURIComponent(consultationMessage);
       <!-- Action Buttons -->
       <div class="button-group">
         <% if (otherPartyPhone) { %>
-          <a href="https://wa.me/<%= whatsappOtherPhone %>?text=<%= encodedMessage %>"
-             target="_blank"
-             class="btn btn-whatsapp"
-             id="whatsappBtn">
+          <button onclick="startWhatsAppCall()" class="btn btn-whatsapp" id="startCallBtn">
             <i class="fa-brands fa-whatsapp"></i>
             Start WhatsApp Video Call
-          </a>
+          </button>
 
           <a href="tel:<%= otherPartyPhone %>" class="btn btn-phone">
             <i class="fa-solid fa-phone"></i>
@@ -644,16 +720,168 @@ const encodedMessage = encodeURIComponent(consultationMessage);
   </div>
 
   <script>
-    // Track call initiation
-    const whatsappBtn = document.getElementById('whatsappBtn');
-    if (whatsappBtn) {
-      whatsappBtn.addEventListener('click', () => {
-        // Log call attempt (you can add analytics here)
-        console.log('WhatsApp video call initiated');
+    const appointmentId = '<%= appointment._id %>';
+    const whatsappOtherPhone = '<%= whatsappOtherPhone %>';
+    const encodedMessage = '<%= encodedMessage %>';
+
+    // Start WhatsApp call and track it
+    async function startWhatsAppCall() {
+      const startCallBtn = document.getElementById('startCallBtn');
+      
+      try {
+        // Show loading state
+        startCallBtn.disabled = true;
+        startCallBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Starting Call...';
         
-        // Optional: Show a quick toast notification
-        showToast('Opening WhatsApp...');
-      });
+        // Call API to start tracking
+        const response = await fetch(`/api/whatsapp-call/${appointmentId}/start`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Open WhatsApp
+          window.open(`https://wa.me/${whatsappOtherPhone}?text=${encodedMessage}`, '_blank');
+          
+          showToast('✅ Call started! Opening WhatsApp...');
+          
+          // Show attended button for doctor
+          <% if (isDoctorView) { %>
+            setTimeout(() => {
+              showAttendedButton();
+            }, 5000);
+          <% } %>
+          
+          // Show rating button for patient after call duration
+          <% if (!isDoctorView) { %>
+            setTimeout(() => {
+              showRatingButton();
+            }, 300000); // 5 minutes
+          <% } %>
+        } else {
+          showToast('❌ ' + result.message);
+          startCallBtn.disabled = false;
+          startCallBtn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Start WhatsApp Video Call';
+        }
+      } catch (error) {
+        console.error('Error starting call:', error);
+        showToast('❌ Error starting call. Please try again.');
+        startCallBtn.disabled = false;
+        startCallBtn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Start WhatsApp Video Call';
+      }
+    }
+
+    // Show attended button for doctor
+    function showAttendedButton() {
+      const buttonGroup = document.querySelector('.button-group');
+      const attendedBtn = document.createElement('button');
+      attendedBtn.className = 'btn btn-success';
+      attendedBtn.innerHTML = '<i class="fa-solid fa-check"></i> Mark as Attended';
+      attendedBtn.onclick = markAsAttended;
+      buttonGroup.appendChild(attendedBtn);
+    }
+
+    // Mark appointment as attended
+    async function markAsAttended() {
+      try {
+        const response = await fetch(`/api/whatsapp-call/${appointmentId}/attend`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast('✅ Appointment marked as attended!');
+          setTimeout(() => {
+            window.location.href = '/doctor/dashboard';
+          }, 1500);
+        } else {
+          showToast('❌ ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error marking attended:', error);
+        showToast('❌ Error marking appointment as attended');
+      }
+    }
+
+    // Show rating button for patient
+    function showRatingButton() {
+      const buttonGroup = document.querySelector('.button-group');
+      const ratingBtn = document.createElement('button');
+      ratingBtn.className = 'btn btn-primary';
+      ratingBtn.innerHTML = '<i class="fa-solid fa-star"></i> Rate Doctor';
+      ratingBtn.onclick = showRatingModal;
+      buttonGroup.appendChild(ratingBtn);
+    }
+
+    // Show rating modal
+    function showRatingModal() {
+      const modal = document.createElement('div');
+      modal.className = 'rating-modal';
+      modal.innerHTML = `
+        <div class="rating-modal-content">
+          <h3><i class="fa-solid fa-star"></i> Rate Your Consultation</h3>
+          <div class="star-rating">
+            <input type="radio" name="rating" value="5" id="star5"><label for="star5">☆</label>
+            <input type="radio" name="rating" value="4" id="star4"><label for="star4">☆</label>
+            <input type="radio" name="rating" value="3" id="star3"><label for="star3">☆</label>
+            <input type="radio" name="rating" value="2" id="star2"><label for="star2">☆</label>
+            <input type="radio" name="rating" value="1" id="star1"><label for="star1">☆</label>
+          </div>
+          <textarea id="reviewText" placeholder="Write your review (optional)" rows="4"></textarea>
+          <div class="rating-actions">
+            <button onclick="submitRating()" class="btn btn-primary">Submit Rating</button>
+            <button onclick="closeRatingModal()" class="btn btn-secondary">Cancel</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    // Close rating modal
+    function closeRatingModal() {
+      const modal = document.querySelector('.rating-modal');
+      if (modal) modal.remove();
+    }
+
+    // Submit rating
+    async function submitRating() {
+      const ratingInput = document.querySelector('input[name="rating"]:checked');
+      const reviewText = document.getElementById('reviewText').value;
+      
+      if (!ratingInput) {
+        showToast('⚠️ Please select a rating');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/whatsapp-call/${appointmentId}/rate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rating: parseInt(ratingInput.value),
+            review: reviewText
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast('✅ Thank you for your rating!');
+          closeRatingModal();
+          setTimeout(() => {
+            window.location.href = '/user/appointments';
+          }, 1500);
+        } else {
+          showToast('❌ ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error submitting rating:', error);
+        showToast('❌ Error submitting rating');
+      }
     }
 
     // Toast notification
@@ -674,7 +902,7 @@ const encodedMessage = encodeURIComponent(consultationMessage);
       `;
       toast.textContent = message;
       document.body.appendChild(toast);
-      
+
       setTimeout(() => {
         toast.style.animation = 'slideDown 0.3s ease';
         setTimeout(() => toast.remove(), 300);

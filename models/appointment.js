@@ -23,7 +23,7 @@ const appointmentSchema = new mongoose.Schema({
     },
     appointmentType: {
         type: String,
-        enum: ['In-Clinic', 'Online', 'WhatsApp', 'Video Call'],
+        enum: ['In-Clinic', 'Online', 'WhatsApp'],
         required: true
     },
     appointmentDate: {
@@ -91,6 +91,28 @@ const appointmentSchema = new mongoose.Schema({
     },
     cancelledAt: {
         type: Date
+    },
+    // WhatsApp Video Call fields
+    callStartedAt: {
+        type: Date
+    },
+    callEndedAt: {
+        type: Date
+    },
+    callDuration: {
+        type: Number, // in minutes
+        default: 0
+    },
+    isAttended: {
+        type: Boolean,
+        default: false
+    },
+    attendedAt: {
+        type: Date
+    },
+    isRated: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
@@ -153,6 +175,37 @@ appointmentSchema.methods.complete = async function(notes = '', prescription = '
     this.status = 'Completed';
     this.notes = notes;
     this.prescription = prescription;
+    await this.save();
+    return this;
+};
+
+// Method to mark appointment as attended (for WhatsApp video calls)
+appointmentSchema.methods.markAttended = async function() {
+    this.isAttended = true;
+    this.attendedAt = new Date();
+    this.status = 'Completed';
+    
+    if (this.callStartedAt && !this.callEndedAt) {
+        this.callEndedAt = new Date();
+        this.callDuration = Math.round((this.callEndedAt - this.callStartedAt) / 60000); // minutes
+    }
+    
+    await this.save();
+    return this;
+};
+
+// Method to start WhatsApp call
+appointmentSchema.methods.startCall = async function() {
+    this.callStartedAt = new Date();
+    this.isAttended = true;
+    this.attendedAt = new Date();
+    await this.save();
+    return this;
+};
+
+// Method to mark as rated
+appointmentSchema.methods.markRated = async function() {
+    this.isRated = true;
     await this.save();
     return this;
 };

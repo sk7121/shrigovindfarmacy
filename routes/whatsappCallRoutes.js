@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const videoCallController = require('../controllers/videoCallController');
-const { authenticate, authenticateVerifiedAPI, isAdmin } = require('../middleware/auth');
+const whatsappCallController = require('../controllers/whatsappCallController');
+const { authenticate } = require('../middleware/auth');
 
 // Middleware to authenticate doctor
 const authenticateDoctor = async (req, res, next) => {
     try {
         const token = req.cookies.accessToken;
-        
+
         if (!token) {
             return res.status(401).json({
                 success: false,
@@ -17,11 +17,11 @@ const authenticateDoctor = async (req, res, next) => {
 
         const jwt = require('jsonwebtoken');
         const decoded = jwt.verify(token, process.env.ACCESS_SECRET);
-        
+
         const Doctor = require('../models/doctor');
-        const doctor = await Doctor.findOne({ 
+        const doctor = await Doctor.findOne({
             _id: decoded.userId,
-            isActive: true 
+            isActive: true
         });
 
         if (!doctor) {
@@ -41,16 +41,16 @@ const authenticateDoctor = async (req, res, next) => {
     }
 };
 
-// Doctor routes
-router.post('/start', authenticateDoctor, videoCallController.startVideoCall);
-router.post('/join', authenticate, videoCallController.joinVideoCall);
-router.post('/end', authenticateDoctor, videoCallController.endVideoCall);
-router.get('/doctor/active', authenticateDoctor, videoCallController.getDoctorActiveCalls);
+// Start WhatsApp call (Doctor or Patient)
+router.post('/:appointmentId/start', authenticate, whatsappCallController.startWhatsAppCall);
 
-// Patient routes
-router.post('/rating', authenticate, videoCallController.submitRating);
+// Mark appointment as attended (Doctor only)
+router.post('/:appointmentId/attend', authenticateDoctor, whatsappCallController.markAppointmentAttended);
 
-// Shared routes
-router.get('/:roomId', authenticate, videoCallController.getVideoCallDetails);
+// Submit rating (Patient only)
+router.post('/:appointmentId/rate', authenticate, whatsappCallController.submitRating);
+
+// Get call status (Doctor or Patient)
+router.get('/:appointmentId/status', authenticate, whatsappCallController.getCallStatus);
 
 module.exports = router;
