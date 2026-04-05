@@ -441,14 +441,14 @@ html[data-theme="dark"] {
 /* ═══════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════ */
-@media (max-width: 1024px) {
+@media (max-width: 1132px) {
   .cat-product-grid { grid-template-columns: repeat(3, 1fr); }
   .cat-section-head { grid-template-columns: 1fr; }
   .csh-right { align-items: flex-start; }
   .cat-meta-chips { justify-content: flex-start; }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 955px) {
   .cat-page-hero { padding: 50px 0 60px; }
   .cat-hero-text h1 { font-size: 2.2rem; }
   .cat-sticky-nav { top: 60px; }

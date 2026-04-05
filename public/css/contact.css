@@ -936,9 +936,9 @@ form         { display: flex; flex-direction: column; gap: 18px; }
 }
 
 /* ================================================
-   RESPONSIVE — TABLET 1024px
+   RESPONSIVE — TABLET 1132px
    ================================================ */
-@media (max-width: 1024px) {
+@media (max-width: 1132px) {
   .quick-cards-grid { grid-template-columns: repeat(2, 1fr); }
   .form-map-grid    { grid-template-columns: 1fr; gap: 36px; }
   .why-grid         { grid-template-columns: repeat(2, 1fr); }
@@ -951,9 +951,9 @@ form         { display: flex; flex-direction: column; gap: 18px; }
 }
 
 /* ================================================
-   RESPONSIVE — MOBILE 768px
+   RESPONSIVE — MOBILE 955px
    ================================================ */
-@media (max-width: 768px) {
+@media (max-width: 955px) {
   .container    { padding: 0 16px; }
 
   /* Topbar */

@@ -1070,7 +1070,7 @@ body {
 }
 
 /* ── RESPONSIVE: TABLET ── */
-@media (max-width: 900px) {
+@media (max-width: 1132px) {
   .auth-page {
     grid-template-columns: 1fr;
   }
@@ -1094,7 +1094,7 @@ body {
 }
 
 /* ── RESPONSIVE: MOBILE ── */
-@media (max-width: 768px) {
+@media (max-width: 955px) {
   .container {
     padding: 0 0.75rem;
   }

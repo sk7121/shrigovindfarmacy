@@ -671,17 +671,17 @@ body {
 }
 
 /* ══ RESPONSIVE ══ */
-@media (max-width: 992px) {
+@media (max-width: 1132px) {
   .appointment-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .appointment-sidebar {
     order: -1;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 955px) {
   .detail-grid {
     grid-template-columns: 1fr;
   }

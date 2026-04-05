@@ -812,11 +812,11 @@ body {
 }
 
 /* ── RESPONSIVE ── */
-@media (max-width:1024px) {
+@media (max-width:1132px) {
   .content-grid { grid-template-columns:1fr; }
   .sidebar { display:grid; grid-template-columns:1fr 1fr; }
 }
-@media (max-width:768px) {
+@media (max-width:955px) {
   .container { padding:0 15px; }
   .hero-text h1 { font-size:1.8rem; }
   .doctor-img-frame { width:200px; height:240px; }

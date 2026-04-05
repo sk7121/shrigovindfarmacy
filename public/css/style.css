@@ -404,7 +404,8 @@ button {
   transition: all 0.2s ease;
 }
 
-.has-dropdown:hover .mega-dropdown {
+.has-dropdown:hover .mega-dropdown,
+.has-dropdown.touch-open .mega-dropdown {
   opacity: 1;
   pointer-events: all;
   transform: translateY(0);
@@ -494,7 +495,8 @@ button {
   transition: all 0.2s ease;
 }
 
-.user-menu:hover .user-dropdown {
+.user-menu:hover .user-dropdown,
+.user-menu.touch-open .user-dropdown {
   opacity: 1;
   pointer-events: all;
   transform: translateY(0);
@@ -1972,7 +1974,7 @@ button {
 /* ── MODAL ── */
 .modal {
   position: fixed;
-  z-index: 900;
+  z-index: 950;
   inset: 0;
   display: flex;
   align-items: center;
@@ -1993,7 +1995,7 @@ button {
   inset: 0;
   background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(4px);
-  z-index: 890;
+  z-index: 940;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s;
@@ -2011,7 +2013,7 @@ button {
   max-width: 700px;
   width: 100%;
   position: relative;
-  z-index: 910;
+  z-index: 960;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   transform: scale(0.95);
@@ -3032,8 +3034,8 @@ button {
    No duplicate blocks. One source of truth per breakpoint.
 ══════════════════════════════════════════════════════ */
 
-/* ── LARGE TABLET (≤1100px) ── */
-@media (max-width: 1100px) {
+/* ── LAPTOP TO TABLET (≤1132px) ── */
+@media (max-width: 1132px) {
   .product-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -3050,10 +3052,7 @@ button {
   .testi-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-}
 
-/* ── TABLET (≤1024px) ── */
-@media (max-width: 1024px) {
   .nav-actions .desktop-only {
     display: none !important;
   }
@@ -3114,8 +3113,8 @@ button {
   }
 }
 
-/* ── MOBILE (≤768px) ── */
-@media (max-width: 768px) {
+/* ── MOBILE (≤955px) ── */
+@media (max-width: 955px) {
   .container {
     padding: 0 16px;
   }
@@ -3412,6 +3411,8 @@ button {
   .modal-content {
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     max-height: 88vh;
+    /* Add safe area padding for iPhone home bar */
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
   }
 
   .modal-grid {
@@ -3718,11 +3719,11 @@ button {
 /* ── VERY TINY (≤320px) — e.g. iPhone SE 1st gen ── */
 @media (max-width: 320px) {
   .hero-slider {
-    height: 240px;
+    height: 260px; /* Increased from 240px to prevent content clipping */
   }
 
   .slide-content h1 {
-    font-size: 1.15rem;
+    font-size: 1.1rem; /* Slightly smaller to fit */
   }
 
   .btn-lg {
