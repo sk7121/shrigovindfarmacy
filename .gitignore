@@ -29,12 +29,6 @@ desktop.ini
 *.swo
 *~
 
-# Uploads
-public/uploads/*
-!public/uploads/.gitkeep
-public/images/*
-!public/images/.gitkeep
-
 # Temporary files
 tmp/
 temp/
