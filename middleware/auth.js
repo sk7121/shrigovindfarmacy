@@ -29,6 +29,10 @@ const authenticate = async (req, res, next) => {
   const token = req.cookies.accessToken;
 
   if (!token) {
+    // Prevent infinite redirect loop
+    if (req.path === '/login' || req.path === '/signIn') {
+      return next();
+    }
     return res.redirect(
       `/login?redirect=${encodeURIComponent(req.originalUrl)}`,
     );
@@ -40,6 +44,14 @@ const authenticate = async (req, res, next) => {
     const user = await User.findById(decoded.userId).select("-password");
 
     if (!user) {
+      // Clear invalid cookies
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+      
+      // Prevent infinite redirect loop
+      if (req.path === '/login' || req.path === '/signIn') {
+        return next();
+      }
       return res.redirect(
         `/login?redirect=${encodeURIComponent(req.originalUrl)}`,
       );
@@ -49,6 +61,14 @@ const authenticate = async (req, res, next) => {
     res.locals.user = user; // Make user available to views
     next();
   } catch (err) {
+    // Clear invalid/expired cookies
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    
+    // Prevent infinite redirect loop
+    if (req.path === '/login' || req.path === '/signIn') {
+      return next();
+    }
     return res.redirect(
       `/login?redirect=${encodeURIComponent(req.originalUrl)}`,
     );
@@ -60,6 +80,10 @@ const authenticateVerified = async (req, res, next) => {
   const token = req.cookies.accessToken;
 
   if (!token) {
+    // Prevent infinite redirect loop
+    if (req.path === '/login' || req.path === '/signIn') {
+      return next();
+    }
     return res.redirect(
       `/login?redirect=${encodeURIComponent(req.originalUrl)}`,
     );
@@ -71,6 +95,14 @@ const authenticateVerified = async (req, res, next) => {
     const user = await User.findById(decoded.userId).select("-password");
 
     if (!user) {
+      // Clear invalid cookies
+      res.clearCookie("accessToken");
+      res.clearCookie("refreshToken");
+      
+      // Prevent infinite redirect loop
+      if (req.path === '/login' || req.path === '/signIn') {
+        return next();
+      }
       return res.redirect(
         `/login?redirect=${encodeURIComponent(req.originalUrl)}`,
       );
@@ -78,6 +110,10 @@ const authenticateVerified = async (req, res, next) => {
 
     // Check if email is verified
     if (!user.isEmailVerified) {
+      // Prevent infinite redirect loop
+      if (req.path === '/verify-otp' || req.path === '/login' || req.path === '/signIn') {
+        return next();
+      }
       // Don't clear cookies - just redirect to verification page
       req.flash("error", "Please verify your email to continue.");
       return res.redirect(
@@ -89,6 +125,14 @@ const authenticateVerified = async (req, res, next) => {
     res.locals.user = user; // Make user available to views
     next();
   } catch (err) {
+    // Clear invalid/expired cookies
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    
+    // Prevent infinite redirect loop
+    if (req.path === '/login' || req.path === '/signIn') {
+      return next();
+    }
     return res.redirect(
       `/login?redirect=${encodeURIComponent(req.originalUrl)}`,
     );

@@ -292,7 +292,7 @@ app.use((req, res, next) => {
 // Use short cache time (5 minutes) to balance freshness and performance
 app.use((req, res, next) => {
   if (req.accepts('html')) {
-    res.set("Cache-Control", "no-cache, max-age=300, stale-while-revalidate=600");
+    res.set("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
   }
   next();
 });
