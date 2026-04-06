@@ -11,7 +11,10 @@
       "Bash(npm install *)",
       "Bash(npm run *)",
       "Bash(taskkill *)",
-      "Bash(findstr *)"
+      "Bash(findstr *)",
+      "Bash(netstat *)",
+      "Bash(npm start)",
+      "Bash(type *)"
     ]
   },
   "$version": 3
