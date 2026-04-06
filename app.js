@@ -161,6 +161,10 @@ const {
 
 const app = express();
 
+// ================== TRUST PROXY ==================
+// Trust Render's reverse proxy for proper HTTPS detection
+app.set('trust proxy', 1);
+
 // ================== MIDDLEWARE ==================
 
 const methodOverride = require("method-override");
@@ -207,8 +211,7 @@ app.use(
     cookie: {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       httpOnly: true,
-      secure:
-        process.env.NODE_ENV === "production" && process.env.HTTPS === "true",
+      secure: process.env.NODE_ENV === "production", // Secure in production automatically
       sameSite: "lax",
     },
   }),
@@ -292,7 +295,14 @@ app.use((req, res, next) => {
 // Use short cache time (5 minutes) to balance freshness and performance
 app.use((req, res, next) => {
   if (req.accepts('html')) {
-    res.set("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
+    // Don't cache HTML in production to prevent stale redirects
+    if (process.env.NODE_ENV === 'production') {
+      res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.set("Pragma", "no-cache");
+      res.set("Expires", "0");
+    } else {
+      res.set("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
+    }
   }
   next();
 });

@@ -1,6 +1,6 @@
-const CACHE_NAME = 'shri-govind-pharmacy-v4';
-const STATIC_CACHE = 'static-v4';
-const DYNAMIC_CACHE = 'dynamic-v4';
+const CACHE_NAME = 'shri-govind-pharmacy-v5';
+const STATIC_CACHE = 'static-v5';
+const DYNAMIC_CACHE = 'dynamic-v5';
 
 const STATIC_ASSETS = [
   '/js/theme.js',
@@ -58,25 +58,29 @@ self.addEventListener('fetch', event => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // HTML pages: Network first, fallback to cache
+  // HTML pages: Cache first in production to prevent redirect loops
   if (request.mode === 'navigate' || (request.headers.get('accept') && request.headers.get('accept').includes('text/html'))) {
     event.respondWith(
-      fetch(request)
-        .then(response => {
-          // Don't cache if not successful
-          if (!response || response.status !== 200) return response;
-
-          const clonedResponse = response.clone();
-          caches.open(DYNAMIC_CACHE)
-            .then(cache => cache.put(request, clonedResponse));
-          return response;
-        })
-        .catch(() => {
-          // Try to serve from cache first
-          return caches.match(request).then(cachedResponse => {
-            return cachedResponse || caches.match('/home');
+      caches.match(request)
+        .then(cachedResponse => {
+          if (cachedResponse) {
+            // Return cached HTML but update cache in background
+            fetch(request).then(response => {
+              if (response && response.status === 200) {
+                caches.open(DYNAMIC_CACHE).then(cache => cache.put(request, response.clone()));
+              }
+            }).catch(() => {});
+            return cachedResponse;
+          }
+          // No cache, fetch from network
+          return fetch(request).then(response => {
+            if (response && response.status === 200) {
+              caches.open(DYNAMIC_CACHE).then(cache => cache.put(request, response.clone()));
+            }
+            return response;
           });
         })
+        .catch(() => fetch(request))
     );
     return;
   }
