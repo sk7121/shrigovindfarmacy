@@ -10,7 +10,8 @@
       "Bash(timeout *)",
       "Bash(npm install *)",
       "Bash(npm run *)",
-      "Bash(taskkill *)"
+      "Bash(taskkill *)",
+      "Bash(findstr *)"
     ]
   },
   "$version": 3

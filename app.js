@@ -148,11 +148,15 @@ const { initializeAppointmentScheduler } = require("./jobs/appointmentScheduler"
 const passport = require("./config/passport");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
 const {
+  optionalAuth,
+  authenticate,
   authenticateVerified,
   authenticateVerifiedAPI,
   authenticateAgent,
   isAdmin,
   isDeliveryAgent,
+  isUser,
+  isDistributor,
 } = require("./middleware/auth");
 
 const app = express();
@@ -275,92 +279,8 @@ mongoose.connection.on("error", (err) => {
 });
 
 // ================== AUTH MIDDLEWARE ==================
-
-const optionalAuth = async (req, res, next) => {
-  const token = req.cookies.accessToken;
-
-  if (!token) {
-    res.locals.user = null;
-    return next(); // no redirect
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.ACCESS_SECRET);
-    const user = await User.findById(decoded.userId).select("-password");
-
-    if (user) {
-      req.user = user;
-      res.locals.user = user; // Make user available to views
-    } else {
-      res.locals.user = null;
-    }
-
-    next();
-  } catch (err) {
-    res.locals.user = null;
-    next(); // invalid token → ignore
-  }
-};
-
-const authenticate = async (req, res, next) => {
-  const token = req.cookies.accessToken;
-  console.log("\n[authenticate] Token present:", !!token);
-
-  if (!token) {
-    console.log("[authenticate] No token, redirecting to /login");
-    // Save the intended URL for redirect after login
-    return res.redirect(
-      `/login?redirect=${encodeURIComponent(req.originalUrl)}`,
-    );
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.ACCESS_SECRET);
-    console.log("[authenticate] Token decoded, userId:", decoded.userId);
-
-    const user = await User.findById(decoded.userId).select("-password");
-
-    if (!user) {
-      console.log("[authenticate] User not found, redirecting to /login");
-      return res.redirect(
-        `/login?redirect=${encodeURIComponent(req.originalUrl)}`,
-      );
-    }
-
-    req.user = user; // full user object from DB
-    console.log(
-      "[authenticate] User authenticated:",
-      user.email,
-      "Role:",
-      user.role,
-    );
-
-    // Check if token is marked as unverified or email is not verified (skip for admin users)
-    if (
-      user.role !== "admin" &&
-      (decoded.unverified || !user.isEmailVerified)
-    ) {
-      console.log(
-        "[authenticate] Email not verified, redirecting to OTP verification",
-      );
-      // Clear cookies to prevent access
-      res.clearCookie("accessToken");
-      res.clearCookie("refreshToken");
-      // Store user info in session for OTP verification
-      req.session.pendingUserId = user._id.toString();
-      return res.redirect(
-        `/verify-otp?email=${encodeURIComponent(user.email)}`,
-      );
-    }
-
-    next();
-  } catch (err) {
-    console.log("[authenticate] Token verification failed:", err.message);
-    return res.redirect(
-      `/login?redirect=${encodeURIComponent(req.originalUrl)}`,
-    );
-  }
-};
+// Authentication middleware is imported from ./middleware/auth
+// See line 149 for imports: optionalAuth, authenticate, authenticateVerified, etc.
 
 // Make user available to all templates
 app.use((req, res, next) => {
@@ -368,29 +288,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// Disable cache for HTML pages only (not static assets)
+// Set cache control for HTML pages
+// Use short cache time (5 minutes) to balance freshness and performance
 app.use((req, res, next) => {
   if (req.accepts('html')) {
-    res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.set("Cache-Control", "no-cache, max-age=300, stale-while-revalidate=600");
   }
   next();
 });
-
-const isUser = (req, res, next) => {
-  if (req.user.role === "user") {
-    next();
-  } else {
-    res.redirect("/home");
-  }
-};
-
-const isDistributor = (req, res, next) => {
-  if (req.user.role === "distributor") {
-    next();
-  } else {
-    res.redirect("/home");
-  }
-};
 
 // ================== ROUTES ==================
 

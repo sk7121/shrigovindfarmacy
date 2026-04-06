@@ -1,6 +1,6 @@
-const CACHE_NAME = 'shri-govind-pharmacy-v3';
-const STATIC_CACHE = 'static-v3';
-const DYNAMIC_CACHE = 'dynamic-v3';
+const CACHE_NAME = 'shri-govind-pharmacy-v4';
+const STATIC_CACHE = 'static-v4';
+const DYNAMIC_CACHE = 'dynamic-v4';
 
 const STATIC_ASSETS = [
   '/js/theme.js',
@@ -59,19 +59,24 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
 
   // HTML pages: Network first, fallback to cache
-  if (request.mode === 'navigate' || request.headers.get('accept').includes('text/html')) {
+  if (request.mode === 'navigate' || (request.headers.get('accept') && request.headers.get('accept').includes('text/html'))) {
     event.respondWith(
       fetch(request)
         .then(response => {
           // Don't cache if not successful
           if (!response || response.status !== 200) return response;
-          
+
           const clonedResponse = response.clone();
           caches.open(DYNAMIC_CACHE)
             .then(cache => cache.put(request, clonedResponse));
           return response;
         })
-        .catch(() => caches.match('/home'))
+        .catch(() => {
+          // Try to serve from cache first
+          return caches.match(request).then(cachedResponse => {
+            return cachedResponse || caches.match('/home');
+          });
+        })
     );
     return;
   }
