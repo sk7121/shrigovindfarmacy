@@ -511,35 +511,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ══════════════════════════════════════
      14. SCROLL REVEAL ANIMATION
-     (respects prefers-reduced-motion)
+     (All elements visible immediately - no lazy loading)
   ══════════════════════════════════════ */
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (!prefersReducedMotion) {
-    const revealTargets = document.querySelectorAll(
-      '.category-card, .product-card, .testi-card, .offer-card, .trust-item'
-    );
-
-    const revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry, i) => {
-        if (entry.isIntersecting) {
-          const el = entry.target;
-          setTimeout(() => {
-            el.style.opacity = '1';
-            el.style.transform = 'translateY(0)';
-          }, (i % 4) * 80);
-          revealObserver.unobserve(el);
-        }
-      });
-    }, { threshold: 0.08 });
-
-    revealTargets.forEach(el => {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(20px)';
-      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-      revealObserver.observe(el);
-    });
-  }
+  // Removed IntersectionObserver lazy loading
+  // All elements are now visible immediately on page load
+  const revealTargets = document.querySelectorAll(
+    '.category-card, .product-card, .testi-card, .offer-card, .trust-item'
+  );
+  
+  // Make all elements visible immediately without animation delay
+  revealTargets.forEach(el => {
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+    el.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+  });
 
 
   /* ══════════════════════════════════════
