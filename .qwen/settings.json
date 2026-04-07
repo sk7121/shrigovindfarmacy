@@ -16,7 +16,8 @@
       "Bash(npm start)",
       "Bash(type *)",
       "Bash(set *)",
-      "Bash(tasklist *)"
+      "Bash(tasklist *)",
+      "Bash(del *)"
     ]
   },
   "$version": 3
